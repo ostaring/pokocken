@@ -56,6 +56,10 @@ Swagger is available at:
 
 - `http://localhost:5080/swagger`
 
+The backend is configured to allow the frontend dev server origin:
+
+- `http://localhost:5173`
+
 ### Run Tests
 
 ```powershell
@@ -121,4 +125,4 @@ This is still a temporary bootstrap solution before proper production auth.
 
 - replace in-memory storage with EF Core + PostgreSQL
 - switch admin protection from API key to real auth
-- connect frontend HTTP mode to these endpoints
+- run the frontend in `http` mode against the live API

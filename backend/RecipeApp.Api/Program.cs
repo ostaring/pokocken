@@ -4,14 +4,34 @@ using RecipeApp.Api.Repositories;
 using RecipeApp.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDevClient", policy =>
+    {
+        if (allowedOrigins.Length == 0)
+        {
+            policy.WithOrigins("http://localhost:5173");
+        }
+        else
+        {
+            policy.WithOrigins(allowedOrigins);
+        }
+
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 builder.Services.AddSingleton<IRecipeRepository, InMemoryRecipeRepository>();
 builder.Services.AddSingleton<AdminSessionStore>();
 builder.Services.AddSingleton<RecipeService>();
 
 var app = builder.Build();
+app.UseCors("FrontendDevClient");
 
 if (app.Environment.IsDevelopment())
 {
