@@ -144,4 +144,29 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task DeleteAdminRecipe_ReturnsNoContentWhenAuthorized()
+    {
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+
+        var response = await client.DeleteAsync("/api/admin/recipes/draft-lemon-tart");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        var followUpResponse = await client.GetAsync("/api/admin/recipes/draft-lemon-tart");
+        Assert.Equal(HttpStatusCode.NotFound, followUpResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteAdminRecipe_ReturnsNotFoundForUnknownRecipe()
+    {
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+
+        var response = await client.DeleteAsync("/api/admin/recipes/missing-recipe");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

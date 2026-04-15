@@ -2,6 +2,23 @@
 
 ASP.NET Core Web API for the recipe app.
 
+## Stack
+
+- ASP.NET Core minimal API
+- .NET 10 SDK
+- xUnit for tests
+- in-memory repository for the current bootstrap phase
+
+## Project Structure
+
+```text
+backend/
+  RecipeApp.sln
+  README.md
+  RecipeApp.Api/
+  RecipeApp.Api.Tests/
+```
+
 ## Current Scope
 
 Current backend implementation includes:
@@ -13,10 +30,11 @@ Current backend implementation includes:
 - admin-protected `GET /api/admin/recipes/{slug}`
 - admin-protected `POST /api/admin/recipes`
 - admin-protected `PUT /api/admin/recipes/{slug}`
+- admin-protected `DELETE /api/admin/recipes/{slug}`
 - Swagger in development
-- xUnit test project for recipe service behavior and API auth
+- xUnit test project for service and endpoint behavior
 
-## Expected Local URL
+## Local Development
 
 The development launch profile is configured for:
 
@@ -24,7 +42,7 @@ The development launch profile is configured for:
 
 This matches the frontend default in `frontend/.env.example`.
 
-## Run
+### Start The API
 
 From the repo root:
 
@@ -33,7 +51,11 @@ cd backend
 dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
 ```
 
-## Run Tests
+Swagger is available at:
+
+- `http://localhost:5080/swagger`
+
+### Run Tests
 
 ```powershell
 cd backend
@@ -42,30 +64,48 @@ dotnet test .\RecipeApp.sln
 
 ## Admin Access
 
-Current admin protection is intentionally simple for the MVP backend bootstrap:
+Current admin protection is intentionally simple for the bootstrap phase:
 
 - send header `X-Admin-Api-Key: dev-admin-key`
 
-This is only a bootstrap mechanism so we can wire frontend and backend end-to-end. We can replace it later with cookie auth.
+This is only a temporary mechanism so we can wire frontend and backend end-to-end before replacing it with proper auth.
 
-## Create Recipe Payload
+## API Overview
 
-`POST /api/admin/recipes` currently expects:
+### Public endpoints
 
-- `title`
-- `slug`
-- `description`
-- `category`
-- `prepTimeMinutes`
-- `servings`
-- `imageUrl`
-- `isPublished`
-- `ingredients`
-- `steps`
+- `GET /api/recipes`
+- `GET /api/recipes/{slug}`
 
-`PUT /api/admin/recipes/{slug}` currently uses the same payload shape.
+### Admin endpoints
+
+- `GET /api/admin/recipes`
+- `GET /api/admin/recipes/{slug}`
+- `POST /api/admin/recipes`
+- `PUT /api/admin/recipes/{slug}`
+- `DELETE /api/admin/recipes/{slug}`
+
+## Recipe Payload Shape
+
+`POST /api/admin/recipes` and `PUT /api/admin/recipes/{slug}` currently use this payload shape:
+
+```json
+{
+  "title": "Herby potato salad",
+  "slug": "herby-potato-salad",
+  "description": "Warm potatoes with herbs and mustard dressing.",
+  "category": "Lunch",
+  "prepTimeMinutes": 30,
+  "servings": 4,
+  "imageUrl": "https://example.com/potato-salad.jpg",
+  "isPublished": false,
+  "ingredients": ["1 kg potatoes", "Parsley", "Mustard"],
+  "steps": ["Boil potatoes.", "Dress and toss."]
+}
+```
 
 ## Next Steps
 
-- add admin recipe delete endpoint
 - replace in-memory storage with EF Core + PostgreSQL
+- switch admin protection from API key to real auth
+- connect frontend HTTP mode to these endpoints

@@ -8,4 +8,5 @@ public interface IRecipeRepository
     Recipe? GetBySlug(string slug);
     Recipe Add(Recipe recipe);
     Recipe? Replace(string currentSlug, Recipe recipe);
+    bool Delete(string slug);
 }

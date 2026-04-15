@@ -119,6 +119,8 @@ public sealed class RecipeService
         return storedRecipe is null ? null : MapToResponse(storedRecipe);
     }
 
+    public bool DeleteRecipe(string slug) => _recipeRepository.Delete(slug);
+
     private static bool MatchesFilters(Recipe recipe, string? normalizedSearch, string? normalizedCategory) =>
         (string.IsNullOrWhiteSpace(normalizedSearch) ||
          recipe.Title.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ||

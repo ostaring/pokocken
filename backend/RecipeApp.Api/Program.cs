@@ -84,6 +84,12 @@ app.MapPut("/api/admin/recipes/{slug}", (string slug, UpdateRecipeRequest reques
     }
 }).AddEndpointFilter<AdminApiKeyEndpointFilter>();
 
+app.MapDelete("/api/admin/recipes/{slug}", (string slug, RecipeService recipeService) =>
+{
+    var deleted = recipeService.DeleteRecipe(slug);
+    return deleted ? Results.NoContent() : Results.NotFound();
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+
 app.Run();
 
 public partial class Program;

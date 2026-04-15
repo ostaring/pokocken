@@ -155,4 +155,27 @@ public sealed class RecipeServiceTests
         var exception = Assert.Throws<InvalidOperationException>(action);
         Assert.Contains("already exists", exception.Message);
     }
+
+    [Fact]
+    public void DeleteRecipe_RemovesRecipeWhenItExists()
+    {
+        var repository = new InMemoryRecipeRepository();
+        var service = new RecipeService(repository);
+
+        var deleted = service.DeleteRecipe("draft-lemon-tart");
+
+        Assert.True(deleted);
+        Assert.Null(repository.GetBySlug("draft-lemon-tart"));
+    }
+
+    [Fact]
+    public void DeleteRecipe_ReturnsFalseWhenRecipeDoesNotExist()
+    {
+        var repository = new InMemoryRecipeRepository();
+        var service = new RecipeService(repository);
+
+        var deleted = service.DeleteRecipe("missing-recipe");
+
+        Assert.False(deleted);
+    }
 }

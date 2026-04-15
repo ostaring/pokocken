@@ -148,4 +148,18 @@ public sealed class InMemoryRecipeRepository : IRecipeRepository
         _recipes[index] = recipe;
         return recipe;
     }
+
+    public bool Delete(string slug)
+    {
+        var index = _recipes.FindIndex(existingRecipe =>
+            string.Equals(existingRecipe.Slug, slug, StringComparison.OrdinalIgnoreCase));
+
+        if (index < 0)
+        {
+            return false;
+        }
+
+        _recipes.RemoveAt(index);
+        return true;
+    }
 }
