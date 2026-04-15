@@ -1,4 +1,5 @@
 using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Repositories;
 using RecipeApp.Api.Services;
 
@@ -33,6 +34,21 @@ app.MapGet("/api/recipes/{slug}", (string slug, RecipeService recipeService) =>
     var recipe = recipeService.GetPublishedRecipeBySlug(slug);
     return recipe is null ? Results.NotFound() : Results.Ok(recipe);
 });
+
+app.MapGet("/api/admin/recipes", (
+    string? search,
+    string? category,
+    RecipeService recipeService) =>
+{
+    var recipes = recipeService.GetAllRecipes(search, category);
+    return Results.Ok(recipes);
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+
+app.MapGet("/api/admin/recipes/{slug}", (string slug, RecipeService recipeService) =>
+{
+    var recipe = recipeService.GetRecipeBySlug(slug);
+    return recipe is null ? Results.NotFound() : Results.Ok(recipe);
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
 
 app.Run();
 

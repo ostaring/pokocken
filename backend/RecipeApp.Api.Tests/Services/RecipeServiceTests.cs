@@ -53,4 +53,15 @@ public sealed class RecipeServiceTests
 
         Assert.Null(recipe);
     }
+
+    [Fact]
+    public void GetAllRecipes_IncludesDraftsForAdminQueries()
+    {
+        var repository = new InMemoryRecipeRepository();
+        var service = new RecipeService(repository);
+
+        var recipes = service.GetAllRecipes(search: null, category: null);
+
+        Assert.Contains(recipes, recipe => recipe.Slug == "draft-lemon-tart");
+    }
 }

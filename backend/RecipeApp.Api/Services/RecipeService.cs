@@ -21,13 +21,7 @@ public sealed class RecipeService
         return _recipeRepository
             .GetAll()
             .Where(recipe => recipe.IsPublished)
-            .Where(recipe =>
-                string.IsNullOrWhiteSpace(normalizedSearch) ||
-                recipe.Title.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ||
-                recipe.Description.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase))
-            .Where(recipe =>
-                string.IsNullOrWhiteSpace(normalizedCategory) ||
-                string.Equals(recipe.Category, normalizedCategory, StringComparison.OrdinalIgnoreCase))
+            .Where(recipe => MatchesFilters(recipe, normalizedSearch, normalizedCategory))
             .Select(MapToResponse)
             .ToList();
     }
@@ -42,6 +36,31 @@ public sealed class RecipeService
 
         return MapToResponse(recipe);
     }
+
+    public IReadOnlyList<RecipeResponse> GetAllRecipes(string? search, string? category)
+    {
+        var normalizedSearch = search?.Trim();
+        var normalizedCategory = category?.Trim();
+
+        return _recipeRepository
+            .GetAll()
+            .Where(recipe => MatchesFilters(recipe, normalizedSearch, normalizedCategory))
+            .Select(MapToResponse)
+            .ToList();
+    }
+
+    public RecipeResponse? GetRecipeBySlug(string slug)
+    {
+        var recipe = _recipeRepository.GetBySlug(slug);
+        return recipe is null ? null : MapToResponse(recipe);
+    }
+
+    private static bool MatchesFilters(Recipe recipe, string? normalizedSearch, string? normalizedCategory) =>
+        (string.IsNullOrWhiteSpace(normalizedSearch) ||
+         recipe.Title.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ||
+         recipe.Description.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrWhiteSpace(normalizedCategory) ||
+         string.Equals(recipe.Category, normalizedCategory, StringComparison.OrdinalIgnoreCase));
 
     private static RecipeResponse MapToResponse(Recipe recipe) =>
         new(

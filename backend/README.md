@@ -9,8 +9,10 @@ Current backend implementation includes:
 - in-memory recipe repository
 - public `GET /api/recipes`
 - public `GET /api/recipes/{slug}`
+- admin-protected `GET /api/admin/recipes`
+- admin-protected `GET /api/admin/recipes/{slug}`
 - Swagger in development
-- xUnit test project for recipe service behavior
+- xUnit test project for recipe service behavior and API auth
 
 ## Expected Local URL
 
@@ -36,12 +38,15 @@ cd backend
 dotnet test .\RecipeApp.sln
 ```
 
-## Important Note
+## Admin Access
 
-The current machine does not appear to have a usable `.NET SDK` installed yet, so I have set up the backend project structure and code manually. The files are ready for normal `dotnet run` and `dotnet test` usage as soon as the SDK is installed.
+Current admin protection is intentionally simple for the MVP backend bootstrap:
+
+- send header `X-Admin-Api-Key: dev-admin-key`
+
+This is only a bootstrap mechanism so we can wire frontend and backend end-to-end. We can replace it later with cookie auth.
 
 ## Next Steps
 
-- add admin auth endpoints
 - add admin recipe CRUD endpoints
 - replace in-memory storage with EF Core + PostgreSQL
