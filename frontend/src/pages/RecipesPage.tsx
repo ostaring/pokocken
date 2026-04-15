@@ -1,14 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
+import { useRecipesQuery } from "../features/recipes/recipe-hooks";
 import { filterRecipes, recipeCategories } from "../features/recipes/recipe-utils";
-import { getAllRecipes } from "../features/recipes/recipe-service";
 import type { RecipeCategory } from "../types/recipe";
 
 export function RecipesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState<RecipeCategory | "All">("All");
-  const recipes = getAllRecipes();
+  const recipesQuery = useRecipesQuery();
+  const recipes = recipesQuery.data ?? [];
 
   const filteredRecipes = useMemo(
     () => filterRecipes(recipes, searchTerm, category),
@@ -22,6 +23,18 @@ export function RecipesPage() {
       description="A first real browsing view with client-side search and category filtering. We can later swap the mock data for a backend query without changing the page structure much."
     >
       <div className="space-y-8">
+        {recipesQuery.isLoading ? (
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white/70 p-8 text-sm text-slate-600">
+            Loading recipes...
+          </div>
+        ) : null}
+
+        {recipesQuery.isError ? (
+          <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-sm text-rose-700">
+            Could not load recipes.
+          </div>
+        ) : null}
+
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
           <label className="space-y-2">
             <span className="text-sm font-semibold text-slate-700">Search recipes</span>
@@ -58,7 +71,7 @@ export function RecipesPage() {
           <p className="text-sm text-slate-500">Mock data for now, API-ready structure next.</p>
         </div>
 
-        {filteredRecipes.length > 0 ? (
+        {!recipesQuery.isLoading && !recipesQuery.isError && filteredRecipes.length > 0 ? (
           <div className="grid gap-5 lg:grid-cols-2">
             {filteredRecipes.map((recipe) => (
               <article
@@ -94,14 +107,16 @@ export function RecipesPage() {
               </article>
             ))}
           </div>
-        ) : (
+        ) : null}
+
+        {!recipesQuery.isLoading && !recipesQuery.isError && filteredRecipes.length === 0 ? (
           <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center">
             <h2 className="text-xl font-semibold text-slate-900">No recipes matched</h2>
             <p className="mt-2 text-sm text-slate-600">
               Try another search term or reset the category filter.
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </PageFrame>
   );

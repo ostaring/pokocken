@@ -1,10 +1,31 @@
 import { useParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
-import { getRecipeBySlug } from "../features/recipes/recipe-service";
+import { useRecipeBySlugQuery } from "../features/recipes/recipe-hooks";
 
 export function RecipeDetailsPage() {
   const { slug } = useParams();
-  const recipe = getRecipeBySlug(slug);
+  const recipeQuery = useRecipeBySlugQuery(slug);
+  const recipe = recipeQuery.data;
+
+  if (recipeQuery.isLoading) {
+    return (
+      <PageFrame eyebrow="Public" title="Loading recipe" description="Fetching recipe details.">
+        <p className="text-slate-700">Loading recipe details...</p>
+      </PageFrame>
+    );
+  }
+
+  if (recipeQuery.isError) {
+    return (
+      <PageFrame
+        eyebrow="Public"
+        title="Recipe unavailable"
+        description="Something went wrong while loading the recipe."
+      >
+        <p className="text-slate-700">Please try again a bit later.</p>
+      </PageFrame>
+    );
+  }
 
   if (!recipe) {
     return (

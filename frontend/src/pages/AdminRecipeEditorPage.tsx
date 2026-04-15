@@ -3,11 +3,11 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
+import { useRecipeByIdQuery } from "../features/recipes/recipe-hooks";
 import {
   recipeFormSchema,
   type RecipeFormValues,
 } from "../features/recipes/recipe-form-schema";
-import { getRecipeById } from "../features/recipes/recipe-service";
 
 type AdminRecipeEditorPageProps = {
   mode: "create" | "edit";
@@ -16,7 +16,8 @@ type AdminRecipeEditorPageProps = {
 export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const title = mode === "create" ? "Create recipe" : "Edit recipe";
   const { id } = useParams();
-  const recipe = mode === "edit" ? getRecipeById(id) : undefined;
+  const recipeQuery = useRecipeByIdQuery(mode === "edit" ? id : undefined);
+  const recipe = recipeQuery.data;
 
   const {
     register,
@@ -59,6 +60,30 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
   function onSubmit(values: RecipeFormValues) {
     console.log("Recipe editor submitted", values);
+  }
+
+  if (mode === "edit" && recipeQuery.isLoading) {
+    return (
+      <PageFrame
+        eyebrow="Admin"
+        title="Loading recipe"
+        description="Fetching recipe data for the editor."
+      >
+        <p className="text-slate-700">Loading recipe editor...</p>
+      </PageFrame>
+    );
+  }
+
+  if (mode === "edit" && recipeQuery.isError) {
+    return (
+      <PageFrame
+        eyebrow="Admin"
+        title="Editor unavailable"
+        description="Something went wrong while loading the recipe."
+      >
+        <p className="text-slate-700">Please try again later.</p>
+      </PageFrame>
+    );
   }
 
   if (mode === "edit" && !recipe) {
