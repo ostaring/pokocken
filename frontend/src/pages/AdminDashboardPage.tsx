@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import {
+  useDeleteRecipeMutation,
   useRecipesQuery,
   useToggleRecipePublishedMutation,
 } from "../features/recipes/recipe-hooks";
@@ -9,6 +10,7 @@ import {
 export function AdminDashboardPage() {
   const recipesQuery = useRecipesQuery();
   const togglePublishedMutation = useToggleRecipePublishedMutation();
+  const deleteRecipeMutation = useDeleteRecipeMutation();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const mockRecipes = recipesQuery.data ?? [];
   const publishedCount = mockRecipes.filter((recipe) => recipe.isPublished).length;
@@ -22,6 +24,18 @@ export function AdminDashboardPage() {
         ? "Recipe published successfully."
         : "Recipe moved back to draft.",
     );
+  }
+
+  async function handleDeleteRecipe(id: string, title: string) {
+    setFeedbackMessage(null);
+
+    const confirmed = window.confirm(`Delete "${title}"? This cannot be undone in the mock store.`);
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteRecipeMutation.mutateAsync(id);
+    setFeedbackMessage("Recipe deleted successfully.");
   }
 
   return (
@@ -44,10 +58,10 @@ export function AdminDashboardPage() {
           </div>
         ) : null}
 
-        {togglePublishedMutation.isError ? (
+        {togglePublishedMutation.isError || deleteRecipeMutation.isError ? (
           <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-            {togglePublishedMutation.error instanceof Error
-              ? togglePublishedMutation.error.message
+            {(togglePublishedMutation.error ?? deleteRecipeMutation.error) instanceof Error
+              ? (togglePublishedMutation.error ?? deleteRecipeMutation.error)?.message
               : "Could not update recipe status."}
           </div>
         ) : null}
@@ -136,6 +150,14 @@ export function AdminDashboardPage() {
                         : recipe.isPublished
                           ? "Unpublish"
                           : "Publish"}
+                    </button>
+                    <button
+                      className="rounded-full border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60"
+                      type="button"
+                      onClick={() => void handleDeleteRecipe(recipe.id, recipe.title)}
+                      disabled={deleteRecipeMutation.isPending || togglePublishedMutation.isPending}
+                    >
+                      {deleteRecipeMutation.isPending ? "Deleting..." : "Delete"}
                     </button>
                   </div>
                 </div>

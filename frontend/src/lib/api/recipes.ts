@@ -116,3 +116,16 @@ export async function toggleRecipePublished(id: string): Promise<RecipeDetail> {
 
   return updatedRecipe;
 }
+
+export async function deleteRecipe(id: string): Promise<void> {
+  await apiDelay();
+
+  const recipes = readStoredRecipes();
+  const nextRecipes = recipes.filter((recipe) => recipe.id !== id);
+
+  if (nextRecipes.length === recipes.length) {
+    throw new Error("Recipe not found.");
+  }
+
+  writeStoredRecipes(nextRecipes);
+}

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createRecipe,
+  deleteRecipe,
   fetchRecipeById,
   fetchRecipeBySlug,
   fetchRecipes,
@@ -72,6 +73,17 @@ export function useToggleRecipePublishedMutation() {
 
   return useMutation({
     mutationFn: (id: string) => toggleRecipePublished(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
+    },
+  });
+}
+
+export function useDeleteRecipeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteRecipe(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
     },
