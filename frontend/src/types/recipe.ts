@@ -16,3 +16,8 @@ export type RecipeSummary = {
   imageUrl: string;
   isPublished: boolean;
 };
+
+export type RecipeDetail = RecipeSummary & {
+  ingredients: string[];
+  steps: string[];
+};

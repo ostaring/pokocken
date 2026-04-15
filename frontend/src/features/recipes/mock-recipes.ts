@@ -1,6 +1,6 @@
-import type { RecipeSummary } from "../../types/recipe";
+import type { RecipeDetail } from "../../types/recipe";
 
-export const mockRecipes: RecipeSummary[] = [
+export const mockRecipes: RecipeDetail[] = [
   {
     id: "1",
     title: "Brown butter pancakes",
@@ -12,6 +12,22 @@ export const mockRecipes: RecipeSummary[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=900&q=80",
     isPublished: true,
+    ingredients: [
+      "250 g plain flour",
+      "2 tsp baking powder",
+      "2 tbsp sugar",
+      "350 ml milk",
+      "2 eggs",
+      "80 g browned butter",
+      "A pinch of cardamom",
+    ],
+    steps: [
+      "Whisk the dry ingredients together in a large bowl.",
+      "Combine milk, eggs, and brown butter, then fold into the dry mix until just combined.",
+      "Rest the batter for 10 minutes.",
+      "Cook in a buttered pan over medium heat until golden on both sides.",
+      "Serve with berries and a spoon of creme fraiche.",
+    ],
   },
   {
     id: "2",
@@ -24,6 +40,20 @@ export const mockRecipes: RecipeSummary[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80",
     isPublished: true,
+    ingredients: [
+      "300 g pasta",
+      "400 g cherry tomatoes",
+      "4 garlic cloves",
+      "Olive oil",
+      "Fresh basil",
+      "Parmesan",
+    ],
+    steps: [
+      "Roast tomatoes and garlic with olive oil until collapsed and sweet.",
+      "Cook pasta until al dente and reserve a little pasta water.",
+      "Toss pasta with roasted tomatoes, garlic, basil, and pasta water.",
+      "Finish with parmesan and black pepper.",
+    ],
   },
   {
     id: "3",
@@ -36,6 +66,21 @@ export const mockRecipes: RecipeSummary[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
     isPublished: true,
+    ingredients: [
+      "2 chicken fillets",
+      "200 g cooked rice",
+      "1 avocado",
+      "1 cucumber",
+      "Greek yogurt",
+      "Lemon juice",
+      "Fresh herbs",
+    ],
+    steps: [
+      "Season and roast the chicken until cooked through.",
+      "Mix yogurt with lemon juice and chopped herbs.",
+      "Assemble bowls with rice, sliced chicken, avocado, and cucumber.",
+      "Spoon over the lemon yogurt before serving.",
+    ],
   },
   {
     id: "4",
@@ -48,6 +93,20 @@ export const mockRecipes: RecipeSummary[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=900&q=80",
     isPublished: true,
+    ingredients: [
+      "200 g dark chocolate",
+      "300 ml cream",
+      "3 eggs",
+      "2 tbsp sugar",
+      "Sea salt",
+    ],
+    steps: [
+      "Melt the chocolate gently and let it cool slightly.",
+      "Whip the cream to soft peaks.",
+      "Whisk egg yolks with sugar, then combine with chocolate.",
+      "Fold in whipped cream and chill before serving.",
+      "Finish with a pinch of sea salt.",
+    ],
   },
   {
     id: "5",
@@ -60,5 +119,18 @@ export const mockRecipes: RecipeSummary[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
     isPublished: true,
+    ingredients: [
+      "2 cans chickpeas",
+      "Olive oil",
+      "1 lime",
+      "Chili flakes",
+      "Smoked paprika",
+      "Salt",
+    ],
+    steps: [
+      "Dry the chickpeas thoroughly and toss with oil and spices.",
+      "Roast until crisp and deep golden.",
+      "Finish with lime zest and extra salt while still warm.",
+    ],
   },
 ];
