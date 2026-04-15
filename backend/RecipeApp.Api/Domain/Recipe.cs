@@ -1,6 +1,6 @@
 namespace RecipeApp.Api.Domain;
 
-public sealed class Recipe
+public sealed record Recipe
 {
     public required Guid Id { get; init; }
     public required string Title { get; init; }

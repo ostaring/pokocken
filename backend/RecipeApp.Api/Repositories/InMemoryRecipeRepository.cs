@@ -4,7 +4,7 @@ namespace RecipeApp.Api.Repositories;
 
 public sealed class InMemoryRecipeRepository : IRecipeRepository
 {
-    private static readonly IReadOnlyList<Recipe> Recipes =
+    private static readonly IReadOnlyList<Recipe> SeedRecipes =
     [
         new Recipe
         {
@@ -120,8 +120,18 @@ public sealed class InMemoryRecipeRepository : IRecipeRepository
         }
     ];
 
-    public IReadOnlyList<Recipe> GetAll() => Recipes;
+    private readonly List<Recipe> _recipes = SeedRecipes
+        .Select(recipe => recipe with { })
+        .ToList();
+
+    public IReadOnlyList<Recipe> GetAll() => _recipes;
 
     public Recipe? GetBySlug(string slug) =>
-        Recipes.FirstOrDefault(recipe => string.Equals(recipe.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        _recipes.FirstOrDefault(recipe => string.Equals(recipe.Slug, slug, StringComparison.OrdinalIgnoreCase));
+
+    public Recipe Add(Recipe recipe)
+    {
+        _recipes.Add(recipe);
+        return recipe;
+    }
 }

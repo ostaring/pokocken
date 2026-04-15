@@ -55,6 +55,61 @@ public sealed class RecipeService
         return recipe is null ? null : MapToResponse(recipe);
     }
 
+    public RecipeResponse CreateRecipe(CreateRecipeRequest request)
+    {
+        var normalizedTitle = request.Title.Trim();
+        var normalizedSlug = request.Slug.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(normalizedTitle))
+        {
+            throw new ArgumentException("Title is required.", nameof(request));
+        }
+
+        if (string.IsNullOrWhiteSpace(normalizedSlug))
+        {
+            throw new ArgumentException("Slug is required.", nameof(request));
+        }
+
+        if (_recipeRepository.GetBySlug(normalizedSlug) is not null)
+        {
+            throw new InvalidOperationException($"A recipe with slug '{normalizedSlug}' already exists.");
+        }
+
+        var recipe = new Recipe
+        {
+            Id = Guid.NewGuid(),
+            Title = normalizedTitle,
+            Slug = normalizedSlug,
+            Description = request.Description.Trim(),
+            Category = request.Category.Trim(),
+            PrepTimeMinutes = request.PrepTimeMinutes,
+            Servings = request.Servings,
+            ImageUrl = request.ImageUrl.Trim(),
+            IsPublished = request.IsPublished,
+            Ingredients = request.Ingredients
+                .Select(ingredient => ingredient.Trim())
+                .Where(ingredient => !string.IsNullOrWhiteSpace(ingredient))
+                .ToList(),
+            Steps = request.Steps
+                .Select(step => step.Trim())
+                .Where(step => !string.IsNullOrWhiteSpace(step))
+                .ToList()
+        };
+
+        if (string.IsNullOrWhiteSpace(recipe.Description) ||
+            string.IsNullOrWhiteSpace(recipe.Category) ||
+            string.IsNullOrWhiteSpace(recipe.ImageUrl) ||
+            recipe.PrepTimeMinutes <= 0 ||
+            recipe.Servings <= 0 ||
+            recipe.Ingredients.Count == 0 ||
+            recipe.Steps.Count == 0)
+        {
+            throw new ArgumentException("Recipe payload is incomplete.", nameof(request));
+        }
+
+        return MapToResponse(_recipeRepository.Add(recipe));
+    }
+
     private static bool MatchesFilters(Recipe recipe, string? normalizedSearch, string? normalizedCategory) =>
         (string.IsNullOrWhiteSpace(normalizedSearch) ||
          recipe.Title.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ||

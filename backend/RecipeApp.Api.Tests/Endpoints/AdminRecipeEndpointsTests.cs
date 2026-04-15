@@ -29,7 +29,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task GetAdminRecipes_ReturnsDraftsWhenAuthorized()
     {
-        using var client = _factory.CreateClient();
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
         client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
 
         var recipes = await client.GetFromJsonAsync<List<RecipeResponse>>("/api/admin/recipes");
@@ -41,7 +41,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task GetAdminRecipeBySlug_ReturnsDraftWhenAuthorized()
     {
-        using var client = _factory.CreateClient();
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
         client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
 
         var recipe = await client.GetFromJsonAsync<RecipeResponse>("/api/admin/recipes/draft-lemon-tart");
@@ -49,5 +49,52 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
         Assert.NotNull(recipe);
         Assert.Equal("draft-lemon-tart", recipe!.Slug);
         Assert.False(recipe.IsPublished);
+    }
+
+    [Fact]
+    public async Task PostAdminRecipe_ReturnsCreatedWhenAuthorized()
+    {
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+
+        var response = await client.PostAsJsonAsync("/api/admin/recipes", new CreateRecipeRequest(
+            "Herby potato salad",
+            "herby-potato-salad",
+            "Warm potatoes with herbs and mustard dressing.",
+            "Lunch",
+            30,
+            4,
+            "https://example.com/potato-salad.jpg",
+            false,
+            ["1 kg potatoes", "Parsley", "Mustard"],
+            ["Boil potatoes.", "Dress and toss."]));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var createdRecipe = await response.Content.ReadFromJsonAsync<RecipeResponse>();
+        Assert.NotNull(createdRecipe);
+        Assert.Equal("herby-potato-salad", createdRecipe!.Slug);
+        Assert.Equal("/api/admin/recipes/herby-potato-salad", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task PostAdminRecipe_ReturnsConflictForDuplicateSlug()
+    {
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+
+        var response = await client.PostAsJsonAsync("/api/admin/recipes", new CreateRecipeRequest(
+            "Duplicate pancake",
+            "brown-butter-pancakes",
+            "Should fail because the slug already exists.",
+            "Breakfast",
+            12,
+            2,
+            "https://example.com/duplicate.jpg",
+            true,
+            ["Flour"],
+            ["Mix."]));
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 }

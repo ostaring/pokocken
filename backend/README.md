@@ -11,6 +11,7 @@ Current backend implementation includes:
 - public `GET /api/recipes/{slug}`
 - admin-protected `GET /api/admin/recipes`
 - admin-protected `GET /api/admin/recipes/{slug}`
+- admin-protected `POST /api/admin/recipes`
 - Swagger in development
 - xUnit test project for recipe service behavior and API auth
 
@@ -46,7 +47,22 @@ Current admin protection is intentionally simple for the MVP backend bootstrap:
 
 This is only a bootstrap mechanism so we can wire frontend and backend end-to-end. We can replace it later with cookie auth.
 
+## Create Recipe Payload
+
+`POST /api/admin/recipes` currently expects:
+
+- `title`
+- `slug`
+- `description`
+- `category`
+- `prepTimeMinutes`
+- `servings`
+- `imageUrl`
+- `isPublished`
+- `ingredients`
+- `steps`
+
 ## Next Steps
 
-- add admin recipe CRUD endpoints
+- add admin recipe update and delete endpoints
 - replace in-memory storage with EF Core + PostgreSQL
