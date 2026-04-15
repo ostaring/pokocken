@@ -53,7 +53,7 @@ describe("AdminRouteGuard", () => {
       ["/admin"],
     );
 
-    expect(screen.getByText("Loading admin session...")).toBeInTheDocument();
+    expect(screen.getByText("Laddar adminsessionsdata...")).toBeInTheDocument();
   });
 
   it("redirects unauthenticated users to login with redirect query", () => {

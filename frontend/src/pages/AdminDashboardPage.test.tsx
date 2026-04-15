@@ -66,14 +66,14 @@ describe("AdminDashboardPage", () => {
 
     renderWithProviders(<AdminDashboardPage />);
 
-    const unpublishButtons = screen.getAllByRole("button", { name: "Unpublish" });
+    const unpublishButtons = screen.getAllByRole("button", { name: "Avpublicera" });
     await user.click(unpublishButtons[0]!);
 
     await waitFor(() => {
       expect(mockToggleMutateAsync).toHaveBeenCalledWith("1");
     });
 
-    expect(await screen.findByText("Recipe moved back to draft.")).toBeInTheDocument();
+    expect(await screen.findByText("Receptet flyttades tillbaka till utkast.")).toBeInTheDocument();
   });
 
   it("deletes a recipe after confirmation and shows success feedback", async () => {
@@ -83,14 +83,14 @@ describe("AdminDashboardPage", () => {
 
     renderWithProviders(<AdminDashboardPage />);
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+    const deleteButtons = screen.getAllByRole("button", { name: "Ta bort" });
     await user.click(deleteButtons[0]!);
 
     await waitFor(() => {
       expect(mockDeleteMutateAsync).toHaveBeenCalledWith("1");
     });
 
-    expect(await screen.findByText("Recipe deleted successfully.")).toBeInTheDocument();
+    expect(await screen.findByText("Receptet togs bort.")).toBeInTheDocument();
   });
 
   it("does not delete when confirmation is cancelled", async () => {
@@ -99,7 +99,7 @@ describe("AdminDashboardPage", () => {
 
     renderWithProviders(<AdminDashboardPage />);
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+    const deleteButtons = screen.getAllByRole("button", { name: "Ta bort" });
     await user.click(deleteButtons[0]!);
 
     expect(mockDeleteMutateAsync).not.toHaveBeenCalled();

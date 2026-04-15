@@ -25,7 +25,7 @@ export async function fetchRecipesHttp(): Promise<RecipeDetail[]> {
   const response = await fetch(buildApiUrl("/api/recipes"));
 
   if (!response.ok) {
-    throw new Error("Failed to fetch recipes.");
+    throw new Error("Kunde inte hämta recepten.");
   }
 
   return (await response.json()) as RecipeDetail[];
@@ -39,7 +39,7 @@ export async function fetchRecipeBySlugHttp(slug: string): Promise<RecipeDetail 
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch recipe.");
+    throw new Error("Kunde inte hämta receptet.");
   }
 
   return (await response.json()) as RecipeDetail;
@@ -51,7 +51,7 @@ export async function fetchAdminRecipesHttp(): Promise<RecipeDetail[]> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch admin recipes.");
+    throw new Error("Kunde inte hämta adminrecepten.");
   }
 
   return (await response.json()) as RecipeDetail[];
@@ -77,15 +77,15 @@ async function sendRecipeWriteRequest(
   });
 
   if (response.status === 401) {
-    throw new Error("Admin session expired. Please log in again.");
+    throw new Error("Adminsessionen har gått ut. Logga in igen.");
   }
 
   if (response.status === 409) {
-    throw new Error("A recipe with that slug already exists.");
+    throw new Error("Ett recept med den sluggen finns redan.");
   }
 
   if (!response.ok) {
-    throw new Error("Failed to save recipe.");
+    throw new Error("Kunde inte spara receptet.");
   }
 
   return (await response.json()) as RecipeDetail;
@@ -99,7 +99,7 @@ export async function updateRecipeHttp(id: string, input: SaveRecipeInput) {
   const recipe = await fetchAdminRecipeByIdHttp(id);
 
   if (!recipe) {
-    throw new Error("Recipe not found.");
+    throw new Error("Receptet hittades inte.");
   }
 
   return sendRecipeWriteRequest(`/api/admin/recipes/${recipe.slug}`, "PUT", input);
@@ -109,7 +109,7 @@ export async function toggleRecipePublishedHttp(id: string): Promise<RecipeDetai
   const recipe = await fetchAdminRecipeByIdHttp(id);
 
   if (!recipe) {
-    throw new Error("Recipe not found.");
+    throw new Error("Receptet hittades inte.");
   }
 
   return sendRecipeWriteRequest(`/api/admin/recipes/${recipe.slug}`, "PUT", {
@@ -129,7 +129,7 @@ export async function deleteRecipeHttp(id: string): Promise<void> {
   const recipe = await fetchAdminRecipeByIdHttp(id);
 
   if (!recipe) {
-    throw new Error("Recipe not found.");
+    throw new Error("Receptet hittades inte.");
   }
 
   const response = await fetch(buildApiUrl(`/api/admin/recipes/${recipe.slug}`), {
@@ -138,10 +138,10 @@ export async function deleteRecipeHttp(id: string): Promise<void> {
   });
 
   if (response.status === 401) {
-    throw new Error("Admin session expired. Please log in again.");
+    throw new Error("Adminsessionen har gått ut. Logga in igen.");
   }
 
   if (!response.ok) {
-    throw new Error("Failed to delete recipe.");
+    throw new Error("Kunde inte ta bort receptet.");
   }
 }

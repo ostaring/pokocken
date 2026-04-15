@@ -38,14 +38,14 @@ describe("AdminLoginPage", () => {
 
     renderWithProviders(<AdminLoginPage />);
 
-    await user.type(screen.getByLabelText(/username/i), "ab");
-    await user.type(screen.getByLabelText(/password/i), "short");
-    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    await user.type(screen.getByLabelText(/användarnamn/i), "ab");
+    await user.type(screen.getByLabelText(/lösenord/i), "short");
+    await user.click(screen.getByRole("button", { name: /logga in/i }));
 
     expect(
-      await screen.findByText("Username must be at least 3 characters."),
+      await screen.findByText("Användarnamnet måste vara minst 3 tecken."),
     ).toBeInTheDocument();
-    expect(screen.getByText("Password must be at least 8 characters.")).toBeInTheDocument();
+    expect(screen.getByText("Lösenordet måste vara minst 8 tecken.")).toBeInTheDocument();
   });
 
   it("submits valid credentials and redirects to admin", async () => {
@@ -54,9 +54,9 @@ describe("AdminLoginPage", () => {
 
     renderWithProviders(<AdminLoginPage />);
 
-    await user.type(screen.getByLabelText(/username/i), "admin");
-    await user.type(screen.getByLabelText(/password/i), "password123");
-    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    await user.type(screen.getByLabelText(/användarnamn/i), "admin");
+    await user.type(screen.getByLabelText(/lösenord/i), "password123");
+    await user.click(screen.getByRole("button", { name: /logga in/i }));
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({

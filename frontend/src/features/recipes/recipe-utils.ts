@@ -9,6 +9,23 @@ export const recipeCategories: Array<RecipeCategory | "All"> = [
   "Snack",
 ];
 
+export function getRecipeCategoryLabel(category: RecipeCategory | "All") {
+  switch (category) {
+    case "All":
+      return "Alla";
+    case "Breakfast":
+      return "Frukost";
+    case "Lunch":
+      return "Lunch";
+    case "Dinner":
+      return "Middag";
+    case "Dessert":
+      return "Dessert";
+    case "Snack":
+      return "Mellanmål";
+  }
+}
+
 export function filterRecipes(
   recipes: RecipeSummary[],
   searchTerm: string,

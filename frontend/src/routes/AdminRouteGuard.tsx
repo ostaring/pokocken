@@ -14,7 +14,7 @@ export function AdminRouteGuard({ children }: AdminRouteGuardProps) {
     return (
       <main className="page-shell px-6 py-10">
         <div className="mx-auto max-w-3xl rounded-[1.75rem] bg-white/80 p-8 text-sm text-slate-700 shadow-sm">
-          Loading admin session...
+          Laddar adminsessionsdata...
         </div>
       </main>
     );

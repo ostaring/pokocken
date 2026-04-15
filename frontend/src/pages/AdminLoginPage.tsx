@@ -31,14 +31,14 @@ export function AdminLoginPage() {
 
   return (
     <PageFrame
-      eyebrow="Admin"
-      title="Login"
-      description="This is now a real form shell with client-side validation. The next step is to connect it to the backend auth endpoint and session handling."
+      eyebrow="Administration"
+      title="Logga in"
+      description="Det här är nu ett riktigt formulär med klientvalidering. Nästa steg är att koppla det till backendens auth-endpoint och sessionshantering."
     >
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
           <label className="block space-y-2">
-            <span className="text-sm font-semibold text-slate-700">Username</span>
+            <span className="text-sm font-semibold text-slate-700">Användarnamn</span>
             <input
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
               type="text"
@@ -52,12 +52,12 @@ export function AdminLoginPage() {
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-semibold text-slate-700">Password</span>
+            <span className="text-sm font-semibold text-slate-700">Lösenord</span>
             <input
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
               type="password"
               autoComplete="current-password"
-              placeholder="At least 8 characters"
+              placeholder="Minst 8 tecken"
               {...register("password")}
             />
             {errors.password ? (
@@ -70,27 +70,27 @@ export function AdminLoginPage() {
             type="submit"
             disabled={!isValid || isSubmitting}
           >
-            {isSubmitting ? "Signing in..." : "Sign in"}
+            {isSubmitting ? "Loggar in..." : "Logga in"}
           </button>
 
           {loginMutation.isError ? (
             <p className="text-sm text-rose-600">
               {loginMutation.error instanceof Error
                 ? loginMutation.error.message
-                : "Login failed."}
+                : "Inloggningen misslyckades."}
             </p>
           ) : null}
         </form>
 
         <aside className="rounded-[1.75rem] bg-emerald-950 px-6 py-7 text-emerald-50">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-200/75">
-            Admin Notes
+            Admininfo
           </p>
-          <h2 className="mt-3 text-2xl font-semibold">Backend-ready form contract</h2>
+          <h2 className="mt-3 text-2xl font-semibold">Formkontrakt redo för backend</h2>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-emerald-50/85">
-            <li>Username and password are validated before submit.</li>
-            <li>Admin routes are now guarded behind a session query.</li>
-            <li>Mock credentials for now: `admin` / `password123`.</li>
+            <li>Användarnamn och lösenord valideras innan formuläret skickas.</li>
+            <li>Adminroutes skyddas nu bakom en session query.</li>
+            <li>Utvecklingsinloggning just nu: `admin` / `admin123`.</li>
           </ul>
         </aside>
       </div>

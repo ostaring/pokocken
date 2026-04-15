@@ -11,7 +11,7 @@ export async function fetchAdminSessionHttp(): Promise<AdminSession | null> {
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch admin session.");
+    throw new Error("Kunde inte hämta adminsessionsdata.");
   }
 
   return (await response.json()) as AdminSession;
@@ -28,7 +28,7 @@ export async function loginAdminHttp(username: string, password: string): Promis
   });
 
   if (!response.ok) {
-    throw new Error("Invalid username or password.");
+    throw new Error("Fel användarnamn eller lösenord.");
   }
 
   return (await response.json()) as AdminSession;
@@ -41,6 +41,6 @@ export async function logoutAdminHttp(): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to log out.");
+    throw new Error("Kunde inte logga ut.");
   }
 }

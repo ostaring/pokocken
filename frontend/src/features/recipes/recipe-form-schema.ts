@@ -1,20 +1,20 @@
 import { z } from "zod";
 
 export const recipeFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters."),
-  description: z.string().min(10, "Description must be at least 10 characters."),
+  title: z.string().min(3, "Titeln måste vara minst 3 tecken."),
+  description: z.string().min(10, "Beskrivningen måste vara minst 10 tecken."),
   category: z.enum(["Breakfast", "Lunch", "Dinner", "Dessert", "Snack"]),
   prepTimeMinutes: z.coerce
     .number()
-    .int("Prep time must be a whole number.")
-    .min(0, "Prep time cannot be negative."),
+    .int("Tillagningstiden måste vara ett heltal.")
+    .min(0, "Tillagningstiden kan inte vara negativ."),
   servings: z.coerce
     .number()
-    .int("Servings must be a whole number.")
-    .min(1, "Servings must be at least 1."),
-  imageUrl: z.url("Image URL must be a valid URL."),
-  ingredientsText: z.string().min(10, "Add at least one ingredient."),
-  stepsText: z.string().min(10, "Add at least one cooking step."),
+    .int("Antal portioner måste vara ett heltal.")
+    .min(1, "Antal portioner måste vara minst 1."),
+  imageUrl: z.url("Bildlänken måste vara en giltig URL."),
+  ingredientsText: z.string().min(10, "Lägg till minst en ingrediens."),
+  stepsText: z.string().min(10, "Lägg till minst ett tillagningssteg."),
   isPublished: z.boolean(),
 });
 

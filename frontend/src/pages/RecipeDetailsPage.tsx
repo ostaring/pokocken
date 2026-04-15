@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
 import { useRecipeBySlugQuery } from "../features/recipes/recipe-hooks";
+import { getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
 
 export function RecipeDetailsPage() {
   const { slug } = useParams();
@@ -9,8 +10,8 @@ export function RecipeDetailsPage() {
 
   if (recipeQuery.isLoading) {
     return (
-      <PageFrame eyebrow="Public" title="Loading recipe" description="Fetching recipe details.">
-        <p className="text-slate-700">Loading recipe details...</p>
+      <PageFrame eyebrow="Publikt" title="Laddar recept" description="Hämtar receptdetaljer.">
+        <p className="text-slate-700">Laddar receptdetaljer...</p>
       </PageFrame>
     );
   }
@@ -18,11 +19,11 @@ export function RecipeDetailsPage() {
   if (recipeQuery.isError) {
     return (
       <PageFrame
-        eyebrow="Public"
-        title="Recipe unavailable"
-        description="Something went wrong while loading the recipe."
+        eyebrow="Publikt"
+        title="Receptet är inte tillgängligt"
+        description="Något gick fel när receptet skulle laddas."
       >
-        <p className="text-slate-700">Please try again a bit later.</p>
+        <p className="text-slate-700">Försök igen lite senare.</p>
       </PageFrame>
     );
   }
@@ -30,12 +31,12 @@ export function RecipeDetailsPage() {
   if (!recipe) {
     return (
       <PageFrame
-        eyebrow="Public"
-        title="Recipe not found"
-        description="We could not find a recipe matching that slug."
+        eyebrow="Publikt"
+        title="Receptet hittades inte"
+        description="Vi kunde inte hitta något recept som matchar den här sluggen."
       >
         <p className="text-slate-700">
-          This route is ready for backend-driven not-found handling later on.
+          Den här routen är redo för backenddriven hantering av saknade recept senare.
         </p>
       </PageFrame>
     );
@@ -43,7 +44,7 @@ export function RecipeDetailsPage() {
 
   return (
     <PageFrame
-      eyebrow="Public"
+      eyebrow="Publikt"
       title={recipe.title}
       description={recipe.description}
     >
@@ -54,7 +55,7 @@ export function RecipeDetailsPage() {
           </div>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-slate-900">Ingredients</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Ingredienser</h2>
             <ul className="grid gap-3">
               {recipe.ingredients.map((ingredient) => (
                 <li
@@ -70,31 +71,31 @@ export function RecipeDetailsPage() {
 
         <aside className="space-y-6">
           <div className="rounded-[1.75rem] bg-slate-900 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/65">Overview</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-white/65">Översikt</p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Category</p>
-                <p className="mt-1 text-lg font-semibold">{recipe.category}</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Kategori</p>
+                <p className="mt-1 text-lg font-semibold">{getRecipeCategoryLabel(recipe.category)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Prep time</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Tillagningstid</p>
                 <p className="mt-1 text-lg font-semibold">{recipe.prepTimeMinutes} min</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Servings</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Portioner</p>
                 <p className="mt-1 text-lg font-semibold">{recipe.servings}</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-white/60">Status</p>
                 <p className="mt-1 text-lg font-semibold">
-                  {recipe.isPublished ? "Published" : "Draft"}
+                  {recipe.isPublished ? "Publicerat" : "Utkast"}
                 </p>
               </div>
             </div>
           </div>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-slate-900">Method</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Gör så här</h2>
             <ol className="grid gap-4">
               {recipe.steps.map((step, index) => (
                 <li
@@ -102,7 +103,7 @@ export function RecipeDetailsPage() {
                   className="rounded-[1.5rem] border border-slate-200 bg-white/70 px-5 py-4"
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
-                    Step {index + 1}
+                    Steg {index + 1}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{step}</p>
                 </li>

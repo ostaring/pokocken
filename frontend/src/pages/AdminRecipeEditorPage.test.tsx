@@ -72,31 +72,31 @@ describe("AdminRecipeEditorPage", () => {
 
     renderWithProviders(<AdminRecipeEditorPage mode="create" />);
 
-    await user.type(screen.getByLabelText(/title/i), "Fresh Pasta Salad");
+    await user.type(screen.getByLabelText(/titel/i), "Fresh Pasta Salad");
     await user.type(
-      screen.getByLabelText(/description/i),
+      screen.getByLabelText(/beskrivning/i),
       "A bright and herby pasta salad for warm evenings.",
     );
-    await user.selectOptions(screen.getByLabelText(/category/i), "Lunch");
-    await user.clear(screen.getByLabelText(/image url/i));
+    await user.selectOptions(screen.getByLabelText(/kategori/i), "Lunch");
+    await user.clear(screen.getByLabelText(/bild-url/i));
     await user.type(
-      screen.getByLabelText(/image url/i),
+      screen.getByLabelText(/bild-url/i),
       "https://example.com/pasta-salad.jpg",
     );
-    await user.clear(screen.getByLabelText(/prep time/i));
-    await user.type(screen.getByLabelText(/prep time/i), "22");
-    await user.clear(screen.getByLabelText(/servings/i));
-    await user.type(screen.getByLabelText(/servings/i), "5");
+    await user.clear(screen.getByLabelText(/tillagningstid/i));
+    await user.type(screen.getByLabelText(/tillagningstid/i), "22");
+    await user.clear(screen.getByLabelText(/portioner/i));
+    await user.type(screen.getByLabelText(/portioner/i), "5");
     await user.type(
-      screen.getByLabelText(/ingredients/i),
+      screen.getByLabelText(/ingredienser/i),
       "200 g pasta{enter}1 lemon{enter}Fresh herbs",
     );
     await user.type(
-      screen.getByLabelText(/^steps$/i),
+      screen.getByLabelText(/^steg$/i),
       "Cook the pasta{enter}Mix the dressing{enter}Combine and serve",
     );
-    await user.click(screen.getByLabelText(/published/i));
-    await user.click(screen.getByRole("button", { name: /create recipe/i }));
+    await user.click(screen.getByLabelText(/publicerad/i));
+    await user.click(screen.getByRole("button", { name: /skapa recept/i }));
 
     await waitFor(() => {
       expect(mockCreateMutateAsync).toHaveBeenCalledWith({
@@ -112,7 +112,7 @@ describe("AdminRecipeEditorPage", () => {
       });
     });
 
-    expect(await screen.findByText("Recipe created successfully.")).toBeInTheDocument();
+    expect(await screen.findByText("Receptet skapades.")).toBeInTheDocument();
   });
 
   it("shows the loading state for edit mode while recipe data is being fetched", async () => {
@@ -124,6 +124,6 @@ describe("AdminRecipeEditorPage", () => {
 
     renderWithProviders(<AdminRecipeEditorPage mode="edit" />);
 
-    expect(screen.getByText("Loading recipe editor...")).toBeInTheDocument();
+    expect(screen.getByText("Laddar recepteditorn...")).toBeInTheDocument();
   });
 });

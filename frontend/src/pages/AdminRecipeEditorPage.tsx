@@ -18,7 +18,7 @@ type AdminRecipeEditorPageProps = {
 };
 
 export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
-  const title = mode === "create" ? "Create recipe" : "Edit recipe";
+  const title = mode === "create" ? "Skapa recept" : "Redigera recept";
   const { id } = useParams();
   const recipeQuery = useRecipeByIdQuery(mode === "edit" ? id : undefined);
   const recipe = recipeQuery.data;
@@ -88,7 +88,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
     if (mode === "create") {
       await createRecipeMutation.mutateAsync(payload);
-      setSuccessMessage("Recipe created successfully.");
+      setSuccessMessage("Receptet skapades.");
       reset();
       return;
     }
@@ -98,16 +98,16 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     }
 
     await updateRecipeMutation.mutateAsync({ id, input: payload });
-    setSuccessMessage("Recipe updated successfully.");
+    setSuccessMessage("Receptet uppdaterades.");
   }
 
   if (mode === "edit" && recipeQuery.isLoading) {
     return (
       <AdminLayout
-        title="Loading recipe"
-        description="Fetching recipe data for the editor."
+        title="Laddar recept"
+        description="Hämtar receptdata till editorn."
       >
-        <p className="text-slate-700">Loading recipe editor...</p>
+        <p className="text-slate-700">Laddar recepteditorn...</p>
       </AdminLayout>
     );
   }
@@ -115,10 +115,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   if (mode === "edit" && recipeQuery.isError) {
     return (
       <AdminLayout
-        title="Editor unavailable"
-        description="Something went wrong while loading the recipe."
+        title="Editorn är inte tillgänglig"
+        description="Något gick fel när receptet skulle laddas."
       >
-        <p className="text-slate-700">Please try again later.</p>
+        <p className="text-slate-700">Försök igen senare.</p>
       </AdminLayout>
     );
   }
@@ -126,12 +126,12 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   if (mode === "edit" && !recipe) {
     return (
       <AdminLayout
-        title="Recipe not found"
-        description="We could not find a recipe matching that admin edit route."
+        title="Receptet hittades inte"
+        description="Vi kunde inte hitta något recept som matchar den här adminrouten."
       >
         <p className="text-slate-700">
-          Once the backend is connected this should map to an authenticated admin fetch plus a clean
-          not-found state.
+          När backend är inkopplad fullt ut ska detta motsvara en autentiserad adminhämtning och ett
+          tydligt not-found-läge.
         </p>
       </AdminLayout>
     );
@@ -143,13 +143,13 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   return (
     <AdminLayout
       title={title}
-      description="A shared admin editor for create and edit mode. The form contract is now stable enough to connect to backend create and update endpoints."
+      description="En gemensam admineditor för både skapa- och redigeraläge. Formkontraktet är nu tillräckligt stabilt för att kopplas till backendens create- och update-endpoints."
       actions={
         <Link
           className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
           to="/admin"
         >
-          Back to dashboard
+          Tillbaka till översikten
         </Link>
       }
     >
@@ -163,27 +163,27 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
           {mutationError ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {mutationError instanceof Error ? mutationError.message : "Could not save recipe."}
+              {mutationError instanceof Error ? mutationError.message : "Kunde inte spara receptet."}
             </div>
           ) : null}
 
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-slate-700">Title</span>
+              <span className="text-sm font-semibold text-slate-700">Titel</span>
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                 type="text"
-                placeholder="Roasted tomato pasta"
+                placeholder="Rostad tomatpasta"
                 {...register("title")}
               />
               {errors.title ? <p className="text-sm text-rose-600">{errors.title.message}</p> : null}
             </label>
 
             <label className="block space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-slate-700">Description</span>
+              <span className="text-sm font-semibold text-slate-700">Beskrivning</span>
               <textarea
                 className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder="A quick pasta built around sweet roasted tomatoes..."
+                placeholder="En snabb pasta med söta rostade tomater..."
                 {...register("description")}
               />
               {errors.description ? (
@@ -192,16 +192,16 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Category</span>
+              <span className="text-sm font-semibold text-slate-700">Kategori</span>
               <select
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                 {...register("category")}
               >
-                <option value="Breakfast">Breakfast</option>
+                <option value="Breakfast">Frukost</option>
                 <option value="Lunch">Lunch</option>
-                <option value="Dinner">Dinner</option>
+                <option value="Dinner">Middag</option>
                 <option value="Dessert">Dessert</option>
-                <option value="Snack">Snack</option>
+                <option value="Snack">Mellanmål</option>
               </select>
               {errors.category ? (
                 <p className="text-sm text-rose-600">{errors.category.message}</p>
@@ -209,7 +209,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Image URL</span>
+              <span className="text-sm font-semibold text-slate-700">Bild-URL</span>
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                 type="url"
@@ -222,7 +222,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Prep time (minutes)</span>
+              <span className="text-sm font-semibold text-slate-700">Tillagningstid (minuter)</span>
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                 type="number"
@@ -234,7 +234,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Servings</span>
+              <span className="text-sm font-semibold text-slate-700">Portioner</span>
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                 type="number"
@@ -246,10 +246,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <label className="block space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-slate-700">Ingredients</span>
+              <span className="text-sm font-semibold text-slate-700">Ingredienser</span>
               <textarea
                 className="min-h-40 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder={"1 onion\n2 tbsp olive oil\n300 g pasta"}
+                placeholder={"1 gul lök\n2 msk olivolja\n300 g pasta"}
                 {...register("ingredientsText")}
               />
               {errors.ingredientsText ? (
@@ -258,10 +258,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <label className="block space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-slate-700">Steps</span>
+              <span className="text-sm font-semibold text-slate-700">Steg</span>
               <textarea
                 className="min-h-48 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder={"Cook the pasta.\nRoast the tomatoes.\nMix everything together."}
+                placeholder={"Koka pastan.\nRosta tomaterna.\nBlanda ihop allt."}
                 {...register("stepsText")}
               />
               {errors.stepsText ? (
@@ -272,7 +272,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
           <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4">
             <input className="h-4 w-4" type="checkbox" {...register("isPublished")} />
-            <span className="text-sm font-semibold text-slate-800">Published</span>
+            <span className="text-sm font-semibold text-slate-800">Publicerad</span>
           </label>
 
           <div className="flex flex-wrap gap-3">
@@ -281,26 +281,26 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               type="submit"
               disabled={!isValid || isSaving}
             >
-              {isSaving ? "Saving..." : mode === "create" ? "Create recipe" : "Save changes"}
+              {isSaving ? "Sparar..." : mode === "create" ? "Skapa recept" : "Spara ändringar"}
             </button>
             <button
               className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
               type="button"
             >
-              Save draft
+              Spara som utkast
             </button>
           </div>
         </form>
 
         <aside className="space-y-4 rounded-[1.75rem] bg-slate-900 px-6 py-7 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">
-            Editor Notes
+            Editorinfo
           </p>
-          <h2 className="text-2xl font-semibold">Ready for backend wiring</h2>
+          <h2 className="text-2xl font-semibold">Redo för backendkoppling</h2>
           <ul className="space-y-3 text-sm leading-6 text-white/80">
-            <li>Create and edit mode share the same validated form contract.</li>
-            <li>Ingredients and steps are currently stored as newline-separated text in the form.</li>
-            <li>Next step is translating these values into the backend DTO shape during submit.</li>
+            <li>Skapa- och redigeraläge delar samma validerade formkontrakt.</li>
+            <li>Ingredienser och steg lagras just nu som radseparerad text i formuläret.</li>
+            <li>Nästa steg är att översätta dessa värden till backendens DTO-format vid submit.</li>
           </ul>
         </aside>
       </div>

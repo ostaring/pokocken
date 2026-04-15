@@ -25,7 +25,7 @@ export function AdminLayout({ title, description, actions, children }: AdminLayo
           <div className="flex flex-col gap-6 border-b border-slate-200/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-2">
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-800/70">
-                Admin
+                Administration
               </p>
               <h1 className="text-3xl font-semibold md:text-4xl">{title}</h1>
               <p className="max-w-2xl text-sm text-slate-600 md:text-base">{description}</p>
@@ -33,7 +33,7 @@ export function AdminLayout({ title, description, actions, children }: AdminLayo
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
-                Signed in as{" "}
+                Inloggad som{" "}
                 <span className="font-semibold text-slate-900">
                   {sessionQuery.data?.username ?? "admin"}
                 </span>
@@ -44,7 +44,7 @@ export function AdminLayout({ title, description, actions, children }: AdminLayo
                 onClick={() => void handleLogout()}
                 disabled={logoutMutation.isPending}
               >
-                {logoutMutation.isPending ? "Signing out..." : "Logout"}
+                {logoutMutation.isPending ? "Loggar ut..." : "Logga ut"}
               </button>
             </div>
           </div>
@@ -55,19 +55,19 @@ export function AdminLayout({ title, description, actions, children }: AdminLayo
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-800 transition hover:border-slate-300 hover:bg-white/80"
                 to="/admin"
               >
-                Dashboard
+                Översikt
               </Link>
               <Link
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-800 transition hover:border-slate-300 hover:bg-white/80"
                 to="/admin/recipes/new"
               >
-                New recipe
+                Nytt recept
               </Link>
               <Link
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-800 transition hover:border-slate-300 hover:bg-white/80"
                 to="/recipes"
               >
-                View public site
+                Visa publika sidan
               </Link>
             </nav>
 

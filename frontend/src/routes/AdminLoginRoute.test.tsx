@@ -53,7 +53,7 @@ describe("AdminLoginRoute", () => {
       ["/admin/login"],
     );
 
-    expect(screen.getByText("Loading admin session...")).toBeInTheDocument();
+    expect(screen.getByText("Laddar adminsessionsdata...")).toBeInTheDocument();
   });
 
   it("renders login content when there is no active session", () => {
