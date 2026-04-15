@@ -3,7 +3,8 @@ import { resolveAppConfig } from "../config";
 import {
   createRecipeHttp,
   deleteRecipeHttp,
-  fetchRecipeByIdHttp,
+  fetchAdminRecipeByIdHttp,
+  fetchAdminRecipesHttp,
   fetchRecipeBySlugHttp,
   fetchRecipesHttp,
   toggleRecipePublishedHttp,
@@ -12,7 +13,8 @@ import {
 import {
   createRecipeMock,
   deleteRecipeMock,
-  fetchRecipeByIdMock,
+  fetchAdminRecipeByIdMock,
+  fetchAdminRecipesMock,
   fetchRecipeBySlugMock,
   fetchRecipesMock,
   toggleRecipePublishedMock,
@@ -30,12 +32,16 @@ export async function fetchRecipes(): Promise<RecipeDetail[]> {
   return useHttpApi() ? fetchRecipesHttp() : fetchRecipesMock();
 }
 
+export async function fetchAdminRecipes(): Promise<RecipeDetail[]> {
+  return useHttpApi() ? fetchAdminRecipesHttp() : fetchAdminRecipesMock();
+}
+
 export async function fetchRecipeBySlug(slug: string): Promise<RecipeDetail | undefined> {
   return useHttpApi() ? fetchRecipeBySlugHttp(slug) : fetchRecipeBySlugMock(slug);
 }
 
-export async function fetchRecipeById(id: string): Promise<RecipeDetail | undefined> {
-  return useHttpApi() ? fetchRecipeByIdHttp(id) : fetchRecipeByIdMock(id);
+export async function fetchAdminRecipeById(id: string): Promise<RecipeDetail | undefined> {
+  return useHttpApi() ? fetchAdminRecipeByIdHttp(id) : fetchAdminRecipeByIdMock(id);
 }
 
 export async function createRecipe(input: SaveRecipeInput): Promise<RecipeDetail> {

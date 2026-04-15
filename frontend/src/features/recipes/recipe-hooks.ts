@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  fetchAdminRecipeById,
+  fetchAdminRecipes,
   createRecipe,
   deleteRecipe,
-  fetchRecipeById,
   fetchRecipeBySlug,
   fetchRecipes,
   toggleRecipePublished,
@@ -24,8 +25,15 @@ type SaveRecipeMutationInput = {
 
 export function useRecipesQuery() {
   return useQuery({
-    queryKey: recipeQueryKeys.all,
+    queryKey: recipeQueryKeys.publicAll,
     queryFn: fetchRecipes,
+  });
+}
+
+export function useAdminRecipesQuery() {
+  return useQuery({
+    queryKey: recipeQueryKeys.adminAll,
+    queryFn: fetchAdminRecipes,
   });
 }
 
@@ -40,7 +48,7 @@ export function useRecipeBySlugQuery(slug: string | undefined) {
 export function useRecipeByIdQuery(id: string | undefined) {
   return useQuery({
     queryKey: id ? recipeQueryKeys.detailById(id) : recipeQueryKeys.detailById("missing"),
-    queryFn: () => fetchRecipeById(id!),
+    queryFn: () => fetchAdminRecipeById(id!),
     enabled: Boolean(id),
   });
 }
@@ -51,7 +59,8 @@ export function useCreateRecipeMutation() {
   return useMutation({
     mutationFn: (input: SaveRecipeMutationInput) => createRecipe(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.publicAll });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.adminAll });
     },
   });
 }
@@ -63,7 +72,8 @@ export function useUpdateRecipeMutation() {
     mutationFn: ({ id, input }: { id: string; input: SaveRecipeMutationInput }) =>
       updateRecipe(id, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.publicAll });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.adminAll });
     },
   });
 }
@@ -74,7 +84,8 @@ export function useToggleRecipePublishedMutation() {
   return useMutation({
     mutationFn: (id: string) => toggleRecipePublished(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.publicAll });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.adminAll });
     },
   });
 }
@@ -85,7 +96,8 @@ export function useDeleteRecipeMutation() {
   return useMutation({
     mutationFn: (id: string) => deleteRecipe(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.publicAll });
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.adminAll });
     },
   });
 }

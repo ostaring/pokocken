@@ -45,6 +45,11 @@ function createSlug(title: string) {
 
 export async function fetchRecipesMock(): Promise<RecipeDetail[]> {
   await apiDelay();
+  return readStoredRecipes().filter((recipe) => recipe.isPublished);
+}
+
+export async function fetchAdminRecipesMock(): Promise<RecipeDetail[]> {
+  await apiDelay();
   return readStoredRecipes();
 }
 
@@ -53,7 +58,7 @@ export async function fetchRecipeBySlugMock(slug: string): Promise<RecipeDetail 
   return readStoredRecipes().find((recipe) => recipe.slug === slug);
 }
 
-export async function fetchRecipeByIdMock(id: string): Promise<RecipeDetail | undefined> {
+export async function fetchAdminRecipeByIdMock(id: string): Promise<RecipeDetail | undefined> {
   await apiDelay();
   return readStoredRecipes().find((recipe) => recipe.id === id);
 }

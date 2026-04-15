@@ -33,7 +33,7 @@ vi.mock("../features/recipes/recipe-hooks", async () => {
 
   return {
     ...actual,
-    useRecipesQuery: () => ({
+    useAdminRecipesQuery: () => ({
       data: mockRecipes,
       isLoading: false,
       isError: false,

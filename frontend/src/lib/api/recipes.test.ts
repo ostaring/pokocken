@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  fetchAdminRecipeById,
+  fetchAdminRecipes,
   createRecipe,
   deleteRecipe,
-  fetchRecipeById,
   fetchRecipeBySlug,
   fetchRecipes,
   toggleRecipePublished,
@@ -11,32 +12,36 @@ import {
 
 const {
   mockResolveAppConfig,
+  mockFetchAdminRecipesHttp,
+  mockFetchAdminRecipeByIdHttp,
   mockFetchRecipesHttp,
   mockFetchRecipeBySlugHttp,
-  mockFetchRecipeByIdHttp,
   mockCreateRecipeHttp,
   mockUpdateRecipeHttp,
   mockToggleRecipePublishedHttp,
   mockDeleteRecipeHttp,
+  mockFetchAdminRecipesMock,
+  mockFetchAdminRecipeByIdMock,
   mockFetchRecipesMock,
   mockFetchRecipeBySlugMock,
-  mockFetchRecipeByIdMock,
   mockCreateRecipeMock,
   mockUpdateRecipeMock,
   mockToggleRecipePublishedMock,
   mockDeleteRecipeMock,
 } = vi.hoisted(() => ({
   mockResolveAppConfig: vi.fn(),
+  mockFetchAdminRecipesHttp: vi.fn(),
+  mockFetchAdminRecipeByIdHttp: vi.fn(),
   mockFetchRecipesHttp: vi.fn(),
   mockFetchRecipeBySlugHttp: vi.fn(),
-  mockFetchRecipeByIdHttp: vi.fn(),
   mockCreateRecipeHttp: vi.fn(),
   mockUpdateRecipeHttp: vi.fn(),
   mockToggleRecipePublishedHttp: vi.fn(),
   mockDeleteRecipeHttp: vi.fn(),
+  mockFetchAdminRecipesMock: vi.fn(),
+  mockFetchAdminRecipeByIdMock: vi.fn(),
   mockFetchRecipesMock: vi.fn(),
   mockFetchRecipeBySlugMock: vi.fn(),
-  mockFetchRecipeByIdMock: vi.fn(),
   mockCreateRecipeMock: vi.fn(),
   mockUpdateRecipeMock: vi.fn(),
   mockToggleRecipePublishedMock: vi.fn(),
@@ -60,9 +65,10 @@ vi.mock("../config", () => ({
 }));
 
 vi.mock("./http/recipes-adapter", () => ({
+  fetchAdminRecipesHttp: mockFetchAdminRecipesHttp,
+  fetchAdminRecipeByIdHttp: mockFetchAdminRecipeByIdHttp,
   fetchRecipesHttp: mockFetchRecipesHttp,
   fetchRecipeBySlugHttp: mockFetchRecipeBySlugHttp,
-  fetchRecipeByIdHttp: mockFetchRecipeByIdHttp,
   createRecipeHttp: mockCreateRecipeHttp,
   updateRecipeHttp: mockUpdateRecipeHttp,
   toggleRecipePublishedHttp: mockToggleRecipePublishedHttp,
@@ -70,9 +76,10 @@ vi.mock("./http/recipes-adapter", () => ({
 }));
 
 vi.mock("./mock/recipes-adapter", () => ({
+  fetchAdminRecipesMock: mockFetchAdminRecipesMock,
+  fetchAdminRecipeByIdMock: mockFetchAdminRecipeByIdMock,
   fetchRecipesMock: mockFetchRecipesMock,
   fetchRecipeBySlugMock: mockFetchRecipeBySlugMock,
-  fetchRecipeByIdMock: mockFetchRecipeByIdMock,
   createRecipeMock: mockCreateRecipeMock,
   updateRecipeMock: mockUpdateRecipeMock,
   toggleRecipePublishedMock: mockToggleRecipePublishedMock,
@@ -91,16 +98,18 @@ describe("recipes api adapter selection", () => {
     });
 
     await fetchRecipes();
+    await fetchAdminRecipes();
     await fetchRecipeBySlug("slug");
-    await fetchRecipeById("id");
+    await fetchAdminRecipeById("id");
     await createRecipe(recipeInput);
     await updateRecipe("id", recipeInput);
     await toggleRecipePublished("id");
     await deleteRecipe("id");
 
     expect(mockFetchRecipesMock).toHaveBeenCalled();
+    expect(mockFetchAdminRecipesMock).toHaveBeenCalled();
     expect(mockFetchRecipeBySlugMock).toHaveBeenCalledWith("slug");
-    expect(mockFetchRecipeByIdMock).toHaveBeenCalledWith("id");
+    expect(mockFetchAdminRecipeByIdMock).toHaveBeenCalledWith("id");
     expect(mockCreateRecipeMock).toHaveBeenCalledWith(recipeInput);
     expect(mockUpdateRecipeMock).toHaveBeenCalledWith("id", recipeInput);
     expect(mockToggleRecipePublishedMock).toHaveBeenCalledWith("id");
@@ -115,16 +124,18 @@ describe("recipes api adapter selection", () => {
     });
 
     await fetchRecipes();
+    await fetchAdminRecipes();
     await fetchRecipeBySlug("slug");
-    await fetchRecipeById("id");
+    await fetchAdminRecipeById("id");
     await createRecipe(recipeInput);
     await updateRecipe("id", recipeInput);
     await toggleRecipePublished("id");
     await deleteRecipe("id");
 
     expect(mockFetchRecipesHttp).toHaveBeenCalled();
+    expect(mockFetchAdminRecipesHttp).toHaveBeenCalled();
     expect(mockFetchRecipeBySlugHttp).toHaveBeenCalledWith("slug");
-    expect(mockFetchRecipeByIdHttp).toHaveBeenCalledWith("id");
+    expect(mockFetchAdminRecipeByIdHttp).toHaveBeenCalledWith("id");
     expect(mockCreateRecipeHttp).toHaveBeenCalledWith(recipeInput);
     expect(mockUpdateRecipeHttp).toHaveBeenCalledWith("id", recipeInput);
     expect(mockToggleRecipePublishedHttp).toHaveBeenCalledWith("id");

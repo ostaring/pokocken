@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import {
+  useAdminRecipesQuery,
   useDeleteRecipeMutation,
-  useRecipesQuery,
   useToggleRecipePublishedMutation,
 } from "../features/recipes/recipe-hooks";
 
 export function AdminDashboardPage() {
-  const recipesQuery = useRecipesQuery();
+  const recipesQuery = useAdminRecipesQuery();
   const togglePublishedMutation = useToggleRecipePublishedMutation();
   const deleteRecipeMutation = useDeleteRecipeMutation();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
