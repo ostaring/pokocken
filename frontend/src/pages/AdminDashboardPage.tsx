@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { PageFrame } from "../components/PageFrame";
+import { AdminLayout } from "../components/AdminLayout";
 import { useRecipesQuery } from "../features/recipes/recipe-hooks";
 
 export function AdminDashboardPage() {
@@ -9,8 +9,7 @@ export function AdminDashboardPage() {
   const draftCount = mockRecipes.length - publishedCount;
 
   return (
-    <PageFrame
-      eyebrow="Admin"
+    <AdminLayout
       title="Dashboard"
       description="A first admin overview with recipe status, editing entry points, and room for future auth protection."
       actions={
@@ -104,6 +103,6 @@ export function AdminDashboardPage() {
           </div>
         ) : null}
       </div>
-    </PageFrame>
+    </AdminLayout>
   );
 }

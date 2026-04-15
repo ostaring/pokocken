@@ -1,9 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
-import { PageFrame } from "../components/PageFrame";
-import { useRecipeByIdQuery } from "../features/recipes/recipe-hooks";
+import { Link, useParams } from "react-router-dom";
+import { AdminLayout } from "../components/AdminLayout";
+import {
+  useCreateRecipeMutation,
+  useRecipeByIdQuery,
+  useUpdateRecipeMutation,
+} from "../features/recipes/recipe-hooks";
 import {
   recipeFormSchema,
   type RecipeFormValues,
@@ -18,6 +22,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const { id } = useParams();
   const recipeQuery = useRecipeByIdQuery(mode === "edit" ? id : undefined);
   const recipe = recipeQuery.data;
+  const createRecipeMutation = useCreateRecipeMutation();
+  const updateRecipeMutation = useUpdateRecipeMutation();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -58,38 +65,67 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     });
   }, [recipe, reset]);
 
-  function onSubmit(values: RecipeFormValues) {
-    console.log("Recipe editor submitted", values);
+  async function onSubmit(values: RecipeFormValues) {
+    setSuccessMessage(null);
+
+    const payload = {
+      title: values.title.trim(),
+      description: values.description.trim(),
+      category: values.category,
+      prepTimeMinutes: Number(values.prepTimeMinutes),
+      servings: Number(values.servings),
+      imageUrl: values.imageUrl.trim(),
+      ingredients: values.ingredientsText
+        .split("\n")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+      steps: values.stepsText
+        .split("\n")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+      isPublished: values.isPublished,
+    };
+
+    if (mode === "create") {
+      await createRecipeMutation.mutateAsync(payload);
+      setSuccessMessage("Recipe created successfully.");
+      reset();
+      return;
+    }
+
+    if (!id) {
+      return;
+    }
+
+    await updateRecipeMutation.mutateAsync({ id, input: payload });
+    setSuccessMessage("Recipe updated successfully.");
   }
 
   if (mode === "edit" && recipeQuery.isLoading) {
     return (
-      <PageFrame
-        eyebrow="Admin"
+      <AdminLayout
         title="Loading recipe"
         description="Fetching recipe data for the editor."
       >
         <p className="text-slate-700">Loading recipe editor...</p>
-      </PageFrame>
+      </AdminLayout>
     );
   }
 
   if (mode === "edit" && recipeQuery.isError) {
     return (
-      <PageFrame
-        eyebrow="Admin"
+      <AdminLayout
         title="Editor unavailable"
         description="Something went wrong while loading the recipe."
       >
         <p className="text-slate-700">Please try again later.</p>
-      </PageFrame>
+      </AdminLayout>
     );
   }
 
   if (mode === "edit" && !recipe) {
     return (
-      <PageFrame
-        eyebrow="Admin"
+      <AdminLayout
         title="Recipe not found"
         description="We could not find a recipe matching that admin edit route."
       >
@@ -97,18 +133,40 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
           Once the backend is connected this should map to an authenticated admin fetch plus a clean
           not-found state.
         </p>
-      </PageFrame>
+      </AdminLayout>
     );
   }
 
+  const mutationError = createRecipeMutation.error ?? updateRecipeMutation.error;
+  const isSaving = isSubmitting || createRecipeMutation.isPending || updateRecipeMutation.isPending;
+
   return (
-    <PageFrame
-      eyebrow="Admin"
+    <AdminLayout
       title={title}
       description="A shared admin editor for create and edit mode. The form contract is now stable enough to connect to backend create and update endpoints."
+      actions={
+        <Link
+          className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
+          to="/admin"
+        >
+          Back to dashboard
+        </Link>
+      }
     >
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
+          {successMessage ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {successMessage}
+            </div>
+          ) : null}
+
+          {mutationError ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {mutationError instanceof Error ? mutationError.message : "Could not save recipe."}
+            </div>
+          ) : null}
+
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block space-y-2 md:col-span-2">
               <span className="text-sm font-semibold text-slate-700">Title</span>
@@ -221,9 +279,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             <button
               className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               type="submit"
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid || isSaving}
             >
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create recipe" : "Save changes"}
+              {isSaving ? "Saving..." : mode === "create" ? "Create recipe" : "Save changes"}
             </button>
             <button
               className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
@@ -246,6 +304,6 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
           </ul>
         </aside>
       </div>
-    </PageFrame>
+    </AdminLayout>
   );
 }
