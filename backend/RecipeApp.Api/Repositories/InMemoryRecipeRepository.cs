@@ -134,4 +134,18 @@ public sealed class InMemoryRecipeRepository : IRecipeRepository
         _recipes.Add(recipe);
         return recipe;
     }
+
+    public Recipe? Replace(string currentSlug, Recipe recipe)
+    {
+        var index = _recipes.FindIndex(existingRecipe =>
+            string.Equals(existingRecipe.Slug, currentSlug, StringComparison.OrdinalIgnoreCase));
+
+        if (index < 0)
+        {
+            return null;
+        }
+
+        _recipes[index] = recipe;
+        return recipe;
+    }
 }

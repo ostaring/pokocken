@@ -108,4 +108,51 @@ public sealed class RecipeServiceTests
         var exception = Assert.Throws<InvalidOperationException>(action);
         Assert.Contains("already exists", exception.Message);
     }
+
+    [Fact]
+    public void UpdateRecipe_UpdatesExistingRecipeIncludingSlug()
+    {
+        var repository = new InMemoryRecipeRepository();
+        var service = new RecipeService(repository);
+
+        var updatedRecipe = service.UpdateRecipe("draft-lemon-tart", new(
+            "Published lemon tart",
+            "published-lemon-tart",
+            "A polished lemon tart recipe for launch.",
+            "Dessert",
+            55,
+            8,
+            "https://example.com/lemon-tart.jpg",
+            true,
+            ["Pastry shell", "Lemons", "Butter", "Sugar", "Eggs"],
+            ["Blind bake.", "Mix filling.", "Bake."]));
+
+        Assert.NotNull(updatedRecipe);
+        Assert.Equal("published-lemon-tart", updatedRecipe!.Slug);
+        Assert.True(updatedRecipe.IsPublished);
+        Assert.Null(repository.GetBySlug("draft-lemon-tart"));
+        Assert.NotNull(repository.GetBySlug("published-lemon-tart"));
+    }
+
+    [Fact]
+    public void UpdateRecipe_ThrowsForDuplicateSlug()
+    {
+        var repository = new InMemoryRecipeRepository();
+        var service = new RecipeService(repository);
+
+        var action = () => service.UpdateRecipe("draft-lemon-tart", new(
+            "Clashing tart",
+            "brown-butter-pancakes",
+            "Should fail.",
+            "Dessert",
+            40,
+            6,
+            "https://example.com/conflict.jpg",
+            false,
+            ["Lemons"],
+            ["Bake."]));
+
+        var exception = Assert.Throws<InvalidOperationException>(action);
+        Assert.Contains("already exists", exception.Message);
+    }
 }

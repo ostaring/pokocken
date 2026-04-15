@@ -12,6 +12,7 @@ Current backend implementation includes:
 - admin-protected `GET /api/admin/recipes`
 - admin-protected `GET /api/admin/recipes/{slug}`
 - admin-protected `POST /api/admin/recipes`
+- admin-protected `PUT /api/admin/recipes/{slug}`
 - Swagger in development
 - xUnit test project for recipe service behavior and API auth
 
@@ -62,7 +63,9 @@ This is only a bootstrap mechanism so we can wire frontend and backend end-to-en
 - `ingredients`
 - `steps`
 
+`PUT /api/admin/recipes/{slug}` currently uses the same payload shape.
+
 ## Next Steps
 
-- add admin recipe update and delete endpoints
+- add admin recipe delete endpoint
 - replace in-memory storage with EF Core + PostgreSQL

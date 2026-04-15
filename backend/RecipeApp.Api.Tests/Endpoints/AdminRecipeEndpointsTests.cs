@@ -97,4 +97,51 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+
+    [Fact]
+    public async Task PutAdminRecipe_ReturnsUpdatedRecipeWhenAuthorized()
+    {
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+
+        var response = await client.PutAsJsonAsync("/api/admin/recipes/draft-lemon-tart", new UpdateRecipeRequest(
+            "Published lemon tart",
+            "published-lemon-tart",
+            "A polished lemon tart recipe for launch.",
+            "Dessert",
+            55,
+            8,
+            "https://example.com/lemon-tart.jpg",
+            true,
+            ["Pastry shell", "Lemons", "Butter", "Sugar", "Eggs"],
+            ["Blind bake.", "Mix filling.", "Bake."]));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var updatedRecipe = await response.Content.ReadFromJsonAsync<RecipeResponse>();
+        Assert.NotNull(updatedRecipe);
+        Assert.Equal("published-lemon-tart", updatedRecipe!.Slug);
+        Assert.True(updatedRecipe.IsPublished);
+    }
+
+    [Fact]
+    public async Task PutAdminRecipe_ReturnsNotFoundForUnknownRecipe()
+    {
+        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+
+        var response = await client.PutAsJsonAsync("/api/admin/recipes/missing-recipe", new UpdateRecipeRequest(
+            "Missing recipe",
+            "missing-recipe",
+            "This recipe does not exist.",
+            "Dinner",
+            20,
+            2,
+            "https://example.com/missing.jpg",
+            false,
+            ["Ingredient"],
+            ["Cook."]));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

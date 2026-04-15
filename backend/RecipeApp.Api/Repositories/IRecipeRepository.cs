@@ -7,4 +7,5 @@ public interface IRecipeRepository
     IReadOnlyList<Recipe> GetAll();
     Recipe? GetBySlug(string slug);
     Recipe Add(Recipe recipe);
+    Recipe? Replace(string currentSlug, Recipe recipe);
 }

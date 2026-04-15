@@ -67,6 +67,23 @@ app.MapPost("/api/admin/recipes", (CreateRecipeRequest request, RecipeService re
     }
 }).AddEndpointFilter<AdminApiKeyEndpointFilter>();
 
+app.MapPut("/api/admin/recipes/{slug}", (string slug, UpdateRecipeRequest request, RecipeService recipeService) =>
+{
+    try
+    {
+        var updatedRecipe = recipeService.UpdateRecipe(slug, request);
+        return updatedRecipe is null ? Results.NotFound() : Results.Ok(updatedRecipe);
+    }
+    catch (ArgumentException exception)
+    {
+        return Results.BadRequest(new { message = exception.Message });
+    }
+    catch (InvalidOperationException exception)
+    {
+        return Results.Conflict(new { message = exception.Message });
+    }
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+
 app.Run();
 
 public partial class Program;
