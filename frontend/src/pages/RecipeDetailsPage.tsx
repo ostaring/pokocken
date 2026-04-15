@@ -1,10 +1,10 @@
 import { useParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
-import { mockRecipes } from "../features/recipes/mock-recipes";
+import { getRecipeBySlug } from "../features/recipes/recipe-service";
 
 export function RecipeDetailsPage() {
   const { slug } = useParams();
-  const recipe = mockRecipes.find((entry) => entry.slug === slug);
+  const recipe = getRecipeBySlug(slug);
 
   if (!recipe) {
     return (

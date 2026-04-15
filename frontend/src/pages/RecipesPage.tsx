@@ -1,17 +1,18 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
-import { mockRecipes } from "../features/recipes/mock-recipes";
 import { filterRecipes, recipeCategories } from "../features/recipes/recipe-utils";
+import { getAllRecipes } from "../features/recipes/recipe-service";
 import type { RecipeCategory } from "../types/recipe";
 
 export function RecipesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState<RecipeCategory | "All">("All");
+  const recipes = getAllRecipes();
 
   const filteredRecipes = useMemo(
-    () => filterRecipes(mockRecipes, searchTerm, category),
-    [category, searchTerm],
+    () => filterRecipes(recipes, searchTerm, category),
+    [category, recipes, searchTerm],
   );
 
   return (

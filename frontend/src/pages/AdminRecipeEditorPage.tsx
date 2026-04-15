@@ -3,11 +3,11 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
-import { mockRecipes } from "../features/recipes/mock-recipes";
 import {
   recipeFormSchema,
   type RecipeFormValues,
 } from "../features/recipes/recipe-form-schema";
+import { getRecipeById } from "../features/recipes/recipe-service";
 
 type AdminRecipeEditorPageProps = {
   mode: "create" | "edit";
@@ -16,7 +16,7 @@ type AdminRecipeEditorPageProps = {
 export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const title = mode === "create" ? "Create recipe" : "Edit recipe";
   const { id } = useParams();
-  const recipe = mode === "edit" ? mockRecipes.find((entry) => entry.id === id) : undefined;
+  const recipe = mode === "edit" ? getRecipeById(id) : undefined;
 
   const {
     register,

@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
-import { mockRecipes } from "../features/recipes/mock-recipes";
+import { getAllRecipes } from "../features/recipes/recipe-service";
 
 export function AdminDashboardPage() {
+  const mockRecipes = getAllRecipes();
   const publishedCount = mockRecipes.filter((recipe) => recipe.isPublished).length;
   const draftCount = mockRecipes.length - publishedCount;
 
@@ -10,6 +12,14 @@ export function AdminDashboardPage() {
       eyebrow="Admin"
       title="Dashboard"
       description="A first admin overview with recipe status, editing entry points, and room for future auth protection."
+      actions={
+        <Link
+          className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          to="/admin/recipes/new"
+        >
+          Create recipe
+        </Link>
+      }
     >
       <div className="space-y-8">
         <div className="grid gap-4 md:grid-cols-3">
@@ -61,12 +71,12 @@ export function AdminDashboardPage() {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Link
                     className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
-                    type="button"
+                    to={`/admin/recipes/${recipe.id}/edit`}
                   >
                     Edit
-                  </button>
+                  </Link>
                   <button
                     className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                     type="button"
