@@ -1,41 +1,20 @@
 import type { AdminSession } from "../../types/auth";
-import { apiDelay } from "./client";
+import { resolveAppConfig } from "../config";
+import { fetchAdminSessionHttp, loginAdminHttp, logoutAdminHttp } from "./http/auth-adapter";
+import { fetchAdminSessionMock, loginAdminMock, logoutAdminMock } from "./mock/auth-adapter";
 
-const AUTH_STORAGE_KEY = "recipe-app-admin-session";
-
-function readStoredSession(): AdminSession | null {
-  const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
-
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as AdminSession;
-  } catch {
-    window.localStorage.removeItem(AUTH_STORAGE_KEY);
-    return null;
-  }
+function useHttpApi() {
+  return resolveAppConfig().apiMode === "http";
 }
 
 export async function fetchAdminSession(): Promise<AdminSession | null> {
-  await apiDelay();
-  return readStoredSession();
+  return useHttpApi() ? fetchAdminSessionHttp() : fetchAdminSessionMock();
 }
 
 export async function loginAdmin(username: string, password: string): Promise<AdminSession> {
-  await apiDelay();
-
-  if (username !== "admin" || password !== "password123") {
-    throw new Error("Invalid username or password.");
-  }
-
-  const session = { username };
-  window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-  return session;
+  return useHttpApi() ? loginAdminHttp(username, password) : loginAdminMock(username, password);
 }
 
 export async function logoutAdmin(): Promise<void> {
-  await apiDelay();
-  window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  return useHttpApi() ? logoutAdminHttp() : logoutAdminMock();
 }

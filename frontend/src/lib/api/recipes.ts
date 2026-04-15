@@ -1,131 +1,55 @@
 import type { RecipeDetail } from "../../types/recipe";
-import { mockRecipes } from "../../features/recipes/mock-recipes";
-import { apiDelay } from "./client";
+import { resolveAppConfig } from "../config";
+import {
+  createRecipeHttp,
+  deleteRecipeHttp,
+  fetchRecipeByIdHttp,
+  fetchRecipeBySlugHttp,
+  fetchRecipesHttp,
+  toggleRecipePublishedHttp,
+  updateRecipeHttp,
+} from "./http/recipes-adapter";
+import {
+  createRecipeMock,
+  deleteRecipeMock,
+  fetchRecipeByIdMock,
+  fetchRecipeBySlugMock,
+  fetchRecipesMock,
+  toggleRecipePublishedMock,
+  updateRecipeMock,
+  type SaveRecipeInput,
+} from "./mock/recipes-adapter";
 
-const RECIPE_STORAGE_KEY = "recipe-app-recipes";
+export type { SaveRecipeInput } from "./mock/recipes-adapter";
 
-type SaveRecipeInput = {
-  title: string;
-  description: string;
-  category: RecipeDetail["category"];
-  prepTimeMinutes: number;
-  servings: number;
-  imageUrl: string;
-  ingredients: string[];
-  steps: string[];
-  isPublished: boolean;
-};
-
-function readStoredRecipes(): RecipeDetail[] {
-  const raw = window.localStorage.getItem(RECIPE_STORAGE_KEY);
-
-  if (!raw) {
-    return mockRecipes;
-  }
-
-  try {
-    return JSON.parse(raw) as RecipeDetail[];
-  } catch {
-    window.localStorage.removeItem(RECIPE_STORAGE_KEY);
-    return mockRecipes;
-  }
-}
-
-function writeStoredRecipes(recipes: RecipeDetail[]) {
-  window.localStorage.setItem(RECIPE_STORAGE_KEY, JSON.stringify(recipes));
-}
-
-function createSlug(title: string) {
-  return title
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+function useHttpApi() {
+  return resolveAppConfig().apiMode === "http";
 }
 
 export async function fetchRecipes(): Promise<RecipeDetail[]> {
-  await apiDelay();
-  return readStoredRecipes();
+  return useHttpApi() ? fetchRecipesHttp() : fetchRecipesMock();
 }
 
 export async function fetchRecipeBySlug(slug: string): Promise<RecipeDetail | undefined> {
-  await apiDelay();
-  return readStoredRecipes().find((recipe) => recipe.slug === slug);
+  return useHttpApi() ? fetchRecipeBySlugHttp(slug) : fetchRecipeBySlugMock(slug);
 }
 
 export async function fetchRecipeById(id: string): Promise<RecipeDetail | undefined> {
-  await apiDelay();
-  return readStoredRecipes().find((recipe) => recipe.id === id);
+  return useHttpApi() ? fetchRecipeByIdHttp(id) : fetchRecipeByIdMock(id);
 }
 
 export async function createRecipe(input: SaveRecipeInput): Promise<RecipeDetail> {
-  await apiDelay();
-
-  const recipes = readStoredRecipes();
-  const recipe: RecipeDetail = {
-    id: crypto.randomUUID(),
-    slug: createSlug(input.title),
-    ...input,
-  };
-
-  recipes.unshift(recipe);
-  writeStoredRecipes(recipes);
-
-  return recipe;
+  return useHttpApi() ? createRecipeHttp(input) : createRecipeMock(input);
 }
 
 export async function updateRecipe(id: string, input: SaveRecipeInput): Promise<RecipeDetail> {
-  await apiDelay();
-
-  const recipes = readStoredRecipes();
-  const index = recipes.findIndex((recipe) => recipe.id === id);
-
-  if (index === -1) {
-    throw new Error("Recipe not found.");
-  }
-
-  const updatedRecipe: RecipeDetail = {
-    ...recipes[index],
-    ...input,
-    slug: createSlug(input.title),
-  };
-
-  recipes[index] = updatedRecipe;
-  writeStoredRecipes(recipes);
-
-  return updatedRecipe;
+  return useHttpApi() ? updateRecipeHttp(id, input) : updateRecipeMock(id, input);
 }
 
 export async function toggleRecipePublished(id: string): Promise<RecipeDetail> {
-  await apiDelay();
-
-  const recipes = readStoredRecipes();
-  const index = recipes.findIndex((recipe) => recipe.id === id);
-
-  if (index === -1) {
-    throw new Error("Recipe not found.");
-  }
-
-  const updatedRecipe: RecipeDetail = {
-    ...recipes[index],
-    isPublished: !recipes[index].isPublished,
-  };
-
-  recipes[index] = updatedRecipe;
-  writeStoredRecipes(recipes);
-
-  return updatedRecipe;
+  return useHttpApi() ? toggleRecipePublishedHttp(id) : toggleRecipePublishedMock(id);
 }
 
 export async function deleteRecipe(id: string): Promise<void> {
-  await apiDelay();
-
-  const recipes = readStoredRecipes();
-  const nextRecipes = recipes.filter((recipe) => recipe.id !== id);
-
-  if (nextRecipes.length === recipes.length) {
-    throw new Error("Recipe not found.");
-  }
-
-  writeStoredRecipes(nextRecipes);
+  return useHttpApi() ? deleteRecipeHttp(id) : deleteRecipeMock(id);
 }
