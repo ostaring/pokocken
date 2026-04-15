@@ -1,12 +1,28 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
-import { useRecipesQuery } from "../features/recipes/recipe-hooks";
+import {
+  useRecipesQuery,
+  useToggleRecipePublishedMutation,
+} from "../features/recipes/recipe-hooks";
 
 export function AdminDashboardPage() {
   const recipesQuery = useRecipesQuery();
+  const togglePublishedMutation = useToggleRecipePublishedMutation();
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const mockRecipes = recipesQuery.data ?? [];
   const publishedCount = mockRecipes.filter((recipe) => recipe.isPublished).length;
   const draftCount = mockRecipes.length - publishedCount;
+
+  async function handleTogglePublished(id: string, nextActionLabel: "Publish" | "Unpublish") {
+    setFeedbackMessage(null);
+    await togglePublishedMutation.mutateAsync(id);
+    setFeedbackMessage(
+      nextActionLabel === "Publish"
+        ? "Recipe published successfully."
+        : "Recipe moved back to draft.",
+    );
+  }
 
   return (
     <AdminLayout
@@ -22,6 +38,20 @@ export function AdminDashboardPage() {
       }
     >
       <div className="space-y-8">
+        {feedbackMessage ? (
+          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+            {feedbackMessage}
+          </div>
+        ) : null}
+
+        {togglePublishedMutation.isError ? (
+          <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+            {togglePublishedMutation.error instanceof Error
+              ? togglePublishedMutation.error.message
+              : "Could not update recipe status."}
+          </div>
+        ) : null}
+
         {recipesQuery.isLoading ? (
           <div className="rounded-[1.75rem] border border-slate-200 bg-white/70 p-8 text-sm text-slate-600">
             Loading admin recipe overview...
@@ -93,8 +123,19 @@ export function AdminDashboardPage() {
                     <button
                       className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                       type="button"
+                      onClick={() =>
+                        void handleTogglePublished(
+                          recipe.id,
+                          recipe.isPublished ? "Unpublish" : "Publish",
+                        )
+                      }
+                      disabled={togglePublishedMutation.isPending}
                     >
-                      {recipe.isPublished ? "Unpublish" : "Publish"}
+                      {togglePublishedMutation.isPending
+                        ? "Saving..."
+                        : recipe.isPublished
+                          ? "Unpublish"
+                          : "Publish"}
                     </button>
                   </div>
                 </div>

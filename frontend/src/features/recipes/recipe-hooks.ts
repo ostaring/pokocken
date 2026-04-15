@@ -4,6 +4,7 @@ import {
   fetchRecipeById,
   fetchRecipeBySlug,
   fetchRecipes,
+  toggleRecipePublished,
   updateRecipe,
 } from "../../lib/api/recipes";
 import { recipeQueryKeys } from "./recipe-query-keys";
@@ -60,6 +61,17 @@ export function useUpdateRecipeMutation() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: SaveRecipeMutationInput }) =>
       updateRecipe(id, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
+    },
+  });
+}
+
+export function useToggleRecipePublishedMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => toggleRecipePublished(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: recipeQueryKeys.all });
     },

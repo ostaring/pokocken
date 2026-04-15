@@ -95,3 +95,24 @@ export async function updateRecipe(id: string, input: SaveRecipeInput): Promise<
 
   return updatedRecipe;
 }
+
+export async function toggleRecipePublished(id: string): Promise<RecipeDetail> {
+  await apiDelay();
+
+  const recipes = readStoredRecipes();
+  const index = recipes.findIndex((recipe) => recipe.id === id);
+
+  if (index === -1) {
+    throw new Error("Recipe not found.");
+  }
+
+  const updatedRecipe: RecipeDetail = {
+    ...recipes[index],
+    isPublished: !recipes[index].isPublished,
+  };
+
+  recipes[index] = updatedRecipe;
+  writeStoredRecipes(recipes);
+
+  return updatedRecipe;
+}
