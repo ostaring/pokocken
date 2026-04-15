@@ -1,9 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
+import { useLoginMutation } from "../features/auth/auth-hooks";
 import { loginSchema, type LoginFormValues } from "../features/auth/login-schema";
 
 export function AdminLoginPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const loginMutation = useLoginMutation();
+  const redirect = searchParams.get("redirect") ?? "/admin";
+
   const {
     register,
     handleSubmit,
@@ -17,8 +24,9 @@ export function AdminLoginPage() {
     mode: "onChange",
   });
 
-  function onSubmit(values: LoginFormValues) {
-    console.log("Admin login form submitted", values);
+  async function onSubmit(values: LoginFormValues) {
+    await loginMutation.mutateAsync(values);
+    navigate(redirect);
   }
 
   return (
@@ -64,6 +72,14 @@ export function AdminLoginPage() {
           >
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
+
+          {loginMutation.isError ? (
+            <p className="text-sm text-rose-600">
+              {loginMutation.error instanceof Error
+                ? loginMutation.error.message
+                : "Login failed."}
+            </p>
+          ) : null}
         </form>
 
         <aside className="rounded-[1.75rem] bg-emerald-950 px-6 py-7 text-emerald-50">
@@ -73,8 +89,8 @@ export function AdminLoginPage() {
           <h2 className="mt-3 text-2xl font-semibold">Backend-ready form contract</h2>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-emerald-50/85">
             <li>Username and password are validated before submit.</li>
-            <li>The form shape is now stable enough to wire into `/api/auth/login`.</li>
-            <li>Next step is handling auth failures and redirect on successful login.</li>
+            <li>Admin routes are now guarded behind a session query.</li>
+            <li>Mock credentials for now: `admin` / `password123`.</li>
           </ul>
         </aside>
       </div>
