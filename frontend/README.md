@@ -32,6 +32,33 @@ npm run dev
 
 Vite will start a local development server and print the local URL in the terminal.
 
+## API Configuration
+
+The frontend supports two API modes:
+
+- `mock`
+- `http`
+
+Create a local env file if you want to override the defaults:
+
+```powershell
+cd frontend
+copy .env.example .env.local
+```
+
+Available variables:
+
+- `VITE_API_MODE=mock`
+- `VITE_API_MODE=http`
+- `VITE_API_BASE_URL=http://localhost:5080`
+
+Recommended usage:
+
+- use `mock` while shaping UI and flows without a running backend
+- use `http` when the ASP.NET backend is running locally
+
+The current default is `mock`.
+
 ## Build
 
 ```powershell
@@ -80,12 +107,12 @@ The frontend currently includes:
 - app shell and routing
 - public pages
 - admin pages
-- mock recipe browsing UI
+- configurable API adapter layer for mock or HTTP mode
 - admin login form with client-side validation
+- Vitest + React Testing Library setup
 
 ## Next Steps
 
-- connect recipes list to backend API
-- connect login form to backend auth endpoint
-- add protected admin routes
-- build recipe editor form
+- wire the upcoming ASP.NET backend to `VITE_API_MODE=http`
+- expand component tests around editor and dashboard edge cases
+- add Playwright later for end-to-end coverage
