@@ -24,6 +24,7 @@ backend/
 Current backend implementation includes:
 
 - in-memory recipe repository
+- cookie-based bootstrap auth endpoints for admin
 - public `GET /api/recipes`
 - public `GET /api/recipes/{slug}`
 - admin-protected `GET /api/admin/recipes`
@@ -64,11 +65,23 @@ dotnet test .\RecipeApp.sln
 
 ## Admin Access
 
-Current admin protection is intentionally simple for the bootstrap phase:
+Current admin auth is bootstrapped in two ways:
 
-- send header `X-Admin-Api-Key: dev-admin-key`
+- preferred for frontend: `POST /api/auth/login` with the development credentials below
+- fallback for manual/API testing: send header `X-Admin-Api-Key: dev-admin-key`
 
-This is only a temporary mechanism so we can wire frontend and backend end-to-end before replacing it with proper auth.
+Development credentials:
+
+- username: `admin`
+- password: `admin123`
+
+Auth endpoints:
+
+- `GET /api/auth/me`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+
+This is still a temporary bootstrap solution before proper production auth.
 
 ## API Overview
 

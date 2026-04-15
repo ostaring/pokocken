@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IRecipeRepository, InMemoryRecipeRepository>();
+builder.Services.AddSingleton<AdminSessionStore>();
 builder.Services.AddSingleton<RecipeService>();
 
 var app = builder.Build();
@@ -33,6 +34,51 @@ app.MapGet("/api/recipes/{slug}", (string slug, RecipeService recipeService) =>
 {
     var recipe = recipeService.GetPublishedRecipeBySlug(slug);
     return recipe is null ? Results.NotFound() : Results.Ok(recipe);
+});
+
+app.MapGet("/api/auth/me", (HttpContext httpContext, AdminSessionStore sessionStore) =>
+{
+    var session = sessionStore.GetSession(httpContext.Request.Cookies[AdminAuthConstants.SessionCookieName]);
+    return session is null ? Results.Unauthorized() : Results.Ok(new AdminSessionResponse(session.Username));
+});
+
+app.MapPost("/api/auth/login", (
+    LoginAdminRequest request,
+    HttpContext httpContext,
+    IConfiguration configuration,
+    AdminSessionStore sessionStore) =>
+{
+    var configuredUsername = configuration["Admin:Username"];
+    var configuredPassword = configuration["Admin:Password"];
+
+    if (!string.Equals(request.Username, configuredUsername, StringComparison.Ordinal) ||
+        !string.Equals(request.Password, configuredPassword, StringComparison.Ordinal))
+    {
+        return Results.Unauthorized();
+    }
+
+    var session = sessionStore.CreateSession(configuredUsername!);
+    httpContext.Response.Cookies.Append(
+        AdminAuthConstants.SessionCookieName,
+        session.Id,
+        new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = false,
+            IsEssential = true,
+            Expires = DateTimeOffset.UtcNow.AddDays(7)
+        });
+
+    return Results.Ok(new AdminSessionResponse(session.Username));
+});
+
+app.MapPost("/api/auth/logout", (HttpContext httpContext, AdminSessionStore sessionStore) =>
+{
+    var sessionId = httpContext.Request.Cookies[AdminAuthConstants.SessionCookieName];
+    sessionStore.RemoveSession(sessionId);
+    httpContext.Response.Cookies.Delete(AdminAuthConstants.SessionCookieName);
+    return Results.NoContent();
 });
 
 app.MapGet("/api/admin/recipes", (

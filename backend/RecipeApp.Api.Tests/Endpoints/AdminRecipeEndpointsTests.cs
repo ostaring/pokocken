@@ -8,7 +8,6 @@ namespace RecipeApp.Api.Tests.Endpoints;
 
 public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private const string AdminApiKey = "dev-admin-key";
     private readonly WebApplicationFactory<Program> _factory;
 
     public AdminRecipeEndpointsTests(WebApplicationFactory<Program> factory)
@@ -27,10 +26,9 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     }
 
     [Fact]
-    public async Task GetAdminRecipes_ReturnsDraftsWhenAuthorized()
+    public async Task GetAdminRecipes_ReturnsDraftsWhenAuthorizedWithSessionCookie()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var recipes = await client.GetFromJsonAsync<List<RecipeResponse>>("/api/admin/recipes");
 
@@ -41,8 +39,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task GetAdminRecipeBySlug_ReturnsDraftWhenAuthorized()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var recipe = await client.GetFromJsonAsync<RecipeResponse>("/api/admin/recipes/draft-lemon-tart");
 
@@ -54,8 +51,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task PostAdminRecipe_ReturnsCreatedWhenAuthorized()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var response = await client.PostAsJsonAsync("/api/admin/recipes", new CreateRecipeRequest(
             "Herby potato salad",
@@ -80,8 +76,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task PostAdminRecipe_ReturnsConflictForDuplicateSlug()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var response = await client.PostAsJsonAsync("/api/admin/recipes", new CreateRecipeRequest(
             "Duplicate pancake",
@@ -101,8 +96,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task PutAdminRecipe_ReturnsUpdatedRecipeWhenAuthorized()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var response = await client.PutAsJsonAsync("/api/admin/recipes/draft-lemon-tart", new UpdateRecipeRequest(
             "Published lemon tart",
@@ -127,8 +121,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task PutAdminRecipe_ReturnsNotFoundForUnknownRecipe()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var response = await client.PutAsJsonAsync("/api/admin/recipes/missing-recipe", new UpdateRecipeRequest(
             "Missing recipe",
@@ -148,8 +141,7 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task DeleteAdminRecipe_ReturnsNoContentWhenAuthorized()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var response = await client.DeleteAsync("/api/admin/recipes/draft-lemon-tart");
 
@@ -162,11 +154,18 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task DeleteAdminRecipe_ReturnsNotFoundForUnknownRecipe()
     {
-        using var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
-        client.DefaultRequestHeaders.Add("X-Admin-Api-Key", AdminApiKey);
+        using var client = await CreateAuthenticatedClientAsync();
 
         var response = await client.DeleteAsync("/api/admin/recipes/missing-recipe");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    private async Task<HttpClient> CreateAuthenticatedClientAsync()
+    {
+        var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        return client;
     }
 }
