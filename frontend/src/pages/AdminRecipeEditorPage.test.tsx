@@ -130,6 +130,28 @@ describe("AdminRecipeEditorPage", () => {
     });
   });
 
+  it("updates the metadata preview while the admin edits the form", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<AdminRecipeEditorPage mode="create" />);
+
+    expect(screen.getByText("skapas-fran-titeln")).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/titel/i), "Fresh Pasta Salad");
+    await user.selectOptions(screen.getByLabelText(/kategori/i), "Lunch");
+    await user.clear(screen.getByLabelText(/tillagningstid/i));
+    await user.type(screen.getByLabelText(/tillagningstid/i), "22");
+    await user.clear(screen.getByLabelText(/portioner/i));
+    await user.type(screen.getByLabelText(/portioner/i), "5");
+    await user.click(screen.getByLabelText(/publicerad/i));
+
+    expect(screen.getByText("fresh-pasta-salad")).toBeInTheDocument();
+    expect(screen.getAllByText("Lunch")).toHaveLength(2);
+    expect(screen.getByText("22 min")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getAllByText("Publicerad").length).toBeGreaterThan(1);
+  });
+
   it("shows the loading state for edit mode while recipe data is being fetched", async () => {
     recipeByIdQueryState = {
       data: undefined,

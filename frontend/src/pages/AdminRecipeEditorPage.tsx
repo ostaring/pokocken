@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
+import { createRecipeSlug, getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
 import {
   useCreateRecipeMutation,
   useRecipeByIdQuery,
@@ -30,6 +31,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting, isValid },
   } = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeFormSchema),
@@ -64,6 +66,13 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
       isPublished: recipe.isPublished,
     });
   }, [recipe, reset]);
+
+  const watchedTitle = watch("title");
+  const watchedCategory = watch("category");
+  const watchedPrepTimeMinutes = watch("prepTimeMinutes");
+  const watchedServings = watch("servings");
+  const watchedIsPublished = watch("isPublished");
+  const slugPreview = createRecipeSlug(watchedTitle ?? "");
 
   async function onSubmit(values: RecipeFormValues) {
     const payload = {
@@ -294,6 +303,35 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             Editorinfo
           </p>
           <h2 className="text-2xl font-semibold">Redo för backendkoppling</h2>
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50">
+              FÃ¶rhandsvisning
+            </p>
+            <dl className="mt-4 grid gap-3 text-sm text-white/85">
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-white/55">Slug</dt>
+                <dd className="font-mono text-right text-white">
+                  {slugPreview || "skapas-fran-titeln"}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-white/55">Status</dt>
+                <dd>{watchedIsPublished ? "Publicerad" : "Utkast"}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-white/55">Kategori</dt>
+                <dd>{getRecipeCategoryLabel(watchedCategory ?? "Dinner")}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-white/55">Tillagningstid</dt>
+                <dd>{Number(watchedPrepTimeMinutes ?? 0)} min</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-white/55">Portioner</dt>
+                <dd>{Number(watchedServings ?? 0)}</dd>
+              </div>
+            </dl>
+          </div>
           <ul className="space-y-3 text-sm leading-6 text-white/80">
             <li>Skapa- och redigeraläge delar samma validerade formkontrakt.</li>
             <li>Ingredienser och steg lagras just nu som radseparerad text i formuläret.</li>

@@ -26,6 +26,14 @@ export function getRecipeCategoryLabel(category: RecipeCategory | "All") {
   }
 }
 
+export function createRecipeSlug(title: string) {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export function filterRecipes(
   recipes: RecipeSummary[],
   searchTerm: string,

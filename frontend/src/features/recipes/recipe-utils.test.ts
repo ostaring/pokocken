@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mockRecipes } from "./mock-recipes";
-import { filterRecipes } from "./recipe-utils";
+import { createRecipeSlug, filterRecipes } from "./recipe-utils";
 
 describe("filterRecipes", () => {
   it("returns all recipes when no filters are applied", () => {
@@ -21,5 +21,9 @@ describe("filterRecipes", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]?.slug).toBe("chili-lime-roasted-chickpeas");
+  });
+
+  it("creates a stable slug from the recipe title", () => {
+    expect(createRecipeSlug("  Fresh Pasta Salad!  ")).toBe("fresh-pasta-salad");
   });
 });
