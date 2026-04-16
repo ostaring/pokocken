@@ -1,10 +1,11 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { AdminLoginRoute } from "./AdminLoginRoute";
 import { AdminRouteGuard } from "./AdminRouteGuard";
 import { AdminDashboardPage } from "../pages/AdminDashboardPage";
 import { AdminLoginPage } from "../pages/AdminLoginPage";
 import { AdminRecipeEditorPage } from "../pages/AdminRecipeEditorPage";
 import { HomePage } from "../pages/HomePage";
+import { NotFoundPage } from "../pages/NotFoundPage";
 import { RecipeDetailsPage } from "../pages/RecipeDetailsPage";
 import { RecipesPage } from "../pages/RecipesPage";
 
@@ -46,7 +47,7 @@ export function AppRoutes() {
           </AdminRouteGuard>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
