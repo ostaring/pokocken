@@ -1,6 +1,6 @@
 # Frontend
 
-Frontend for the recipe app.
+Frontend for receptappen.
 
 ## Stack
 
@@ -12,17 +12,19 @@ Frontend for the recipe app.
 - React Hook Form
 - Zod
 - Tailwind CSS
+- Vitest
+- React Testing Library
 
-## Requirements
+## Krav
 
-- Windows with `npm` available
-- No global Node upgrade is required for this project right now
+- Windows med `npm` tillgangligt
+- ingen global Node-uppgradering kravs for projektet
 
-The frontend scripts are configured to use the local portable Node runtime in `../tools/node-v24.14.1-win-x64`, so the app can still run even if the system-installed Node version is older.
+Frontendskripten anvander den lokala portabla Node-runtime som ligger i `../tools/node-v24.14.1-win-x64`, sa appen kan koras aven om den globalt installerade Node-versionen ar aldre.
 
-## Start The App
+## Starta Frontend
 
-From the repo root:
+Fran repo-roten:
 
 ```powershell
 cd frontend
@@ -30,59 +32,59 @@ npm install
 npm run dev
 ```
 
-Vite will start a local development server and print the local URL in the terminal.
+Vite startar da den lokala utvecklingsservern och skriver ut URL:en i terminalen.
 
-## API Configuration
+## API-Lagen
 
-The frontend supports two API modes:
+Frontend har tva API-lagen:
 
 - `mock`
 - `http`
 
-Create a local env file if you want to override the defaults:
+Skapa en lokal env-fil om du vill styra laget:
 
 ```powershell
 cd frontend
 copy .env.example .env.local
 ```
 
-Available variables:
+Tillgangliga variabler:
 
 - `VITE_API_MODE=mock`
 - `VITE_API_MODE=http`
 - `VITE_API_BASE_URL=http://localhost:5080`
 
-Recommended usage:
+Rekommenderad anvandning:
 
-- use `mock` while shaping UI and flows without a running backend
-- use `http` when the ASP.NET backend is running locally
+- anvand `mock` nar du vill jobba snabbt med UI och floden utan backend
+- anvand `http` nar ASP.NET-backenden kor lokalt
 
-The current default is `mock`.
+Projektets standardlage ar fortfarande `mock`.
 
-## Build
+## Bygg Och Testa
 
 ```powershell
 cd frontend
+npm run test -- --run
 npm run build
 ```
 
-This creates a production build in `frontend/dist`.
-
-## Preview Production Build
+## Forhandsgranska Produktionsbygge
 
 ```powershell
 cd frontend
 npm run preview
 ```
 
-## Useful Scripts
+## Viktiga Skript
 
-- `npm run dev` starts the development server
-- `npm run build` runs TypeScript build checks and creates a production bundle
-- `npm run preview` serves the production build locally
-- `npm run lint` runs ESLint
+- `npm run dev` startar utvecklingsservern
+- `npm run test -- --run` kor frontendens testsuite en gang
+- `npm run build` kor TypeScript-bygget och skapar produktionsbundle
+- `npm run preview` server lokalt det byggda resultatet
+- `npm run lint` kor ESLint
 
-## Folder Structure
+## Mappstruktur
 
 ```text
 frontend/
@@ -91,28 +93,41 @@ frontend/
     app/
     components/
     features/
-      admin/
       auth/
       recipes/
     lib/
     pages/
     routes/
+    test/
     types/
 ```
 
-## Current State
+## Nuvarande Funktioner
 
-The frontend currently includes:
+- startsida med utvalda recept och tydliga ingangar till publik del och admin
+- publik receptlista med sokning, kategorifilter och filter i URL
+- publik receptdetaljsida med oversikt, ingredienser, steg och relaterade recept
+- admininloggning med validering och sessionskontroll
+- adminoversikt med filter, publicera/avpublicera och borttagning
+- admineditor for att skapa och redigera recept
+- tydlig 404-sida for okanda routes
+- bred Vitest-tackning for sidor, routes, hooks och API-adapters
 
-- app shell and routing
-- public pages
-- admin pages
-- configurable API adapter layer for mock or HTTP mode
-- admin login form with client-side validation
-- Vitest + React Testing Library setup
+## Koera Mot Backend
 
-## Next Steps
+1. Starta API:t enligt [backend/README.md](C:/Users/Oscar/Documents/New%20project/backend/README.md).
+2. Skapa `frontend/.env.local`.
+3. Satt:
 
-- wire the upcoming ASP.NET backend to `VITE_API_MODE=http`
-- expand component tests around editor and dashboard edge cases
-- add Playwright later for end-to-end coverage
+```env
+VITE_API_MODE=http
+VITE_API_BASE_URL=http://localhost:5080
+```
+
+4. Starta frontend med `npm run dev`.
+
+## Nastkommande Steg
+
+- koppla fler floden till verklig backenddata som standard i lokal fullstack-korning
+- lagga till fler UI-tester kring fellagen och edge cases
+- komplettera senare med Playwright for end-to-end-tester

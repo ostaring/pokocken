@@ -1,15 +1,15 @@
 # Backend
 
-ASP.NET Core Web API for the recipe app.
+ASP.NET Core Web API for receptappen.
 
 ## Stack
 
 - ASP.NET Core minimal API
 - .NET 10 SDK
-- xUnit for tests
-- in-memory repository for the current bootstrap phase
+- xUnit for tester
+- in-memory repository i den nuvarande bootstrapfasen
 
-## Project Structure
+## Projektstruktur
 
 ```text
 backend/
@@ -19,110 +19,117 @@ backend/
   RecipeApp.Api.Tests/
 ```
 
-## Current Scope
+## Nuvarande Omfang
 
-Current backend implementation includes:
+Backenden innehaller just nu:
 
-- in-memory recipe repository
-- cookie-based bootstrap auth endpoints for admin
-- public `GET /api/recipes`
-- public `GET /api/recipes/{slug}`
-- admin-protected `GET /api/admin/recipes`
-- admin-protected `GET /api/admin/recipes/{slug}`
-- admin-protected `POST /api/admin/recipes`
-- admin-protected `PUT /api/admin/recipes/{slug}`
-- admin-protected `DELETE /api/admin/recipes/{slug}`
-- Swagger in development
-- xUnit test project for service and endpoint behavior
+- in-memory repository for recept
+- cookie-baserad bootstrap-auth for admin
+- offentliga endpoints for receptlista och receptdetalj
+- adminskyddade CRUD-endpoints for recept
+- auth-endpoints for session, login och logout
+- CORS-konfiguration for frontendens dev-server
+- Swagger i utvecklingslage
+- testprojekt for services och endpoints
 
-## Local Development
+## Lokal Utveckling
 
-The development launch profile is configured for:
+Utvecklingsprofilen ar konfigurerad for:
 
 - `http://localhost:5080`
 
-This matches the frontend default in `frontend/.env.example`.
+Detta matchar frontendens `VITE_API_BASE_URL`.
 
-### Start The API
+### Starta API:t
 
-From the repo root:
+Fran repo-roten:
 
 ```powershell
 cd backend
 dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
 ```
 
-Swagger is available at:
+Swagger finns pa:
 
 - `http://localhost:5080/swagger`
 
-The backend is configured to allow the frontend dev server origin:
+Backenden tillater frontendens dev-origin:
 
 - `http://localhost:5173`
 
-### Run Tests
+### Koer Tester
 
 ```powershell
 cd backend
 dotnet test .\RecipeApp.sln
 ```
 
-## Admin Access
+## Adminatkomst
 
-Current admin auth is bootstrapped in two ways:
+Nuvarande adminauth ar bootstrapad pa tva satt:
 
-- preferred for frontend: `POST /api/auth/login` with the development credentials below
-- fallback for manual/API testing: send header `X-Admin-Api-Key: dev-admin-key`
+- foredraget for frontend: `POST /api/auth/login` med utvecklingsuppgifterna nedan
+- fallback for manuell eller teknisk API-testning: skicka header `X-Admin-Api-Key: dev-admin-key`
 
-Development credentials:
+Utvecklingsuppgifter:
 
 - username: `admin`
 - password: `admin123`
 
-Auth endpoints:
+Auth-endpoints:
 
 - `GET /api/auth/me`
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 
-This is still a temporary bootstrap solution before proper production auth.
+Detta ar fortfarande en tillfallig losning fore riktig produktionsauth.
 
-## API Overview
+## API-Oversikt
 
-### Public endpoints
+### Publika endpoints
 
 - `GET /api/recipes`
 - `GET /api/recipes/{slug}`
 
-### Admin endpoints
+### Admin-endpoints
 
 - `GET /api/admin/recipes`
-- `GET /api/admin/recipes/{slug}`
+- `GET /api/admin/recipes/{id}`
 - `POST /api/admin/recipes`
-- `PUT /api/admin/recipes/{slug}`
-- `DELETE /api/admin/recipes/{slug}`
+- `PUT /api/admin/recipes/{id}`
+- `DELETE /api/admin/recipes/{id}`
 
-## Recipe Payload Shape
+## Payloadformat
 
-`POST /api/admin/recipes` and `PUT /api/admin/recipes/{slug}` currently use this payload shape:
+`POST /api/admin/recipes` och `PUT /api/admin/recipes/{id}` anvander just nu detta payloadformat:
 
 ```json
 {
-  "title": "Herby potato salad",
-  "slug": "herby-potato-salad",
-  "description": "Warm potatoes with herbs and mustard dressing.",
+  "title": "Ortig potatissallad",
+  "slug": "ortig-potatissallad",
+  "description": "Ljummen potatis med orter och senapsdressing.",
   "category": "Lunch",
   "prepTimeMinutes": 30,
   "servings": 4,
   "imageUrl": "https://example.com/potato-salad.jpg",
   "isPublished": false,
-  "ingredients": ["1 kg potatoes", "Parsley", "Mustard"],
-  "steps": ["Boil potatoes.", "Dress and toss."]
+  "ingredients": ["1 kg potatis", "Persilja", "Senap"],
+  "steps": ["Koka potatisen.", "Blanda dressingen.", "Vand ihop allt."]
 }
 ```
 
-## Next Steps
+## Koppling Till Frontend
 
-- replace in-memory storage with EF Core + PostgreSQL
-- switch admin protection from API key to real auth
-- run the frontend in `http` mode against the live API
+For att kora fullstack lokalt:
+
+1. Starta backend med `dotnet run`.
+2. Skapa `frontend/.env.local`.
+3. Satt `VITE_API_MODE=http`.
+4. Satt `VITE_API_BASE_URL=http://localhost:5080`.
+5. Starta frontendens Vite-server.
+
+## Nastkommande Steg
+
+- byta in-memory-lagring mot databas, troligen EF Core och PostgreSQL
+- ersatta bootstrap-auth med riktig autentisering
+- hardna validering, felhantering och persistens innan extern publicering
