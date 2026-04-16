@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import {
   useCreateRecipeMutation,
@@ -19,12 +19,12 @@ type AdminRecipeEditorPageProps = {
 
 export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const title = mode === "create" ? "Skapa recept" : "Redigera recept";
+  const navigate = useNavigate();
   const { id } = useParams();
   const recipeQuery = useRecipeByIdQuery(mode === "edit" ? id : undefined);
   const recipe = recipeQuery.data;
   const createRecipeMutation = useCreateRecipeMutation();
   const updateRecipeMutation = useUpdateRecipeMutation();
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -66,8 +66,6 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   }, [recipe, reset]);
 
   async function onSubmit(values: RecipeFormValues) {
-    setSuccessMessage(null);
-
     const payload = {
       title: values.title.trim(),
       description: values.description.trim(),
@@ -87,9 +85,11 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     };
 
     if (mode === "create") {
-      await createRecipeMutation.mutateAsync(payload);
-      setSuccessMessage("Receptet skapades.");
-      reset();
+      const createdRecipe = await createRecipeMutation.mutateAsync(payload);
+      navigate(`/admin/recipes/${createdRecipe.id}/edit`, {
+        replace: true,
+        state: { feedbackMessage: "Receptet skapades." },
+      });
       return;
     }
 
@@ -98,7 +98,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     }
 
     await updateRecipeMutation.mutateAsync({ id, input: payload });
-    setSuccessMessage("Receptet uppdaterades.");
+    navigate("/admin", {
+      replace: true,
+      state: { feedbackMessage: "Receptet uppdaterades." },
+    });
   }
 
   if (mode === "edit" && recipeQuery.isLoading) {
@@ -155,12 +158,6 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     >
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
-          {successMessage ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-              {successMessage}
-            </div>
-          ) : null}
-
           {mutationError ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {mutationError instanceof Error ? mutationError.message : "Kunde inte spara receptet."}

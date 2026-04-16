@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminDashboardPage } from "./AdminDashboardPage";
-import { renderWithProviders } from "../test/render";
+import { renderWithMemoryRouter, renderWithProviders } from "../test/render";
 import { mockRecipes } from "../features/recipes/mock-recipes";
 
 const mockToggleMutateAsync = vi.fn();
@@ -118,5 +118,13 @@ describe("AdminDashboardPage", () => {
     expect(screen.queryByText("Brown butter pancakes")).not.toBeInTheDocument();
     expect(screen.queryByText("Roasted tomato pasta")).not.toBeInTheDocument();
     expect(screen.queryByText("Dark chocolate mousse")).not.toBeInTheDocument();
+  });
+
+  it("shows feedback passed back from another admin route", () => {
+    renderWithMemoryRouter(<AdminDashboardPage />, [
+      { pathname: "/admin", state: { feedbackMessage: "Receptet uppdaterades." } } as never,
+    ]);
+
+    expect(screen.getByText("Receptet uppdaterades.")).toBeInTheDocument();
   });
 });

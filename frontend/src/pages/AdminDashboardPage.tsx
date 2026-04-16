@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
 import {
@@ -12,6 +13,14 @@ import type { RecipeCategory } from "../types/recipe";
 type AdminStatusFilter = "Alla" | "Publicerade" | "Utkast";
 
 export function AdminDashboardPage() {
+  const location = useLocation();
+  const locationFeedback =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "feedbackMessage" in location.state &&
+    typeof location.state.feedbackMessage === "string"
+      ? location.state.feedbackMessage
+      : null;
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState<RecipeCategory | "All">("All");
   const [status, setStatus] = useState<AdminStatusFilter>("Alla");
@@ -75,6 +84,12 @@ export function AdminDashboardPage() {
         {feedbackMessage ? (
           <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
             {feedbackMessage}
+          </div>
+        ) : null}
+
+        {!feedbackMessage && locationFeedback ? (
+          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+            {locationFeedback}
           </div>
         ) : null}
 

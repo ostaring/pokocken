@@ -3,6 +3,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
 
+type MemoryEntry =
+  | string
+  | {
+      pathname: string;
+      search?: string;
+      hash?: string;
+      state?: unknown;
+      key?: string;
+    };
+
 export function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -31,7 +41,7 @@ export function renderWithProviders(ui: ReactElement) {
 }
 
 type MemoryRouterProvidersProps = PropsWithChildren<{
-  initialEntries?: string[];
+  initialEntries?: MemoryEntry[];
 }>;
 
 function MemoryRouterProviders({
@@ -47,7 +57,7 @@ function MemoryRouterProviders({
   );
 }
 
-export function renderWithMemoryRouter(ui: ReactElement, initialEntries?: string[]) {
+export function renderWithMemoryRouter(ui: ReactElement, initialEntries?: MemoryEntry[]) {
   return render(ui, {
     wrapper: ({ children }) => (
       <MemoryRouterProviders initialEntries={initialEntries}>{children}</MemoryRouterProviders>

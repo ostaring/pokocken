@@ -6,6 +6,7 @@ import { renderWithProviders } from "../test/render";
 
 const mockCreateMutateAsync = vi.fn();
 const mockUpdateMutateAsync = vi.fn();
+const mockNavigate = vi.fn();
 let recipeByIdQueryState: {
   data: unknown;
   isLoading: boolean;
@@ -15,6 +16,16 @@ let recipeByIdQueryState: {
   isLoading: false,
   isError: false,
 };
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useParams: () => ({ id: "1" }),
+  };
+});
 
 vi.mock("../features/auth/auth-hooks", async () => {
   const actual = await vi.importActual<typeof import("../features/auth/auth-hooks")>(
@@ -59,6 +70,7 @@ describe("AdminRecipeEditorPage", () => {
   beforeEach(() => {
     mockCreateMutateAsync.mockReset();
     mockUpdateMutateAsync.mockReset();
+    mockNavigate.mockReset();
     recipeByIdQueryState = {
       data: undefined,
       isLoading: false,
@@ -68,7 +80,7 @@ describe("AdminRecipeEditorPage", () => {
 
   it("submits create mode values as a normalized recipe payload", async () => {
     const user = userEvent.setup();
-    mockCreateMutateAsync.mockResolvedValueOnce(undefined);
+    mockCreateMutateAsync.mockResolvedValueOnce({ id: "42" });
 
     renderWithProviders(<AdminRecipeEditorPage mode="create" />);
 
@@ -112,7 +124,10 @@ describe("AdminRecipeEditorPage", () => {
       });
     });
 
-    expect(await screen.findByText("Receptet skapades.")).toBeInTheDocument();
+    expect(mockNavigate).toHaveBeenCalledWith("/admin/recipes/42/edit", {
+      replace: true,
+      state: { feedbackMessage: "Receptet skapades." },
+    });
   });
 
   it("shows the loading state for edit mode while recipe data is being fetched", async () => {
@@ -125,5 +140,42 @@ describe("AdminRecipeEditorPage", () => {
     renderWithProviders(<AdminRecipeEditorPage mode="edit" />);
 
     expect(screen.getByText("Laddar recepteditorn...")).toBeInTheDocument();
+  });
+
+  it("navigates back to dashboard after saving changes in edit mode", async () => {
+    const user = userEvent.setup();
+    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "1" });
+    recipeByIdQueryState = {
+      data: {
+        id: "1",
+        title: "Brown butter pancakes",
+        slug: "brown-butter-pancakes",
+        description: "Soft, golden pancakes with brown butter.",
+        category: "Breakfast",
+        prepTimeMinutes: 25,
+        servings: 4,
+        imageUrl: "https://example.com/pancakes.jpg",
+        ingredients: ["Mjöl", "Mjölk"],
+        steps: ["Vispa ihop", "Stek"],
+        isPublished: true,
+      },
+      isLoading: false,
+      isError: false,
+    };
+
+    renderWithProviders(<AdminRecipeEditorPage mode="edit" />);
+
+    await user.clear(screen.getByLabelText(/titel/i));
+    await user.type(screen.getByLabelText(/titel/i), "Brown butter pancakes deluxe");
+    await user.click(screen.getByRole("button", { name: /spara ändringar/i }));
+
+    await waitFor(() => {
+      expect(mockUpdateMutateAsync).toHaveBeenCalled();
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith("/admin", {
+      replace: true,
+      state: { feedbackMessage: "Receptet uppdaterades." },
+    });
   });
 });
