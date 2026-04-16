@@ -99,14 +99,19 @@ describe("AdminRecipeEditorPage", () => {
     await user.type(screen.getByLabelText(/tillagningstid/i), "22");
     await user.clear(screen.getByLabelText(/portioner/i));
     await user.type(screen.getByLabelText(/portioner/i), "5");
-    await user.type(
-      screen.getByLabelText(/ingredienser/i),
-      "200 g pasta{enter}1 lemon{enter}Fresh herbs",
-    );
-    await user.type(
-      screen.getByLabelText(/^steg$/i),
-      "Cook the pasta{enter}Mix the dressing{enter}Combine and serve",
-    );
+
+    await user.type(screen.getByLabelText(/ingrediens 1/i), "200 g pasta");
+    await user.click(screen.getByRole("button", { name: /lagg till ingrediens/i }));
+    await user.type(screen.getByLabelText(/ingrediens 2/i), "1 lemon");
+    await user.click(screen.getByRole("button", { name: /lagg till ingrediens/i }));
+    await user.type(screen.getByLabelText(/ingrediens 3/i), "Fresh herbs");
+
+    await user.type(screen.getByLabelText(/steg 1/i), "Cook the pasta");
+    await user.click(screen.getByRole("button", { name: /lagg till steg/i }));
+    await user.type(screen.getByLabelText(/steg 2/i), "Mix the dressing");
+    await user.click(screen.getByRole("button", { name: /lagg till steg/i }));
+    await user.type(screen.getByLabelText(/steg 3/i), "Combine and serve");
+
     await user.click(screen.getByLabelText(/publicerad/i));
     await user.click(screen.getByRole("button", { name: /skapa recept/i }));
 
@@ -128,6 +133,29 @@ describe("AdminRecipeEditorPage", () => {
       replace: true,
       state: { feedbackMessage: "Receptet skapades." },
     });
+  });
+
+  it("lets the admin add and remove structured ingredient and step rows", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<AdminRecipeEditorPage mode="create" />);
+
+    expect(screen.getByLabelText(/ingrediens 1/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/steg 1/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /lagg till ingrediens/i }));
+    await user.click(screen.getByRole("button", { name: /lagg till steg/i }));
+
+    expect(screen.getByLabelText(/ingrediens 2/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/steg 2/i)).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: /ta bort/i })[0]);
+    await user.click(screen.getAllByRole("button", { name: /ta bort/i })[1]);
+
+    expect(screen.queryByLabelText(/ingrediens 2/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/steg 2/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/ingrediens 1/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/steg 1/i)).toBeInTheDocument();
   });
 
   it("updates the metadata preview while the admin edits the form", async () => {
@@ -177,7 +205,7 @@ describe("AdminRecipeEditorPage", () => {
         prepTimeMinutes: 25,
         servings: 4,
         imageUrl: "https://example.com/pancakes.jpg",
-        ingredients: ["Mjöl", "Mjölk"],
+        ingredients: ["Mjol", "Mjolk"],
         steps: ["Vispa ihop", "Stek"],
         isPublished: true,
       },
@@ -189,10 +217,17 @@ describe("AdminRecipeEditorPage", () => {
 
     await user.clear(screen.getByLabelText(/titel/i));
     await user.type(screen.getByLabelText(/titel/i), "Brown butter pancakes deluxe");
-    await user.click(screen.getByRole("button", { name: /spara ändringar/i }));
+    await user.click(screen.getByRole("button", { name: /spara andringar/i }));
 
     await waitFor(() => {
-      expect(mockUpdateMutateAsync).toHaveBeenCalled();
+      expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+        id: "1",
+        input: expect.objectContaining({
+          title: "Brown butter pancakes deluxe",
+          ingredients: ["Mjol", "Mjolk"],
+          steps: ["Vispa ihop", "Stek"],
+        }),
+      });
     });
 
     expect(mockNavigate).toHaveBeenCalledWith("/admin", {

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { createRecipeSlug, getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
@@ -18,6 +18,8 @@ type AdminRecipeEditorPageProps = {
   mode: "create" | "edit";
 };
 
+const emptyRecipeListItem = { value: "" };
+
 export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const title = mode === "create" ? "Skapa recept" : "Redigera recept";
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const updateRecipeMutation = useUpdateRecipeMutation();
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -43,10 +46,20 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
       prepTimeMinutes: 30,
       servings: 4,
       imageUrl: "",
-      ingredientsText: "",
-      stepsText: "",
+      ingredients: [{ ...emptyRecipeListItem }],
+      steps: [{ ...emptyRecipeListItem }],
       isPublished: false,
     },
+  });
+
+  const ingredientsFieldArray = useFieldArray({
+    control,
+    name: "ingredients",
+  });
+
+  const stepsFieldArray = useFieldArray({
+    control,
+    name: "steps",
   });
 
   useEffect(() => {
@@ -61,8 +74,14 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
       prepTimeMinutes: recipe.prepTimeMinutes,
       servings: recipe.servings,
       imageUrl: recipe.imageUrl,
-      ingredientsText: recipe.ingredients.join("\n"),
-      stepsText: recipe.steps.join("\n"),
+      ingredients:
+        recipe.ingredients.length > 0
+          ? recipe.ingredients.map((ingredient) => ({ value: ingredient }))
+          : [{ ...emptyRecipeListItem }],
+      steps:
+        recipe.steps.length > 0
+          ? recipe.steps.map((step) => ({ value: step }))
+          : [{ ...emptyRecipeListItem }],
       isPublished: recipe.isPublished,
     });
   }, [recipe, reset]);
@@ -82,14 +101,8 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
       prepTimeMinutes: Number(values.prepTimeMinutes),
       servings: Number(values.servings),
       imageUrl: values.imageUrl.trim(),
-      ingredients: values.ingredientsText
-        .split("\n")
-        .map((entry) => entry.trim())
-        .filter(Boolean),
-      steps: values.stepsText
-        .split("\n")
-        .map((entry) => entry.trim())
-        .filter(Boolean),
+      ingredients: values.ingredients.map((entry) => entry.value.trim()),
+      steps: values.steps.map((entry) => entry.value.trim()),
       isPublished: values.isPublished,
     };
 
@@ -117,7 +130,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     return (
       <AdminLayout
         title="Laddar recept"
-        description="Hämtar receptdata till editorn."
+        description="Hamtar receptdata till editorn."
       >
         <p className="text-slate-700">Laddar recepteditorn...</p>
       </AdminLayout>
@@ -127,10 +140,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   if (mode === "edit" && recipeQuery.isError) {
     return (
       <AdminLayout
-        title="Editorn är inte tillgänglig"
-        description="Något gick fel när receptet skulle laddas."
+        title="Editorn ar inte tillganglig"
+        description="Nagot gick fel nar receptet skulle laddas."
       >
-        <p className="text-slate-700">Försök igen senare.</p>
+        <p className="text-slate-700">Forsok igen senare.</p>
       </AdminLayout>
     );
   }
@@ -139,11 +152,11 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     return (
       <AdminLayout
         title="Receptet hittades inte"
-        description="Vi kunde inte hitta något recept som matchar den här adminrouten."
+        description="Vi kunde inte hitta nagot recept som matchar den har adminrouten."
       >
         <p className="text-slate-700">
-          När backend är inkopplad fullt ut ska detta motsvara en autentiserad adminhämtning och ett
-          tydligt not-found-läge.
+          Nar backend ar inkopplad fullt ut ska detta motsvara en autentiserad adminhamtning och ett
+          tydligt not-found-lage.
         </p>
       </AdminLayout>
     );
@@ -151,17 +164,19 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
   const mutationError = createRecipeMutation.error ?? updateRecipeMutation.error;
   const isSaving = isSubmitting || createRecipeMutation.isPending || updateRecipeMutation.isPending;
+  const ingredientErrors = Array.isArray(errors.ingredients) ? errors.ingredients : [];
+  const stepErrors = Array.isArray(errors.steps) ? errors.steps : [];
 
   return (
     <AdminLayout
       title={title}
-      description="En gemensam admineditor för både skapa- och redigeraläge. Formkontraktet är nu tillräckligt stabilt för att kopplas till backendens create- och update-endpoints."
+      description="En gemensam admineditor for bade skapa- och redigeralage. Formkontraktet ar nu tillrackligt stabilt for att kopplas till backendens create- och update-endpoints."
       actions={
         <Link
           className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
           to="/admin"
         >
-          Tillbaka till översikten
+          Tillbaka till oversikten
         </Link>
       }
     >
@@ -189,7 +204,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               <span className="text-sm font-semibold text-slate-700">Beskrivning</span>
               <textarea
                 className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder="En snabb pasta med söta rostade tomater..."
+                placeholder="En snabb pasta med sota rostade tomater..."
                 {...register("description")}
               />
               {errors.description ? (
@@ -207,7 +222,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
                 <option value="Lunch">Lunch</option>
                 <option value="Dinner">Middag</option>
                 <option value="Dessert">Dessert</option>
-                <option value="Snack">Mellanmål</option>
+                <option value="Snack">Mellanmal</option>
               </select>
               {errors.category ? (
                 <p className="text-sm text-rose-600">{errors.category.message}</p>
@@ -251,29 +266,100 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               ) : null}
             </label>
 
-            <label className="block space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-slate-700">Ingredienser</span>
-              <textarea
-                className="min-h-40 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder={"1 gul lök\n2 msk olivolja\n300 g pasta"}
-                {...register("ingredientsText")}
-              />
-              {errors.ingredientsText ? (
-                <p className="text-sm text-rose-600">{errors.ingredientsText.message}</p>
+            <section className="space-y-3 md:col-span-2" aria-labelledby="ingredients-heading">
+              <div className="flex items-center justify-between gap-3">
+                <h2
+                  id="ingredients-heading"
+                  className="text-sm font-semibold text-slate-700"
+                >
+                  Ingredienser
+                </h2>
+                <button
+                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                  type="button"
+                  onClick={() => ingredientsFieldArray.append({ ...emptyRecipeListItem })}
+                >
+                  Lagg till ingrediens
+                </button>
+              </div>
+              <div className="space-y-3">
+                {ingredientsFieldArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-3">
+                    <input
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
+                      type="text"
+                      aria-label={`Ingrediens ${index + 1}`}
+                      placeholder={`Ingrediens ${index + 1}`}
+                      {...register(`ingredients.${index}.value`)}
+                    />
+                    <button
+                      className="rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      type="button"
+                      onClick={() => ingredientsFieldArray.remove(index)}
+                      disabled={ingredientsFieldArray.fields.length === 1}
+                    >
+                      Ta bort
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {errors.ingredients?.message ? (
+                <p className="text-sm text-rose-600">{errors.ingredients.message}</p>
               ) : null}
-            </label>
+              {ingredientErrors.map((itemError, index) =>
+                itemError?.value ? (
+                  <p key={index} className="text-sm text-rose-600">
+                    Ingrediens {index + 1}: {itemError.value.message}
+                  </p>
+                ) : null,
+              )}
+            </section>
 
-            <label className="block space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-slate-700">Steg</span>
-              <textarea
-                className="min-h-48 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder={"Koka pastan.\nRosta tomaterna.\nBlanda ihop allt."}
-                {...register("stepsText")}
-              />
-              {errors.stepsText ? (
-                <p className="text-sm text-rose-600">{errors.stepsText.message}</p>
+            <section className="space-y-3 md:col-span-2" aria-labelledby="steps-heading">
+              <div className="flex items-center justify-between gap-3">
+                <h2 id="steps-heading" className="text-sm font-semibold text-slate-700">
+                  Steg
+                </h2>
+                <button
+                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                  type="button"
+                  onClick={() => stepsFieldArray.append({ ...emptyRecipeListItem })}
+                >
+                  Lagg till steg
+                </button>
+              </div>
+              <div className="space-y-3">
+                {stepsFieldArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-3">
+                    <input
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
+                      type="text"
+                      aria-label={`Steg ${index + 1}`}
+                      placeholder={`Steg ${index + 1}`}
+                      {...register(`steps.${index}.value`)}
+                    />
+                    <button
+                      className="rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      type="button"
+                      onClick={() => stepsFieldArray.remove(index)}
+                      disabled={stepsFieldArray.fields.length === 1}
+                    >
+                      Ta bort
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {errors.steps?.message ? (
+                <p className="text-sm text-rose-600">{errors.steps.message}</p>
               ) : null}
-            </label>
+              {stepErrors.map((itemError, index) =>
+                itemError?.value ? (
+                  <p key={index} className="text-sm text-rose-600">
+                    Steg {index + 1}: {itemError.value.message}
+                  </p>
+                ) : null,
+              )}
+            </section>
           </div>
 
           <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4">
@@ -287,7 +373,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               type="submit"
               disabled={!isValid || isSaving}
             >
-              {isSaving ? "Sparar..." : mode === "create" ? "Skapa recept" : "Spara ändringar"}
+              {isSaving ? "Sparar..." : mode === "create" ? "Skapa recept" : "Spara andringar"}
             </button>
             <button
               className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
@@ -302,10 +388,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">
             Editorinfo
           </p>
-          <h2 className="text-2xl font-semibold">Redo för backendkoppling</h2>
+          <h2 className="text-2xl font-semibold">Redo for backendkoppling</h2>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50">
-              FÃ¶rhandsvisning
+              Forhandsvisning
             </p>
             <dl className="mt-4 grid gap-3 text-sm text-white/85">
               <div className="flex items-start justify-between gap-4">
@@ -333,9 +419,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </dl>
           </div>
           <ul className="space-y-3 text-sm leading-6 text-white/80">
-            <li>Skapa- och redigeraläge delar samma validerade formkontrakt.</li>
-            <li>Ingredienser och steg lagras just nu som radseparerad text i formuläret.</li>
-            <li>Nästa steg är att översätta dessa värden till backendens DTO-format vid submit.</li>
+            <li>Skapa- och redigeralage delar samma validerade formkontrakt.</li>
+            <li>Ingredienser och steg redigeras nu som strukturerade listor i formularet.</li>
+            <li>Submit mappas fortfarande direkt till backendens DTO-format.</li>
           </ul>
         </aside>
       </div>
