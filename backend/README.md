@@ -7,7 +7,8 @@ ASP.NET Core Web API for receptappen.
 - ASP.NET Core minimal API
 - .NET 10 SDK
 - xUnit for tester
-- konfigurerbar repositorystrategi med minnes- eller filbaserad lagring
+- EF Core med SQLite i utvecklingslage
+- konfigurerbar repositorystrategi med minne, fil eller SQLite
 
 ## Projektstruktur
 
@@ -28,7 +29,7 @@ Backenden innehaller just nu:
 - cookie-baserad bootstrap-auth for admin
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
-- filbaserad receptpersistens i utvecklingslage
+- SQLite-baserad receptpersistens i utvecklingslage
 - health-endpoint for snabb lokal diagnostik
 - testprojekt for services, repositories och endpoints
 
@@ -63,10 +64,11 @@ Backenden tillater frontendens dev-origin:
 
 ### Persistenslagen
 
-Backenden kan kora i tva lagen:
+Backenden kan kora i tre lagen:
 
 - `Memory`
 - `File`
+- `Sqlite`
 
 Konfigurationen ligger i:
 
@@ -76,9 +78,13 @@ Konfigurationen ligger i:
 Nuvarande standard:
 
 - generell baseline: `Memory`
-- utvecklingslage: `File`
+- utvecklingslage: `Sqlite`
 
-Vid filpersistens sparas recepten i:
+Vid SQLite-lagring sparas databasen i:
+
+- `RecipeApp.Api/App_Data/recipes.db`
+
+Filrepositoryn finns kvar som alternativ och anvander:
 
 - `RecipeApp.Api/App_Data/recipes.json`
 
@@ -89,6 +95,8 @@ cd backend
 dotnet build .\RecipeApp.sln
 dotnet test .\RecipeApp.sln
 ```
+
+Notera att endpointtesterna tvingas till minneslagring i testhosten for att sviten ska vara deterministisk aven om utvecklingslaget ar SQLite.
 
 ## Adminatkomst
 
@@ -160,6 +168,7 @@ For att kora fullstack lokalt:
 
 ## Nastkommande Steg
 
-- byta fil- eller minneslagring mot riktig databas, troligen EF Core och PostgreSQL
+- lagga till migrationer och mer explicit databasschemahantering
+- kunna byta vidare till PostgreSQL nar deploysparet tar form
 - ersatta bootstrap-auth med riktig autentisering
 - hardna validering, felhantering och persistens innan extern publicering

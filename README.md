@@ -5,13 +5,13 @@ Fullstack-repo for en svensk receptapp med React i frontend och ASP.NET Core i b
 ## Delprojekt
 
 - `frontend/` innehaller den publika webbappen och admingranssnittet
-- `backend/` innehaller API, auth-bootstrap, persistens och tester
+- `backend/` innehaller API, auth-bootstrap, databas/persistens och tester
 - `tools/` innehaller lokal Node-runtime som frontendens skript anvander
 
 ## Stack
 
 - frontend: React, TypeScript, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS
-- backend: ASP.NET Core minimal API, .NET 10, xUnit
+- backend: ASP.NET Core minimal API, .NET 10, xUnit, EF Core, SQLite
 
 ## Kom Igang
 
@@ -34,9 +34,9 @@ cd backend
 dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
 ```
 
-I utvecklingslage anvander backenden filbaserad receptpersistens och skriver till:
+I utvecklingslage anvander backenden nu SQLite och skriver databasen till:
 
-- `backend/RecipeApp.Api/App_Data/recipes.json`
+- `backend/RecipeApp.Api/App_Data/recipes.db`
 
 Snabbkontroller for backend:
 
@@ -91,11 +91,11 @@ dotnet test .\RecipeApp.sln
 - adminoversikt med filter, publicering och borttagning
 - admineditor for att skapa och redigera recept
 - explicit 404-sida i frontend
-- filbaserad backendpersistens i utvecklingslage
+- SQLite-baserad backend i utvecklingslage
 - health-endpoint for lokal diagnostik
 
 ## Vidare Arbete
 
-- byta fil- eller minneslagring mot databas i backend
+- lagga till migrationer och fler databashardningar runt EF Core-lagret
 - ersatta bootstrap-auth med mer riktig autentisering
 - lagga till e2e-tester nar huvudflodena satt sig helt
