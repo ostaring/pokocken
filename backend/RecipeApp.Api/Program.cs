@@ -1,10 +1,14 @@
+using Microsoft.EntityFrameworkCore;
 using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Data;
 using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Repositories;
 using RecipeApp.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+var persistenceMode = builder.Configuration["Persistence:Mode"] ?? "Memory";
+var sqliteConnectionString = builder.Configuration.GetConnectionString("RecipesDb");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -26,21 +30,41 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-builder.Services.AddSingleton<IRecipeRepository>(_ =>
-{
-    var persistenceMode = builder.Configuration["Persistence:Mode"];
-    var storagePath = builder.Configuration["Persistence:RecipesFilePath"];
 
-    return string.Equals(persistenceMode, "File", StringComparison.OrdinalIgnoreCase) &&
-           !string.IsNullOrWhiteSpace(storagePath)
-        ? new FileRecipeRepository(storagePath)
-        : new InMemoryRecipeRepository();
-});
+if (string.Equals(persistenceMode, "Sqlite", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddDbContext<RecipeDbContext>(options =>
+    {
+        options.UseSqlite(sqliteConnectionString);
+    });
+    builder.Services.AddScoped<IRecipeRepository, SqliteRecipeRepository>();
+    builder.Services.AddScoped<RecipeDbInitializer>();
+}
+else if (string.Equals(persistenceMode, "File", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton<IRecipeRepository>(_ =>
+    {
+        var storagePath = builder.Configuration["Persistence:RecipesFilePath"];
+        return new FileRecipeRepository(storagePath!);
+    });
+}
+else
+{
+    builder.Services.AddSingleton<IRecipeRepository, InMemoryRecipeRepository>();
+}
+
 builder.Services.AddSingleton<AdminSessionStore>();
-builder.Services.AddSingleton<RecipeService>();
+builder.Services.AddScoped<RecipeService>();
 
 var app = builder.Build();
 app.UseCors("FrontendDevClient");
+
+if (string.Equals(persistenceMode, "Sqlite", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var initializer = scope.ServiceProvider.GetRequiredService<RecipeDbInitializer>();
+    await initializer.InitializeAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
