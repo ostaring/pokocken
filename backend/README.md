@@ -7,7 +7,7 @@ ASP.NET Core Web API for receptappen.
 - ASP.NET Core minimal API
 - .NET 10 SDK
 - xUnit for tester
-- in-memory repository i den nuvarande bootstrapfasen
+- konfigurerbar repositorystrategi med minnes- eller filbaserad lagring
 
 ## Projektstruktur
 
@@ -23,14 +23,14 @@ backend/
 
 Backenden innehaller just nu:
 
-- in-memory repository for recept
-- cookie-baserad bootstrap-auth for admin
-- offentliga endpoints for receptlista och receptdetalj
+- publik receptlista och receptdetalj
 - adminskyddade CRUD-endpoints for recept
-- auth-endpoints for session, login och logout
+- cookie-baserad bootstrap-auth for admin
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
-- testprojekt for services och endpoints
+- filbaserad receptpersistens i utvecklingslage
+- health-endpoint for snabb lokal diagnostik
+- testprojekt for services, repositories och endpoints
 
 ## Lokal Utveckling
 
@@ -53,14 +53,40 @@ Swagger finns pa:
 
 - `http://localhost:5080/swagger`
 
+Health-endpoint finns pa:
+
+- `http://localhost:5080/health`
+
 Backenden tillater frontendens dev-origin:
 
 - `http://localhost:5173`
+
+### Persistenslagen
+
+Backenden kan kora i tva lagen:
+
+- `Memory`
+- `File`
+
+Konfigurationen ligger i:
+
+- `RecipeApp.Api/appsettings.json`
+- `RecipeApp.Api/appsettings.Development.json`
+
+Nuvarande standard:
+
+- generell baseline: `Memory`
+- utvecklingslage: `File`
+
+Vid filpersistens sparas recepten i:
+
+- `RecipeApp.Api/App_Data/recipes.json`
 
 ### Koer Tester
 
 ```powershell
 cd backend
+dotnet build .\RecipeApp.sln
 dotnet test .\RecipeApp.sln
 ```
 
@@ -85,6 +111,10 @@ Auth-endpoints:
 Detta ar fortfarande en tillfallig losning fore riktig produktionsauth.
 
 ## API-Oversikt
+
+### Infrastruktur
+
+- `GET /health`
 
 ### Publika endpoints
 
@@ -130,6 +160,6 @@ For att kora fullstack lokalt:
 
 ## Nastkommande Steg
 
-- byta in-memory-lagring mot databas, troligen EF Core och PostgreSQL
+- byta fil- eller minneslagring mot riktig databas, troligen EF Core och PostgreSQL
 - ersatta bootstrap-auth med riktig autentisering
 - hardna validering, felhantering och persistens innan extern publicering

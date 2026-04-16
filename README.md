@@ -5,7 +5,7 @@ Fullstack-repo for en svensk receptapp med React i frontend och ASP.NET Core i b
 ## Delprojekt
 
 - `frontend/` innehaller den publika webbappen och admingranssnittet
-- `backend/` innehaller API, auth-bootstrap och tester
+- `backend/` innehaller API, auth-bootstrap, persistens och tester
 - `tools/` innehaller lokal Node-runtime som frontendens skript anvander
 
 ## Stack
@@ -13,7 +13,7 @@ Fullstack-repo for en svensk receptapp med React i frontend och ASP.NET Core i b
 - frontend: React, TypeScript, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS
 - backend: ASP.NET Core minimal API, .NET 10, xUnit
 
-## Kom Igång
+## Kom Igang
 
 ### Frontend i mock-lage
 
@@ -33,6 +33,15 @@ Starta backend i ett terminalfonster:
 cd backend
 dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
 ```
+
+I utvecklingslage anvander backenden filbaserad receptpersistens och skriver till:
+
+- `backend/RecipeApp.Api/App_Data/recipes.json`
+
+Snabbkontroller for backend:
+
+- `http://localhost:5080/health`
+- `http://localhost:5080/swagger`
 
 Starta sedan frontend i ett annat terminalfonster:
 
@@ -69,6 +78,7 @@ Backend:
 
 ```powershell
 cd backend
+dotnet build .\RecipeApp.sln
 dotnet test .\RecipeApp.sln
 ```
 
@@ -81,9 +91,11 @@ dotnet test .\RecipeApp.sln
 - adminoversikt med filter, publicering och borttagning
 - admineditor for att skapa och redigera recept
 - explicit 404-sida i frontend
+- filbaserad backendpersistens i utvecklingslage
+- health-endpoint for lokal diagnostik
 
 ## Vidare Arbete
 
-- byta in-memory-lagring mot databas i backend
+- byta fil- eller minneslagring mot databas i backend
 - ersatta bootstrap-auth med mer riktig autentisering
 - lagga till e2e-tester nar huvudflodena satt sig helt
