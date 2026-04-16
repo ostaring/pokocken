@@ -10,3 +10,4 @@ frontend/node_modules/.tmp/
 
 backend/**/bin/
 backend/**/obj/
+backend/**/App_Data/

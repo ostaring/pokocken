@@ -1,14 +1,14 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
+using RecipeApp.Api.Tests.Testing;
 using Xunit;
 
 namespace RecipeApp.Api.Tests.Endpoints;
 
-public sealed class CorsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class CorsEndpointsTests : IClassFixture<RecipeApiFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly RecipeApiFactory _factory;
 
-    public CorsEndpointsTests(WebApplicationFactory<Program> factory)
+    public CorsEndpointsTests(RecipeApiFactory factory)
     {
         _factory = factory;
     }

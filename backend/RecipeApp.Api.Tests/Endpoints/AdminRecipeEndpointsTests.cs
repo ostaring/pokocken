@@ -1,16 +1,16 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Tests.Testing;
 using Xunit;
 
 namespace RecipeApp.Api.Tests.Endpoints;
 
-public sealed class AdminRecipeEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class AdminRecipeEndpointsTests : IClassFixture<RecipeApiFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly RecipeApiFactory _factory;
 
-    public AdminRecipeEndpointsTests(WebApplicationFactory<Program> factory)
+    public AdminRecipeEndpointsTests(RecipeApiFactory factory)
     {
         _factory = factory;
     }

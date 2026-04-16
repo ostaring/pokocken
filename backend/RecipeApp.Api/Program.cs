@@ -26,7 +26,16 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-builder.Services.AddSingleton<IRecipeRepository, InMemoryRecipeRepository>();
+builder.Services.AddSingleton<IRecipeRepository>(_ =>
+{
+    var persistenceMode = builder.Configuration["Persistence:Mode"];
+    var storagePath = builder.Configuration["Persistence:RecipesFilePath"];
+
+    return string.Equals(persistenceMode, "File", StringComparison.OrdinalIgnoreCase) &&
+           !string.IsNullOrWhiteSpace(storagePath)
+        ? new FileRecipeRepository(storagePath)
+        : new InMemoryRecipeRepository();
+});
 builder.Services.AddSingleton<AdminSessionStore>();
 builder.Services.AddSingleton<RecipeService>();
 
