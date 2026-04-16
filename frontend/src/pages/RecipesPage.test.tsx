@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useLocation } from "react-router-dom";
 import { RecipesPage } from "./RecipesPage";
 import { renderWithMemoryRouter } from "../test/render";
 
@@ -13,9 +14,15 @@ vi.mock("../features/recipes/recipe-hooks", async () => {
 
   return {
     ...actual,
-    useRecipesQuery: (filters: { search?: string; category?: string }) => mockUseRecipesQuery(filters),
+    useRecipesQuery: (filters: { search?: string; category?: string }) =>
+      mockUseRecipesQuery(filters),
   };
 });
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
+}
 
 describe("RecipesPage", () => {
   beforeEach(() => {
@@ -66,11 +73,37 @@ describe("RecipesPage", () => {
     );
   });
 
+  it("reads active filters from the URL and keeps them visible in the UI", () => {
+    mockUseRecipesQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithMemoryRouter(
+      <>
+        <RecipesPage />
+        <LocationDisplay />
+      </>,
+      ["/recipes?search=tomat&category=Dinner"],
+    );
+
+    expect(screen.getByDisplayValue("tomat")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /kategori/i })).toHaveValue("Dinner");
+    expect(screen.getByText("Sokning: tomat")).toBeInTheDocument();
+    expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=tomat&category=Dinner");
+    expect(mockUseRecipesQuery).toHaveBeenCalledWith({
+      search: "tomat",
+      category: "Dinner",
+    });
+  });
+
   it("shows active filters and allows the user to reset them", async () => {
     const user = userEvent.setup();
-    mockUseRecipesQuery.mockImplementation(
-      (filters: { search?: string; category?: string }) => ({
-        data: filters.search || filters.category
+    mockUseRecipesQuery.mockImplementation((filters: { search?: string; category?: string }) => ({
+      data:
+        filters.search || filters.category
           ? []
           : [
               {
@@ -85,12 +118,17 @@ describe("RecipesPage", () => {
                 isPublished: true,
               },
             ],
-        isLoading: false,
-        isError: false,
-      }),
-    );
+      isLoading: false,
+      isError: false,
+    }));
 
-    renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
+    renderWithMemoryRouter(
+      <>
+        <RecipesPage />
+        <LocationDisplay />
+      </>,
+      ["/recipes"],
+    );
 
     expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
 
@@ -100,48 +138,56 @@ describe("RecipesPage", () => {
     expect(await screen.findByText("Sokning: tomat")).toBeInTheDocument();
     expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /rensa filter/i })).toBeEnabled();
+    expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=tomat&category=Dinner");
 
     await user.click(screen.getByRole("button", { name: /rensa filter/i }));
 
     expect(screen.queryByText("Sokning: tomat")).not.toBeInTheDocument();
     expect(screen.queryByText("Kategori: Middag")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
+    expect(screen.getByTestId("location")).toHaveTextContent("/recipes");
   });
 
   it("lets the user recover from an empty result by resetting the filters", async () => {
     const user = userEvent.setup();
-    mockUseRecipesQuery.mockImplementation(
-      (filters: { search?: string; category?: string }) => ({
-        data:
-          filters.search === "zzz"
-            ? []
-            : [
-                {
-                  id: "1",
-                  title: "Rostad tomatpasta",
-                  slug: "rostad-tomatpasta",
-                  description: "En snabb pasta med sota tomater.",
-                  category: "Dinner",
-                  prepTimeMinutes: 35,
-                  servings: 3,
-                  imageUrl: "https://example.com/pasta.jpg",
-                  isPublished: true,
-                },
-              ],
-        isLoading: false,
-        isError: false,
-      }),
-    );
+    mockUseRecipesQuery.mockImplementation((filters: { search?: string; category?: string }) => ({
+      data:
+        filters.search === "zzz"
+          ? []
+          : [
+              {
+                id: "1",
+                title: "Rostad tomatpasta",
+                slug: "rostad-tomatpasta",
+                description: "En snabb pasta med sota tomater.",
+                category: "Dinner",
+                prepTimeMinutes: 35,
+                servings: 3,
+                imageUrl: "https://example.com/pasta.jpg",
+                isPublished: true,
+              },
+            ],
+      isLoading: false,
+      isError: false,
+    }));
 
-    renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
+    renderWithMemoryRouter(
+      <>
+        <RecipesPage />
+        <LocationDisplay />
+      </>,
+      ["/recipes"],
+    );
 
     await user.type(screen.getByLabelText(/sok recept/i), "zzz");
 
     expect(await screen.findByText("Inga recept matchade")).toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=zzz");
 
     await user.click(screen.getByRole("button", { name: /visa alla recept/i }));
 
     expect(screen.queryByText("Inga recept matchade")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/recipes");
   });
 });

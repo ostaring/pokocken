@@ -1,5 +1,5 @@
-import { useDeferredValue, useState } from "react";
-import { Link } from "react-router-dom";
+import { useDeferredValue } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
 import { useRecipesQuery } from "../features/recipes/recipe-hooks";
 import {
@@ -8,9 +8,15 @@ import {
 } from "../features/recipes/recipe-utils";
 import type { RecipeCategory } from "../types/recipe";
 
+function isRecipeCategory(value: string): value is RecipeCategory {
+  return ["Breakfast", "Lunch", "Dinner", "Dessert", "Snack"].includes(value);
+}
+
 export function RecipesPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [category, setCategory] = useState<RecipeCategory | "All">("All");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchTerm = searchParams.get("search") ?? "";
+  const categoryParam = searchParams.get("category");
+  const category = categoryParam && isRecipeCategory(categoryParam) ? categoryParam : "All";
   const deferredSearchTerm = useDeferredValue(searchTerm);
   const trimmedSearchTerm = searchTerm.trim();
   const hasActiveFilters = trimmedSearchTerm.length > 0 || category !== "All";
@@ -20,9 +26,24 @@ export function RecipesPage() {
   });
   const filteredRecipes = recipesQuery.data ?? [];
 
+  function updateFilters(nextValues: { search?: string; category?: RecipeCategory | "All" }) {
+    const nextSearch = nextValues.search ?? searchTerm;
+    const nextCategory = nextValues.category ?? category;
+    const nextParams = new URLSearchParams();
+
+    if (nextSearch.trim().length > 0) {
+      nextParams.set("search", nextSearch);
+    }
+
+    if (nextCategory !== "All") {
+      nextParams.set("category", nextCategory);
+    }
+
+    setSearchParams(nextParams);
+  }
+
   function resetFilters() {
-    setSearchTerm("");
-    setCategory("All");
+    setSearchParams({});
   }
 
   return (
@@ -60,7 +81,7 @@ export function RecipesPage() {
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none ring-0 transition focus:border-emerald-500"
                 type="search"
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={(event) => updateFilters({ search: event.target.value })}
                 placeholder="Sok pa titel eller beskrivning"
               />
             </label>
@@ -70,7 +91,11 @@ export function RecipesPage() {
               <select
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                 value={category}
-                onChange={(event) => setCategory(event.target.value as RecipeCategory | "All")}
+                onChange={(event) =>
+                  updateFilters({
+                    category: event.target.value as RecipeCategory | "All",
+                  })
+                }
               >
                 {recipeCategories.map((entry) => (
                   <option key={entry} value={entry}>
