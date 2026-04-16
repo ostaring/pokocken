@@ -1,0 +1,147 @@
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { RecipesPage } from "./RecipesPage";
+import { renderWithMemoryRouter } from "../test/render";
+
+const mockUseRecipesQuery = vi.fn();
+
+vi.mock("../features/recipes/recipe-hooks", async () => {
+  const actual = await vi.importActual<typeof import("../features/recipes/recipe-hooks")>(
+    "../features/recipes/recipe-hooks",
+  );
+
+  return {
+    ...actual,
+    useRecipesQuery: (filters: { search?: string; category?: string }) => mockUseRecipesQuery(filters),
+  };
+});
+
+describe("RecipesPage", () => {
+  beforeEach(() => {
+    mockUseRecipesQuery.mockReset();
+  });
+
+  it("shows loading state while public recipes are fetched", () => {
+    mockUseRecipesQuery.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
+
+    renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
+
+    expect(screen.getByText("Laddar recept...")).toBeInTheDocument();
+  });
+
+  it("shows public recipe cards and a link back to the start page", () => {
+    mockUseRecipesQuery.mockReturnValue({
+      data: [
+        {
+          id: "1",
+          title: "Rostad tomatpasta",
+          slug: "rostad-tomatpasta",
+          description: "En snabb pasta med sota tomater.",
+          category: "Dinner",
+          prepTimeMinutes: 35,
+          servings: 3,
+          imageUrl: "https://example.com/pasta.jpg",
+          isPublished: true,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
+
+    expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /tillbaka till startsidan/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("link", { name: /oppna recept/i })).toHaveAttribute(
+      "href",
+      "/recipes/rostad-tomatpasta",
+    );
+  });
+
+  it("shows active filters and allows the user to reset them", async () => {
+    const user = userEvent.setup();
+    mockUseRecipesQuery.mockImplementation(
+      (filters: { search?: string; category?: string }) => ({
+        data: filters.search || filters.category
+          ? []
+          : [
+              {
+                id: "1",
+                title: "Rostad tomatpasta",
+                slug: "rostad-tomatpasta",
+                description: "En snabb pasta med sota tomater.",
+                category: "Dinner",
+                prepTimeMinutes: 35,
+                servings: 3,
+                imageUrl: "https://example.com/pasta.jpg",
+                isPublished: true,
+              },
+            ],
+        isLoading: false,
+        isError: false,
+      }),
+    );
+
+    renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
+
+    expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
+
+    await user.type(screen.getByLabelText(/sok recept/i), "tomat");
+    await user.selectOptions(screen.getByLabelText(/kategori/i), "Dinner");
+
+    expect(await screen.findByText("Sokning: tomat")).toBeInTheDocument();
+    expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /rensa filter/i })).toBeEnabled();
+
+    await user.click(screen.getByRole("button", { name: /rensa filter/i }));
+
+    expect(screen.queryByText("Sokning: tomat")).not.toBeInTheDocument();
+    expect(screen.queryByText("Kategori: Middag")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
+  });
+
+  it("lets the user recover from an empty result by resetting the filters", async () => {
+    const user = userEvent.setup();
+    mockUseRecipesQuery.mockImplementation(
+      (filters: { search?: string; category?: string }) => ({
+        data:
+          filters.search === "zzz"
+            ? []
+            : [
+                {
+                  id: "1",
+                  title: "Rostad tomatpasta",
+                  slug: "rostad-tomatpasta",
+                  description: "En snabb pasta med sota tomater.",
+                  category: "Dinner",
+                  prepTimeMinutes: 35,
+                  servings: 3,
+                  imageUrl: "https://example.com/pasta.jpg",
+                  isPublished: true,
+                },
+              ],
+        isLoading: false,
+        isError: false,
+      }),
+    );
+
+    renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
+
+    await user.type(screen.getByLabelText(/sok recept/i), "zzz");
+
+    expect(await screen.findByText("Inga recept matchade")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /visa alla recept/i }));
+
+    expect(screen.queryByText("Inga recept matchade")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
+  });
+});
