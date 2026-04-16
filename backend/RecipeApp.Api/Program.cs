@@ -49,6 +49,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "ok",
+    persistenceMode = builder.Configuration["Persistence:Mode"] ?? "Memory"
+}));
 
 app.MapGet("/api/recipes", (
     string? search,
