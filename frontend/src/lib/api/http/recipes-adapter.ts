@@ -1,6 +1,7 @@
 import type { RecipeDetail } from "../../../types/recipe";
 import { buildApiUrl } from "../http-client";
 import type { SaveRecipeInput } from "../mock/recipes-adapter";
+import type { RecipeFilters } from "../recipes";
 
 type BackendRecipeWriteRequest = SaveRecipeInput & {
   slug: string;
@@ -21,8 +22,22 @@ function toBackendRecipeWriteRequest(input: SaveRecipeInput): BackendRecipeWrite
   };
 }
 
-export async function fetchRecipesHttp(): Promise<RecipeDetail[]> {
-  const response = await fetch(buildApiUrl("/api/recipes"));
+function buildRecipeCollectionUrl(path: string, filters: RecipeFilters = {}) {
+  const url = new URL(buildApiUrl(path));
+
+  if (filters.search?.trim()) {
+    url.searchParams.set("search", filters.search.trim());
+  }
+
+  if (filters.category) {
+    url.searchParams.set("category", filters.category);
+  }
+
+  return url.toString();
+}
+
+export async function fetchRecipesHttp(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
+  const response = await fetch(buildRecipeCollectionUrl("/api/recipes", filters));
 
   if (!response.ok) {
     throw new Error("Kunde inte hämta recepten.");
@@ -45,8 +60,8 @@ export async function fetchRecipeBySlugHttp(slug: string): Promise<RecipeDetail 
   return (await response.json()) as RecipeDetail;
 }
 
-export async function fetchAdminRecipesHttp(): Promise<RecipeDetail[]> {
-  const response = await fetch(buildApiUrl("/api/admin/recipes"), {
+export async function fetchAdminRecipesHttp(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
+  const response = await fetch(buildRecipeCollectionUrl("/api/admin/recipes", filters), {
     credentials: "include",
   });
 

@@ -4,6 +4,7 @@ import {
   deleteRecipeHttp,
   fetchAdminRecipeByIdHttp,
   fetchAdminRecipesHttp,
+  fetchRecipesHttp,
   toggleRecipePublishedHttp,
 } from "./recipes-adapter";
 
@@ -29,6 +30,21 @@ describe("http recipes adapter", () => {
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:5080/api/admin/recipes", {
       credentials: "include",
     });
+  });
+
+  it("includes search and category query params for public recipes", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await fetchRecipesHttp({ search: "pasta", category: "Dinner" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:5080/api/recipes?search=pasta&category=Dinner",
+    );
   });
 
   it("finds an admin recipe by id from the admin list endpoint", async () => {

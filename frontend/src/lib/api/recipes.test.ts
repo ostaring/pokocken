@@ -97,7 +97,7 @@ describe("recipes api adapter selection", () => {
       apiBaseUrl: "http://localhost:5080",
     });
 
-    await fetchRecipes();
+    await fetchRecipes({ search: "pasta", category: "Dinner" });
     await fetchAdminRecipes();
     await fetchRecipeBySlug("slug");
     await fetchAdminRecipeById("id");
@@ -106,7 +106,7 @@ describe("recipes api adapter selection", () => {
     await toggleRecipePublished("id");
     await deleteRecipe("id");
 
-    expect(mockFetchRecipesMock).toHaveBeenCalled();
+    expect(mockFetchRecipesMock).toHaveBeenCalledWith({ search: "pasta", category: "Dinner" });
     expect(mockFetchAdminRecipesMock).toHaveBeenCalled();
     expect(mockFetchRecipeBySlugMock).toHaveBeenCalledWith("slug");
     expect(mockFetchAdminRecipeByIdMock).toHaveBeenCalledWith("id");
@@ -123,7 +123,7 @@ describe("recipes api adapter selection", () => {
       apiBaseUrl: "http://localhost:5080",
     });
 
-    await fetchRecipes();
+    await fetchRecipes({ search: "pasta", category: "Dinner" });
     await fetchAdminRecipes();
     await fetchRecipeBySlug("slug");
     await fetchAdminRecipeById("id");
@@ -132,7 +132,7 @@ describe("recipes api adapter selection", () => {
     await toggleRecipePublished("id");
     await deleteRecipe("id");
 
-    expect(mockFetchRecipesHttp).toHaveBeenCalled();
+    expect(mockFetchRecipesHttp).toHaveBeenCalledWith({ search: "pasta", category: "Dinner" });
     expect(mockFetchAdminRecipesHttp).toHaveBeenCalled();
     expect(mockFetchRecipeBySlugHttp).toHaveBeenCalledWith("slug");
     expect(mockFetchAdminRecipeByIdHttp).toHaveBeenCalledWith("id");

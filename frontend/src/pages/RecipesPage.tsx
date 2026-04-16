@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
 import { useRecipesQuery } from "../features/recipes/recipe-hooks";
 import {
-  filterRecipes,
   getRecipeCategoryLabel,
   recipeCategories,
 } from "../features/recipes/recipe-utils";
@@ -12,13 +11,12 @@ import type { RecipeCategory } from "../types/recipe";
 export function RecipesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState<RecipeCategory | "All">("All");
-  const recipesQuery = useRecipesQuery();
-  const recipes = recipesQuery.data ?? [];
-
-  const filteredRecipes = useMemo(
-    () => filterRecipes(recipes, searchTerm, category),
-    [category, recipes, searchTerm],
-  );
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const recipesQuery = useRecipesQuery({
+    search: deferredSearchTerm,
+    category: category === "All" ? undefined : category,
+  });
+  const filteredRecipes = recipesQuery.data ?? [];
 
   return (
     <PageFrame
@@ -72,7 +70,7 @@ export function RecipesPage() {
             Visar <span className="font-semibold text-slate-900">{filteredRecipes.length}</span>{" "}
             recept
           </p>
-          <p className="text-sm text-slate-500">Mockdata just nu, API-redo struktur redan nu.</p>
+          <p className="text-sm text-slate-500">Sökning och filter skickas nu vidare i datalagret.</p>
         </div>
 
         {!recipesQuery.isLoading && !recipesQuery.isError && filteredRecipes.length > 0 ? (

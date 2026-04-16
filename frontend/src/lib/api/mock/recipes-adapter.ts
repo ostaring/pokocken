@@ -1,6 +1,7 @@
 import type { RecipeDetail } from "../../../types/recipe";
 import { mockRecipes } from "../../../features/recipes/mock-recipes";
 import { apiDelay } from "../client";
+import type { RecipeFilters } from "../recipes";
 
 const RECIPE_STORAGE_KEY = "recipe-app-recipes";
 
@@ -43,9 +44,26 @@ function createSlug(title: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export async function fetchRecipesMock(): Promise<RecipeDetail[]> {
+function filterDetailedRecipes(recipes: RecipeDetail[], filters: RecipeFilters) {
+  const normalizedSearch = filters.search?.trim().toLowerCase() ?? "";
+
+  return recipes.filter((recipe) => {
+    const matchesSearch =
+      normalizedSearch.length === 0 ||
+      recipe.title.toLowerCase().includes(normalizedSearch) ||
+      recipe.description.toLowerCase().includes(normalizedSearch);
+
+    const matchesCategory = !filters.category || recipe.category === filters.category;
+
+    return matchesSearch && matchesCategory;
+  });
+}
+
+export async function fetchRecipesMock(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
   await apiDelay();
-  return readStoredRecipes().filter((recipe) => recipe.isPublished);
+
+  const publishedRecipes = readStoredRecipes().filter((recipe) => recipe.isPublished);
+  return filterDetailedRecipes(publishedRecipes, filters);
 }
 
 export async function fetchAdminRecipesMock(): Promise<RecipeDetail[]> {

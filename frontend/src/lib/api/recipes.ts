@@ -1,4 +1,5 @@
 import type { RecipeDetail } from "../../types/recipe";
+import type { RecipeCategory } from "../../types/recipe";
 import { resolveAppConfig } from "../config";
 import {
   createRecipeHttp,
@@ -23,13 +24,17 @@ import {
 } from "./mock/recipes-adapter";
 
 export type { SaveRecipeInput } from "./mock/recipes-adapter";
+export type RecipeFilters = {
+  search?: string;
+  category?: RecipeCategory;
+};
 
 function useHttpApi() {
   return resolveAppConfig().apiMode === "http";
 }
 
-export async function fetchRecipes(): Promise<RecipeDetail[]> {
-  return useHttpApi() ? fetchRecipesHttp() : fetchRecipesMock();
+export async function fetchRecipes(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
+  return useHttpApi() ? fetchRecipesHttp(filters) : fetchRecipesMock(filters);
 }
 
 export async function fetchAdminRecipes(): Promise<RecipeDetail[]> {

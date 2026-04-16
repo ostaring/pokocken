@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { RecipeCategory } from "../../types/recipe";
 import {
   fetchAdminRecipeById,
   fetchAdminRecipes,
@@ -23,10 +24,17 @@ type SaveRecipeMutationInput = {
   isPublished: boolean;
 };
 
-export function useRecipesQuery() {
+export function useRecipesQuery(filters: { search?: string; category?: RecipeCategory } = {}) {
+  const normalizedSearch = filters.search?.trim() ?? "";
+  const normalizedCategory = filters.category ?? "";
+
   return useQuery({
-    queryKey: recipeQueryKeys.publicAll,
-    queryFn: fetchRecipes,
+    queryKey: recipeQueryKeys.publicList(normalizedSearch, normalizedCategory),
+    queryFn: () =>
+      fetchRecipes({
+        search: normalizedSearch || undefined,
+        category: filters.category,
+      }),
   });
 }
 
