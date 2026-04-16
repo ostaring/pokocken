@@ -32,6 +32,24 @@ describe("http recipes adapter", () => {
     });
   });
 
+  it("includes search and category query params for admin recipes", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await fetchAdminRecipesHttp({ search: "tårta", category: "Dessert" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:5080/api/admin/recipes?search=t%C3%A5rta&category=Dessert",
+      {
+        credentials: "include",
+      },
+    );
+  });
+
   it("includes search and category query params for public recipes", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify([]), {

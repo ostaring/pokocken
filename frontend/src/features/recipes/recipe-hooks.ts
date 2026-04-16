@@ -39,9 +39,22 @@ export function useRecipesQuery(filters: { search?: string; category?: RecipeCat
 }
 
 export function useAdminRecipesQuery() {
+  return useAdminRecipesQueryWithFilters();
+}
+
+export function useAdminRecipesQueryWithFilters(
+  filters: { search?: string; category?: RecipeCategory } = {},
+) {
+  const normalizedSearch = filters.search?.trim() ?? "";
+  const normalizedCategory = filters.category ?? "";
+
   return useQuery({
-    queryKey: recipeQueryKeys.adminAll,
-    queryFn: fetchAdminRecipes,
+    queryKey: recipeQueryKeys.adminList(normalizedSearch, normalizedCategory),
+    queryFn: () =>
+      fetchAdminRecipes({
+        search: normalizedSearch || undefined,
+        category: filters.category,
+      }),
   });
 }
 

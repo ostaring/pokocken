@@ -66,9 +66,9 @@ export async function fetchRecipesMock(filters: RecipeFilters = {}): Promise<Rec
   return filterDetailedRecipes(publishedRecipes, filters);
 }
 
-export async function fetchAdminRecipesMock(): Promise<RecipeDetail[]> {
+export async function fetchAdminRecipesMock(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
   await apiDelay();
-  return readStoredRecipes();
+  return filterDetailedRecipes(readStoredRecipes(), filters);
 }
 
 export async function fetchRecipeBySlugMock(slug: string): Promise<RecipeDetail | undefined> {

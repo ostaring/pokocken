@@ -33,7 +33,7 @@ vi.mock("../features/recipes/recipe-hooks", async () => {
 
   return {
     ...actual,
-    useAdminRecipesQuery: () => ({
+    useAdminRecipesQueryWithFilters: () => ({
       data: mockRecipes,
       isLoading: false,
       isError: false,
@@ -103,5 +103,20 @@ describe("AdminDashboardPage", () => {
     await user.click(deleteButtons[0]!);
 
     expect(mockDeleteMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("filters the visible list by selected status", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<AdminDashboardPage />);
+
+    expect(screen.getByText("Brown butter pancakes")).toBeInTheDocument();
+    expect(screen.getByText("Dark chocolate mousse")).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText(/status/i), "Utkast");
+
+    expect(screen.queryByText("Brown butter pancakes")).not.toBeInTheDocument();
+    expect(screen.queryByText("Roasted tomato pasta")).not.toBeInTheDocument();
+    expect(screen.queryByText("Dark chocolate mousse")).not.toBeInTheDocument();
   });
 });

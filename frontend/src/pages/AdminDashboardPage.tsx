@@ -1,21 +1,42 @@
-import { useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
 import {
-  useAdminRecipesQuery,
+  useAdminRecipesQueryWithFilters,
   useDeleteRecipeMutation,
   useToggleRecipePublishedMutation,
 } from "../features/recipes/recipe-hooks";
+import type { RecipeCategory } from "../types/recipe";
+
+type AdminStatusFilter = "Alla" | "Publicerade" | "Utkast";
 
 export function AdminDashboardPage() {
-  const recipesQuery = useAdminRecipesQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useState<RecipeCategory | "All">("All");
+  const [status, setStatus] = useState<AdminStatusFilter>("Alla");
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const recipesQuery = useAdminRecipesQueryWithFilters({
+    search: deferredSearchTerm,
+    category: category === "All" ? undefined : category,
+  });
   const togglePublishedMutation = useToggleRecipePublishedMutation();
   const deleteRecipeMutation = useDeleteRecipeMutation();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-  const mockRecipes = recipesQuery.data ?? [];
-  const publishedCount = mockRecipes.filter((recipe) => recipe.isPublished).length;
-  const draftCount = mockRecipes.length - publishedCount;
+  const recipes = recipesQuery.data ?? [];
+  const publishedCount = recipes.filter((recipe) => recipe.isPublished).length;
+  const draftCount = recipes.length - publishedCount;
+  const visibleRecipes = useMemo(() => {
+    if (status === "Publicerade") {
+      return recipes.filter((recipe) => recipe.isPublished);
+    }
+
+    if (status === "Utkast") {
+      return recipes.filter((recipe) => !recipe.isPublished);
+    }
+
+    return recipes;
+  }, [recipes, status]);
 
   async function handleTogglePublished(id: string, nextActionLabel: "Publicera" | "Avpublicera") {
     setFeedbackMessage(null);
@@ -88,7 +109,7 @@ export function AdminDashboardPage() {
           </div>
           <div className="rounded-[1.75rem] bg-slate-900 p-6 text-white">
             <p className="text-sm uppercase tracking-[0.28em] text-white/60">Totalt antal recept</p>
-            <p className="mt-3 text-4xl font-semibold">{mockRecipes.length}</p>
+            <p className="mt-3 text-4xl font-semibold">{recipes.length}</p>
           </div>
         </div>
 
@@ -100,8 +121,49 @@ export function AdminDashboardPage() {
                 Detta mappar naturligt mot admin-API:ets lista över recept.
               </p>
             </div>
+            <div className="grid gap-4 border-b border-slate-200 px-6 py-4 md:grid-cols-3">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-slate-700">Sök recept</span>
+                <input
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Sök på titel eller beskrivning"
+                />
+              </label>
+
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-slate-700">Kategori</span>
+                <select
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
+                  value={category}
+                  onChange={(event) => setCategory(event.target.value as RecipeCategory | "All")}
+                >
+                  <option value="All">Alla</option>
+                  <option value="Breakfast">Frukost</option>
+                  <option value="Lunch">Lunch</option>
+                  <option value="Dinner">Middag</option>
+                  <option value="Dessert">Dessert</option>
+                  <option value="Snack">Mellanmål</option>
+                </select>
+              </label>
+
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-slate-700">Status</span>
+                <select
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
+                  value={status}
+                  onChange={(event) => setStatus(event.target.value as AdminStatusFilter)}
+                >
+                  <option value="Alla">Alla</option>
+                  <option value="Publicerade">Publicerade</option>
+                  <option value="Utkast">Utkast</option>
+                </select>
+              </label>
+            </div>
             <div className="divide-y divide-slate-200">
-              {mockRecipes.map((recipe) => (
+              {visibleRecipes.map((recipe) => (
                 <div
                   key={recipe.id}
                   className="grid gap-4 px-6 py-5 md:grid-cols-[minmax(0,1.5fr)_140px_140px_180px]"
@@ -161,6 +223,11 @@ export function AdminDashboardPage() {
                   </div>
                 </div>
               ))}
+              {visibleRecipes.length === 0 ? (
+                <div className="px-6 py-8 text-sm text-slate-600">
+                  Inga recept matchar det aktuella filtret.
+                </div>
+              ) : null}
             </div>
           </div>
         ) : null}

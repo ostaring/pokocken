@@ -37,8 +37,8 @@ export async function fetchRecipes(filters: RecipeFilters = {}): Promise<RecipeD
   return useHttpApi() ? fetchRecipesHttp(filters) : fetchRecipesMock(filters);
 }
 
-export async function fetchAdminRecipes(): Promise<RecipeDetail[]> {
-  return useHttpApi() ? fetchAdminRecipesHttp() : fetchAdminRecipesMock();
+export async function fetchAdminRecipes(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
+  return useHttpApi() ? fetchAdminRecipesHttp(filters) : fetchAdminRecipesMock(filters);
 }
 
 export async function fetchRecipeBySlug(slug: string): Promise<RecipeDetail | undefined> {
