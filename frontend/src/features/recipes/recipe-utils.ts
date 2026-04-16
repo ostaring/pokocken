@@ -20,9 +20,9 @@ export function getRecipeCategoryLabel(category: RecipeCategory | "All") {
     case "Dinner":
       return "Middag";
     case "Dessert":
-      return "Dessert";
+      return "Efterratt";
     case "Snack":
-      return "Mellanmål";
+      return "Mellanmal";
   }
 }
 
@@ -30,6 +30,9 @@ export function createRecipeSlug(title: string) {
   return title
     .trim()
     .toLowerCase()
+    .replaceAll("å", "a")
+    .replaceAll("ä", "a")
+    .replaceAll("ö", "o")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }

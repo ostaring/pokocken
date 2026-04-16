@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mockRecipes } from "./mock-recipes";
-import { createRecipeSlug, filterRecipes } from "./recipe-utils";
+import { createRecipeSlug, filterRecipes, getRecipeCategoryLabel } from "./recipe-utils";
 
 describe("filterRecipes", () => {
   it("returns all recipes when no filters are applied", () => {
@@ -10,20 +10,35 @@ describe("filterRecipes", () => {
   });
 
   it("filters by search term", () => {
-    const result = filterRecipes(mockRecipes, "pasta", "All");
+    const result = filterRecipes(mockRecipes, "tomat", "All");
 
     expect(result).toHaveLength(1);
-    expect(result[0]?.slug).toBe("roasted-tomato-pasta");
+    expect(result[0]?.slug).toBe("rostad-tomatpasta");
   });
 
   it("filters by category", () => {
     const result = filterRecipes(mockRecipes, "", "Snack");
 
     expect(result).toHaveLength(1);
-    expect(result[0]?.slug).toBe("chili-lime-roasted-chickpeas");
+    expect(result[0]?.slug).toBe("chilistekta-kikartor");
+  });
+});
+
+describe("createRecipeSlug", () => {
+  it("creates a stable slug from a Swedish recipe title", () => {
+    expect(createRecipeSlug("  Frasch pastasallad med orter!  ")).toBe(
+      "frasch-pastasallad-med-orter",
+    );
   });
 
-  it("creates a stable slug from the recipe title", () => {
-    expect(createRecipeSlug("  Fresh Pasta Salad!  ")).toBe("fresh-pasta-salad");
+  it("normalizes Swedish characters before building the slug", () => {
+    expect(createRecipeSlug("Rakor med brod och aioli")).toBe("rakor-med-brod-och-aioli");
+  });
+});
+
+describe("getRecipeCategoryLabel", () => {
+  it("returns Swedish category labels for the UI", () => {
+    expect(getRecipeCategoryLabel("Dessert")).toBe("Efterratt");
+    expect(getRecipeCategoryLabel("Snack")).toBe("Mellanmal");
   });
 });
