@@ -15,7 +15,7 @@ public sealed class RecipeDbInitializer
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.EnsureCreatedAsync(cancellationToken);
+        await _dbContext.Database.MigrateAsync(cancellationToken);
 
         if (await _dbContext.Recipes.AnyAsync(cancellationToken))
         {

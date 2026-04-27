@@ -8,6 +8,7 @@ ASP.NET Core Web API for receptappen.
 - .NET 10 SDK
 - xUnit for tester
 - EF Core med SQLite i utvecklingslage
+- lokal `dotnet-ef` tool-manifest for migrationer
 - konfigurerbar repositorystrategi med minne, fil eller SQLite
 
 ## Projektstruktur
@@ -30,6 +31,7 @@ Backenden innehaller just nu:
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
 - SQLite-baserad receptpersistens i utvecklingslage
+- EF Core-migrationer for databasschema
 - health-endpoint for snabb lokal diagnostik
 - testprojekt for services, repositories och endpoints
 
@@ -84,6 +86,8 @@ Vid SQLite-lagring sparas databasen i:
 
 - `RecipeApp.Api/App_Data/recipes.db`
 
+Databasen skapas och uppgraderas nu via EF Core-migrationer nar API:t startar i `Sqlite`-lage.
+
 Filrepositoryn finns kvar som alternativ och anvander:
 
 - `RecipeApp.Api/App_Data/recipes.json`
@@ -97,6 +101,32 @@ dotnet test .\RecipeApp.sln
 ```
 
 Notera att endpointtesterna tvingas till minneslagring i testhosten for att sviten ska vara deterministisk aven om utvecklingslaget ar SQLite.
+
+### Migrationer Och Schemauppdateringar
+
+Forsta gangen pa en ny maskin:
+
+```powershell
+cd backend
+dotnet tool restore
+```
+
+Skapa en ny migration efter en modelandring:
+
+```powershell
+cd backend
+dotnet ef migrations add <MigrationName> --project .\RecipeApp.Api\RecipeApp.Api.csproj --startup-project .\RecipeApp.Api\RecipeApp.Api.csproj --output-dir Data\Migrations
+```
+
+Backenden applicerar migrationer automatiskt vid uppstart genom `RecipeDbInitializer`.
+
+Om du bara vill verifiera att migrationerna gar att applicera lokalt:
+
+```powershell
+cd backend
+dotnet test .\RecipeApp.sln
+dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
+```
 
 ## Adminatkomst
 
@@ -168,7 +198,6 @@ For att kora fullstack lokalt:
 
 ## Nastkommande Steg
 
-- lagga till migrationer och mer explicit databasschemahantering
 - kunna byta vidare till PostgreSQL nar deploysparet tar form
 - ersatta bootstrap-auth med riktig autentisering
 - hardna validering, felhantering och persistens innan extern publicering
