@@ -2,12 +2,12 @@ namespace RecipeApp.Api.Infrastructure;
 
 public sealed class AdminApiKeyEndpointFilter : IEndpointFilter
 {
-    private readonly IConfiguration _configuration;
+    private readonly AdminAuthOptions _options;
     private readonly AdminSessionStore _sessionStore;
 
-    public AdminApiKeyEndpointFilter(IConfiguration configuration, AdminSessionStore sessionStore)
+    public AdminApiKeyEndpointFilter(Microsoft.Extensions.Options.IOptions<AdminAuthOptions> options, AdminSessionStore sessionStore)
     {
-        _configuration = configuration;
+        _options = options.Value;
         _sessionStore = sessionStore;
     }
 
@@ -19,8 +19,12 @@ public sealed class AdminApiKeyEndpointFilter : IEndpointFilter
             return next(context);
         }
 
-        var configuredApiKey = _configuration["Admin:ApiKey"];
-        if (string.IsNullOrWhiteSpace(configuredApiKey))
+        if (!_options.AllowApiKeyFallback)
+        {
+            return ValueTask.FromResult<object?>(Results.Unauthorized());
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
         {
             return ValueTask.FromResult<object?>(Results.Problem(
                 title: "Admin authentication is not configured.",
@@ -28,7 +32,7 @@ public sealed class AdminApiKeyEndpointFilter : IEndpointFilter
         }
 
         if (!context.HttpContext.Request.Headers.TryGetValue(AdminAuthConstants.ApiKeyHeaderName, out var providedApiKey) ||
-            !string.Equals(providedApiKey.ToString(), configuredApiKey, StringComparison.Ordinal))
+            !string.Equals(providedApiKey.ToString(), _options.ApiKey, StringComparison.Ordinal))
         {
             return ValueTask.FromResult<object?>(Results.Unauthorized());
         }

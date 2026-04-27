@@ -1,7 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Infrastructure;
+using RecipeApp.Api.Tests.Infrastructure;
 using RecipeApp.Api.Tests.Testing;
 using Xunit;
 
@@ -28,6 +33,8 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains(response.Headers, header => header.Key == "Set-Cookie");
+        Assert.Contains(response.Headers.GetValues("Set-Cookie"), header => header.Contains("HttpOnly", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(response.Headers.GetValues("Set-Cookie"), header => header.Contains("SameSite=Strict", StringComparison.OrdinalIgnoreCase));
 
         var session = await response.Content.ReadFromJsonAsync<AdminSessionResponse>();
         Assert.NotNull(session);
@@ -73,5 +80,70 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
 
         var meResponse = await client.GetAsync("/api/auth/me");
         Assert.Equal(HttpStatusCode.Unauthorized, meResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Me_ReturnsUnauthorized_AfterSessionExpires()
+    {
+        var timeProvider = new MutableTimeProvider(new DateTimeOffset(2026, 4, 27, 10, 0, 0, TimeSpan.Zero));
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                services.AddSingleton<TimeProvider>(timeProvider);
+            });
+        }).CreateClient();
+
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        timeProvider.Advance(TimeSpan.FromDays(8));
+
+        var meResponse = await client.GetAsync("/api/auth/me");
+        Assert.Equal(HttpStatusCode.Unauthorized, meResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminEndpoints_AcceptApiKey_WhenFallbackIsEnabled()
+    {
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+            {
+                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Admin:AllowApiKeyFallback"] = "true"
+                });
+            });
+        }).CreateClient();
+
+        client.DefaultRequestHeaders.Add(AdminAuthConstants.ApiKeyHeaderName, "dev-admin-key");
+
+        var response = await client.GetAsync("/api/admin/recipes");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminEndpoints_RejectApiKey_WhenFallbackIsDisabled()
+    {
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment("Production");
+            builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+            {
+                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Persistence:Mode"] = "Memory",
+                    ["Admin:AllowApiKeyFallback"] = "false"
+                });
+            });
+        }).CreateClient();
+
+        client.DefaultRequestHeaders.Add(AdminAuthConstants.ApiKeyHeaderName, "dev-admin-key");
+
+        var response = await client.GetAsync("/api/admin/recipes");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

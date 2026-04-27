@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RecipeApp.Api.Contracts;
 using RecipeApp.Api.Data;
 using RecipeApp.Api.Infrastructure;
@@ -10,6 +11,8 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 var persistenceMode = builder.Configuration["Persistence:Mode"] ?? "Memory";
 var sqliteConnectionString = builder.Configuration.GetConnectionString("RecipesDb");
 
+builder.Services.Configure<AdminAuthOptions>(builder.Configuration.GetSection("Admin"));
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
@@ -103,11 +106,11 @@ app.MapGet("/api/auth/me", (HttpContext httpContext, AdminSessionStore sessionSt
 app.MapPost("/api/auth/login", (
     LoginAdminRequest request,
     HttpContext httpContext,
-    IConfiguration configuration,
+    IOptions<AdminAuthOptions> authOptions,
     AdminSessionStore sessionStore) =>
 {
-    var configuredUsername = configuration["Admin:Username"];
-    var configuredPassword = configuration["Admin:Password"];
+    var configuredUsername = authOptions.Value.Username;
+    var configuredPassword = authOptions.Value.Password;
 
     if (!string.Equals(request.Username, configuredUsername, StringComparison.Ordinal) ||
         !string.Equals(request.Password, configuredPassword, StringComparison.Ordinal))
@@ -122,10 +125,10 @@ app.MapPost("/api/auth/login", (
         new CookieOptions
         {
             HttpOnly = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = false,
+            SameSite = SameSiteMode.Strict,
+            Secure = httpContext.Request.IsHttps,
             IsEssential = true,
-            Expires = DateTimeOffset.UtcNow.AddDays(7)
+            Expires = session.ExpiresAtUtc
         });
 
     return Results.Ok(new AdminSessionResponse(session.Username));

@@ -29,6 +29,7 @@ Backenden innehaller just nu:
 - adminskyddade CRUD-endpoints for recept
 - cookie-baserad bootstrap-auth for admin
 - fältspecifik requestvalidering for admin create/update
+- tidsbegransade adminsessions och konfigurerbar API-key fallback
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
 - SQLite-baserad receptpersistens i utvecklingslage
@@ -134,7 +135,7 @@ dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
 Nuvarande adminauth ar bootstrapad pa tva satt:
 
 - foredraget for frontend: `POST /api/auth/login` med utvecklingsuppgifterna nedan
-- fallback for manuell eller teknisk API-testning: skicka header `X-Admin-Api-Key: dev-admin-key`
+- valfri fallback for manuell eller teknisk API-testning: skicka header `X-Admin-Api-Key: dev-admin-key`
 
 Utvecklingsuppgifter:
 
@@ -147,7 +148,14 @@ Auth-endpoints:
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 
-Detta ar fortfarande en tillfallig losning fore riktig produktionsauth.
+Adminsessions ar tidsbegransade och sessionens langd styrs via `Admin:SessionDurationHours`.
+
+API-key fallback ar nu konfigurerbar via `Admin:AllowApiKeyFallback`:
+
+- `false` i grundkonfigurationen
+- `true` i lokal utvecklingskonfiguration
+
+Detta ar fortfarande en tillfallig losning fore riktig produktionsauth, men betydligt mer kontrollerad an en alltid-aktiv fallback.
 
 ## API-Oversikt
 
