@@ -1,0 +1,88 @@
+@startuml Backend class overview
+
+skinparam classAttributeIconSize 0
+
+package "Contracts" {
+  class CreateRecipeRequest
+  class UpdateRecipeRequest
+  class RecipeResponse
+  class LoginAdminRequest
+  class AdminSessionResponse
+}
+
+package "Domain" {
+  class Recipe
+}
+
+package "Services" {
+  class RecipeService {
+    +GetPublishedRecipes(search, category)
+    +GetPublishedRecipeBySlug(slug)
+    +GetAllRecipes(search, category)
+    +GetRecipeBySlug(slug)
+    +CreateRecipe(request)
+    +UpdateRecipe(currentSlug, request)
+    +DeleteRecipe(slug)
+  }
+}
+
+package "Infrastructure" {
+  class AdminApiKeyEndpointFilter
+  class AdminSessionStore
+}
+
+package "Repositories" {
+  interface IRecipeRepository {
+    +GetAll()
+    +GetBySlug(slug)
+    +Add(recipe)
+    +Replace(currentSlug, recipe)
+    +Delete(slug)
+  }
+
+  class InMemoryRecipeRepository
+  class FileRecipeRepository
+  class SqliteRecipeRepository
+  class RecipeSeedData
+}
+
+package "Data" {
+  class RecipeDbContext
+  class RecipeDbInitializer
+  class RecipeEntity
+}
+
+RecipeService --> IRecipeRepository
+RecipeService ..> CreateRecipeRequest
+RecipeService ..> UpdateRecipeRequest
+RecipeService ..> RecipeResponse
+RecipeService ..> Recipe
+
+AdminApiKeyEndpointFilter --> AdminSessionStore
+
+IRecipeRepository <|.. InMemoryRecipeRepository
+IRecipeRepository <|.. FileRecipeRepository
+IRecipeRepository <|.. SqliteRecipeRepository
+
+InMemoryRecipeRepository ..> RecipeSeedData
+FileRecipeRepository ..> RecipeSeedData
+SqliteRecipeRepository --> RecipeDbContext
+RecipeDbInitializer --> RecipeDbContext
+RecipeDbInitializer ..> RecipeSeedData
+RecipeDbContext --> RecipeEntity
+
+note right of RecipeService
+Innehaller:
+- filtrering
+- payload-normalisering
+- slug-krockskontroll
+- mapping till RecipeResponse
+end note
+
+note right of AdminApiKeyEndpointFilter
+Tillater adminanrop via:
+- session cookie
+- fallback API key header
+end note
+
+@enduml

@@ -1,0 +1,44 @@
+@startuml Backend persistence modes
+
+left to right direction
+
+rectangle "Program.cs" as Program
+rectangle "RecipeService" as Service
+interface "IRecipeRepository" as Repo
+
+database "Memory mode" as MemoryMode
+database "File mode\nApp_Data/recipes.json" as FileMode
+database "Sqlite mode\nApp_Data/recipes.db" as SqliteMode
+
+rectangle "RecipeDbContext" as DbContext
+rectangle "RecipeDbInitializer" as DbInitializer
+
+Program --> Service
+Service --> Repo
+
+Repo <|.. MemoryMode
+Repo <|.. FileMode
+Repo <|.. SqliteMode
+
+SqliteMode --> DbContext
+Program --> DbInitializer
+DbInitializer --> DbContext
+
+note bottom of Program
+Val via appsettings:
+- Memory
+- File
+- Sqlite
+end note
+
+note right of SqliteMode
+Aktivt standardlage i
+appsettings.Development.json
+end note
+
+note left of MemoryMode
+Anvands som stabil baseline
+och i endpointtester
+end note
+
+@enduml

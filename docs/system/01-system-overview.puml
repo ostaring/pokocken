@@ -1,0 +1,63 @@
+@startuml
+title Recipe App - system overview
+
+actor "Besokare" as Visitor
+actor "Admin" as Admin
+
+rectangle "Frontend (React + Vite)" {
+  component "HomePage" as HomePage
+  component "RecipesPage" as RecipesPage
+  component "RecipeDetailsPage" as RecipeDetailsPage
+  component "AdminLoginPage" as AdminLoginPage
+  component "AdminDashboardPage" as AdminDashboardPage
+  component "AdminRecipeEditorPage" as AdminRecipeEditorPage
+  component "React Query hooks" as Hooks
+  component "API facade\nlib/api/*.ts" as ApiFacade
+}
+
+rectangle "Backend (ASP.NET Core minimal API)" {
+  component "Program.cs endpoints" as Endpoints
+  component "AdminApiKeyEndpointFilter" as Filter
+  component "AdminSessionStore" as SessionStore
+  component "RecipeService" as RecipeService
+  interface "IRecipeRepository" as Repo
+}
+
+database "Memory repository" as MemoryRepo
+database "File repository\nrecipes.json" as FileRepo
+database "SQLite repository\nrecipes.db" as SqliteRepo
+
+Visitor --> HomePage
+Visitor --> RecipesPage
+Visitor --> RecipeDetailsPage
+Admin --> AdminLoginPage
+Admin --> AdminDashboardPage
+Admin --> AdminRecipeEditorPage
+
+HomePage --> Hooks
+RecipesPage --> Hooks
+RecipeDetailsPage --> Hooks
+AdminLoginPage --> Hooks
+AdminDashboardPage --> Hooks
+AdminRecipeEditorPage --> Hooks
+
+Hooks --> ApiFacade
+ApiFacade --> Endpoints
+
+Endpoints --> Filter
+Filter --> SessionStore
+Endpoints --> RecipeService
+RecipeService --> Repo
+
+Repo <|.. MemoryRepo
+Repo <|.. FileRepo
+Repo <|.. SqliteRepo
+
+note right of Repo
+Valjs via konfiguration:
+- Memory
+- File
+- Sqlite
+end note
+
+@enduml

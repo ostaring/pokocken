@@ -1,0 +1,35 @@
+@startuml
+title Admin login - exact function calls
+
+actor Admin
+participant "AdminLoginPage" as LoginPage
+participant "react-hook-form\nhandleSubmit()" as HandleSubmit
+participant "onSubmit()" as OnSubmit
+participant "useLoginMutation()" as UseLoginMutation
+participant "loginAdmin()" as LoginAdminFacade
+participant "loginAdminHttp()" as LoginAdminHttp
+participant "buildApiUrl()" as BuildApiUrl
+participant "Program.cs\nMapPost(/api/auth/login)" as LoginEndpoint
+participant "AdminSessionStore.CreateSession()" as CreateSession
+participant "useNavigate()" as Navigate
+
+Admin -> LoginPage : Submit username/password
+LoginPage -> HandleSubmit : handleSubmit(onSubmit)
+HandleSubmit -> OnSubmit : onSubmit(values)
+OnSubmit -> UseLoginMutation : loginMutation.mutateAsync(values)
+UseLoginMutation -> LoginAdminFacade : loginAdmin(username, password)
+LoginAdminFacade -> LoginAdminHttp : loginAdminHttp(username, password)
+LoginAdminHttp -> BuildApiUrl : buildApiUrl("/api/auth/login")
+BuildApiUrl --> LoginAdminHttp : absolute URL
+LoginAdminHttp -> LoginEndpoint : POST /api/auth/login
+LoginEndpoint -> CreateSession : CreateSession(username)
+CreateSession --> LoginEndpoint : session id
+LoginEndpoint --> LoginAdminHttp : 200 OK + Set-Cookie + AdminSessionResponse
+LoginAdminHttp --> LoginAdminFacade : AdminSession
+LoginAdminFacade --> UseLoginMutation : session
+UseLoginMutation -> UseLoginMutation : queryClient.setQueryData(authQueryKeys.session, session)
+UseLoginMutation --> OnSubmit : resolve mutateAsync
+OnSubmit -> Navigate : navigate(redirect)
+Navigate --> Admin : browser navigates to /admin or redirect route
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+title Public recipe list - exact function calls
+
+actor User
+participant "RecipesPage" as RecipesPage
+participant "updateFilters()" as UpdateFilters
+participant "useRecipesQuery()" as UseRecipesQuery
+participant "fetchRecipes()" as FetchRecipes
+participant "fetchRecipesHttp()" as FetchRecipesHttp
+participant "buildRecipeCollectionUrl()" as BuildCollectionUrl
+participant "buildApiUrl()" as BuildApiUrl
+participant "Program.cs\nMapGet(/api/recipes)" as RecipesEndpoint
+participant "RecipeService.GetPublishedRecipes()" as GetPublishedRecipes
+participant "SqliteRecipeRepository.GetAll()" as RepoGetAll
+
+== Initial page load ==
+User -> RecipesPage : Open /recipes?search&category
+RecipesPage -> UseRecipesQuery : useRecipesQuery({ search, category })
+UseRecipesQuery -> FetchRecipes : fetchRecipes(filters)
+FetchRecipes -> FetchRecipesHttp : fetchRecipesHttp(filters)
+FetchRecipesHttp -> BuildCollectionUrl : buildRecipeCollectionUrl("/api/recipes", filters)
+BuildCollectionUrl -> BuildApiUrl : buildApiUrl("/api/recipes")
+BuildApiUrl --> BuildCollectionUrl : absolute URL
+BuildCollectionUrl --> FetchRecipesHttp : URL with search params
+FetchRecipesHttp -> RecipesEndpoint : GET /api/recipes?search&category
+RecipesEndpoint -> GetPublishedRecipes : GetPublishedRecipes(search, category)
+GetPublishedRecipes -> RepoGetAll : GetAll()
+RepoGetAll --> GetPublishedRecipes : Recipe[]
+GetPublishedRecipes --> RecipesEndpoint : List<RecipeResponse>
+RecipesEndpoint --> FetchRecipesHttp : 200 OK + JSON
+FetchRecipesHttp --> FetchRecipes : RecipeDetail[]
+FetchRecipes --> UseRecipesQuery : query data
+UseRecipesQuery --> RecipesPage : recipesQuery.data
+RecipesPage --> User : Render filtered recipe cards
+
+== User changes filters ==
+User -> RecipesPage : Type search or select category
+RecipesPage -> UpdateFilters : updateFilters({ search/category })
+UpdateFilters -> RecipesPage : setSearchParams(nextParams)
+RecipesPage -> UseRecipesQuery : useRecipesQuery({ search, category })
+
+@enduml

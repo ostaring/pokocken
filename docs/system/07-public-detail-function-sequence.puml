@@ -1,0 +1,57 @@
+@startuml
+title Public recipe detail - exact function calls
+
+actor User
+participant "RecipeDetailsPage" as DetailsPage
+participant "useRecipeBySlugQuery()" as UseBySlug
+participant "fetchRecipeBySlug()" as FetchBySlug
+participant "fetchRecipeBySlugHttp()" as FetchBySlugHttp
+participant "buildApiUrl()" as BuildApiUrl
+participant "Program.cs\nMapGet(/api/recipes/{slug})" as DetailEndpoint
+participant "RecipeService.GetPublishedRecipeBySlug()" as GetPublishedBySlug
+participant "SqliteRecipeRepository.GetBySlug()" as RepoGetBySlug
+
+participant "useRecipesQuery()" as UseRelatedRecipes
+participant "fetchRecipes()" as FetchRecipes
+participant "fetchRecipesHttp()" as FetchRecipesHttp
+participant "Program.cs\nMapGet(/api/recipes)" as ListEndpoint
+participant "RecipeService.GetPublishedRecipes()" as GetPublishedRecipes
+participant "SqliteRecipeRepository.GetAll()" as RepoGetAll
+
+== Load detail ==
+User -> DetailsPage : Open /recipes/{slug}
+DetailsPage -> UseBySlug : useRecipeBySlugQuery(slug)
+UseBySlug -> FetchBySlug : fetchRecipeBySlug(slug)
+FetchBySlug -> FetchBySlugHttp : fetchRecipeBySlugHttp(slug)
+FetchBySlugHttp -> BuildApiUrl : buildApiUrl(`/api/recipes/${slug}`)
+BuildApiUrl --> FetchBySlugHttp : absolute URL
+FetchBySlugHttp -> DetailEndpoint : GET /api/recipes/{slug}
+DetailEndpoint -> GetPublishedBySlug : GetPublishedRecipeBySlug(slug)
+GetPublishedBySlug -> RepoGetBySlug : GetBySlug(slug)
+RepoGetBySlug --> GetPublishedBySlug : Recipe?
+GetPublishedBySlug --> DetailEndpoint : RecipeResponse or null
+DetailEndpoint --> FetchBySlugHttp : 200 OK or 404
+FetchBySlugHttp --> FetchBySlug : RecipeDetail | undefined
+FetchBySlug --> UseBySlug : query data
+UseBySlug --> DetailsPage : recipeQuery.data
+
+== Load related recipes ==
+DetailsPage -> UseRelatedRecipes : useRecipesQuery({ category: recipe?.category })
+UseRelatedRecipes -> FetchRecipes : fetchRecipes({ category })
+FetchRecipes -> FetchRecipesHttp : fetchRecipesHttp({ category })
+FetchRecipesHttp -> ListEndpoint : GET /api/recipes?category=...
+ListEndpoint -> GetPublishedRecipes : GetPublishedRecipes(search, category)
+GetPublishedRecipes -> RepoGetAll : GetAll()
+RepoGetAll --> GetPublishedRecipes : Recipe[]
+GetPublishedRecipes --> ListEndpoint : List<RecipeResponse>
+ListEndpoint --> FetchRecipesHttp : 200 OK + JSON
+FetchRecipesHttp --> FetchRecipes : RecipeDetail[]
+FetchRecipes --> UseRelatedRecipes : query data
+UseRelatedRecipes --> DetailsPage : relatedRecipesQuery.data
+
+== Render ==
+DetailsPage -> DetailsPage : filter(entry => entry.id !== recipe.id)
+DetailsPage -> DetailsPage : slice(0, 3)
+DetailsPage --> User : Render detail + related recipes
+
+@enduml

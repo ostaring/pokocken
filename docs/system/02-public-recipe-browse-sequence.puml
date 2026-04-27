@@ -1,0 +1,44 @@
+@startuml Public recipe browse and detail flow
+
+actor "Besokare" as Visitor
+participant "RecipesPage /\nRecipeDetailsPage" as Page
+participant "useRecipesQuery /\nuseRecipeBySlugQuery" as Hook
+participant "lib/api/recipes.ts" as ApiFacade
+participant "HTTP adapter or\nmock adapter" as Adapter
+participant "API endpoint" as Endpoint
+participant "RecipeService" as Service
+participant "IRecipeRepository" as Repo
+
+== Recipe list ==
+Visitor -> Page : Open /recipes
+Page -> Hook : useRecipesQuery({ search, category })
+Hook -> ApiFacade : fetchRecipes(filters)
+ApiFacade -> Adapter : fetchRecipesHttp or fetchRecipesMock
+Adapter -> Endpoint : GET /api/recipes?search&category
+Endpoint -> Service : GetPublishedRecipes(search, category)
+Service -> Repo : GetAll()
+Repo --> Service : Recipe[]
+Service --> Endpoint : RecipeResponse[]
+Endpoint --> Adapter : 200 OK + list
+Adapter --> ApiFacade
+ApiFacade --> Hook
+Hook --> Page : query result
+Page --> Visitor : Render filtered recipe cards
+
+== Recipe detail ==
+Visitor -> Page : Open /recipes/{slug}
+Page -> Hook : useRecipeBySlugQuery(slug)
+Hook -> ApiFacade : fetchRecipeBySlug(slug)
+ApiFacade -> Adapter : fetchRecipeBySlugHttp or mock
+Adapter -> Endpoint : GET /api/recipes/{slug}
+Endpoint -> Service : GetPublishedRecipeBySlug(slug)
+Service -> Repo : GetBySlug(slug)
+Repo --> Service : Recipe?
+Service --> Endpoint : RecipeResponse or null
+Endpoint --> Adapter : 200 OK or 404
+Adapter --> ApiFacade
+ApiFacade --> Hook
+Hook --> Page : query result
+Page --> Visitor : Render recipe details
+
+@enduml

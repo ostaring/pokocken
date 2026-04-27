@@ -1,0 +1,93 @@
+@startuml
+title Admin save recipe - exact function calls
+
+actor Admin
+participant "AdminRecipeEditorPage" as EditorPage
+participant "react-hook-form\nhandleSubmit()" as HandleSubmit
+participant "onSubmit()" as OnSubmit
+participant "useCreateRecipeMutation() /\nuseUpdateRecipeMutation()" as SaveMutation
+participant "createRecipe() /\nupdateRecipe()" as RecipeApiFacade
+participant "createRecipeHttp() /\nupdateRecipeHttp()" as RecipeHttpAdapter
+participant "fetchAdminRecipeByIdHttp()" as FetchAdminByIdHttp
+participant "fetchAdminRecipesHttp()" as FetchAdminRecipesHttp
+participant "sendRecipeWriteRequest()" as SendWriteRequest
+participant "buildApiUrl()" as BuildApiUrl
+participant "Program.cs\nMapPost/MapPut admin recipe endpoints" as AdminEndpoint
+participant "AdminApiKeyEndpointFilter.InvokeAsync()" as Filter
+participant "AdminSessionStore.GetSession()" as GetSession
+participant "RecipeService.CreateRecipe() /\nRecipeService.UpdateRecipe()" as RecipeService
+participant "SqliteRecipeRepository.GetBySlug()" as RepoGetBySlug
+participant "SqliteRecipeRepository.Add() /\nReplace()" as RepoWrite
+participant "queryClient.invalidateQueries()" as InvalidateQueries
+participant "useNavigate()" as Navigate
+
+Admin -> EditorPage : Click Save
+EditorPage -> HandleSubmit : handleSubmit(onSubmit)
+HandleSubmit -> OnSubmit : onSubmit(values)
+OnSubmit -> OnSubmit : normalize payload from form values
+
+alt Create mode
+  OnSubmit -> SaveMutation : createRecipeMutation.mutateAsync(payload)
+  SaveMutation -> RecipeApiFacade : createRecipe(input)
+  RecipeApiFacade -> RecipeHttpAdapter : createRecipeHttp(input)
+  RecipeHttpAdapter -> SendWriteRequest : sendRecipeWriteRequest("/api/admin/recipes", "POST", input)
+else Edit mode
+  OnSubmit -> SaveMutation : updateRecipeMutation.mutateAsync({ id, input })
+  SaveMutation -> RecipeApiFacade : updateRecipe(id, input)
+  RecipeApiFacade -> RecipeHttpAdapter : updateRecipeHttp(id, input)
+  RecipeHttpAdapter -> FetchAdminByIdHttp : fetchAdminRecipeByIdHttp(id)
+  FetchAdminByIdHttp -> FetchAdminRecipesHttp : fetchAdminRecipesHttp()
+  FetchAdminRecipesHttp -> BuildApiUrl : buildApiUrl("/api/admin/recipes")
+  BuildApiUrl --> FetchAdminRecipesHttp : absolute URL
+  FetchAdminRecipesHttp -> AdminEndpoint : GET /api/admin/recipes
+  AdminEndpoint -> Filter : InvokeAsync(context, next)
+  Filter -> GetSession : GetSession(cookie)
+  GetSession --> Filter : session exists
+  Filter --> AdminEndpoint : continue
+  AdminEndpoint --> FetchAdminRecipesHttp : 200 OK + admin recipes
+  FetchAdminRecipesHttp --> FetchAdminByIdHttp : RecipeDetail[]
+  FetchAdminByIdHttp --> RecipeHttpAdapter : matching recipe by id
+  RecipeHttpAdapter -> SendWriteRequest : sendRecipeWriteRequest(`/api/admin/recipes/${recipe.slug}`, "PUT", input)
+end
+
+SendWriteRequest -> BuildApiUrl : buildApiUrl(path)
+BuildApiUrl --> SendWriteRequest : absolute URL
+SendWriteRequest -> AdminEndpoint : POST/PUT admin recipe request
+AdminEndpoint -> Filter : InvokeAsync(context, next)
+Filter -> GetSession : GetSession(cookie)
+GetSession --> Filter : session exists
+Filter --> AdminEndpoint : continue
+
+alt CreateRecipe
+  AdminEndpoint -> RecipeService : CreateRecipe(request)
+  RecipeService -> RepoGetBySlug : GetBySlug(payload.Slug)
+  RepoGetBySlug --> RecipeService : null
+  RecipeService -> RepoWrite : Add(recipe)
+  RepoWrite --> RecipeService : stored recipe
+else UpdateRecipe
+  AdminEndpoint -> RecipeService : UpdateRecipe(currentSlug, request)
+  RecipeService -> RepoGetBySlug : GetBySlug(currentSlug)
+  RepoGetBySlug --> RecipeService : existing recipe
+  RecipeService -> RepoGetBySlug : GetBySlug(payload.Slug)
+  RepoGetBySlug --> RecipeService : same recipe or null
+  RecipeService -> RepoWrite : Replace(currentSlug, updatedRecipe)
+  RepoWrite --> RecipeService : stored recipe
+end
+
+RecipeService --> AdminEndpoint : RecipeResponse
+AdminEndpoint --> SendWriteRequest : 201/200 OK + RecipeResponse
+SendWriteRequest --> RecipeHttpAdapter : RecipeDetail
+RecipeHttpAdapter --> RecipeApiFacade : RecipeDetail
+RecipeApiFacade --> SaveMutation : mutation result
+SaveMutation -> InvalidateQueries : invalidateQueries(publicAll/adminAll)
+SaveMutation --> OnSubmit : createdRecipe or updatedRecipe
+
+alt Create mode
+  OnSubmit -> Navigate : navigate(`/admin/recipes/${createdRecipe.id}/edit`, state)
+else Edit mode
+  OnSubmit -> Navigate : navigate("/admin", state)
+end
+
+Navigate --> Admin : updated route and feedback state
+
+@enduml

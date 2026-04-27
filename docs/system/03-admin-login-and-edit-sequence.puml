@@ -1,0 +1,48 @@
+@startuml Admin login and recipe edit flow
+
+actor "Admin" as Admin
+participant "AdminLoginPage" as LoginPage
+participant "useLoginMutation" as LoginHook
+participant "lib/api/auth.ts" as AuthApi
+participant "Auth endpoints" as AuthEndpoint
+participant "AdminSessionStore" as SessionStore
+
+participant "AdminRecipeEditorPage" as EditorPage
+participant "useCreateRecipeMutation /\nuseUpdateRecipeMutation" as RecipeHook
+participant "lib/api/recipes.ts" as RecipeApi
+participant "Admin recipe endpoints" as AdminEndpoint
+participant "AdminApiKeyEndpointFilter" as Filter
+participant "RecipeService" as Service
+participant "IRecipeRepository" as Repo
+
+== Login ==
+Admin -> LoginPage : Submit username/password
+LoginPage -> LoginHook : mutate({ username, password })
+LoginHook -> AuthApi : loginAdmin(username, password)
+AuthApi -> AuthEndpoint : POST /api/auth/login
+AuthEndpoint -> SessionStore : CreateSession(username)
+SessionStore --> AuthEndpoint : session id
+AuthEndpoint --> AuthApi : 200 OK + cookie
+AuthApi --> LoginHook : AdminSession
+LoginHook --> LoginPage : success
+LoginPage --> Admin : Redirect to admin route
+
+== Create or update recipe ==
+Admin -> EditorPage : Save recipe
+EditorPage -> RecipeHook : mutateAsync(payload)
+RecipeHook -> RecipeApi : createRecipe or updateRecipe
+RecipeApi -> AdminEndpoint : POST/PUT /api/admin/recipes...
+AdminEndpoint -> Filter : authorize request
+Filter -> SessionStore : validate cookie session
+SessionStore --> Filter : session exists
+Filter --> AdminEndpoint : continue
+AdminEndpoint -> Service : CreateRecipe or UpdateRecipe
+Service -> Repo : GetBySlug / Add / Replace
+Repo --> Service : stored recipe
+Service --> AdminEndpoint : RecipeResponse
+AdminEndpoint --> RecipeApi : 201/200 or error
+RecipeApi --> RecipeHook
+RecipeHook --> EditorPage : success + invalidate caches
+EditorPage --> Admin : Navigate to dashboard or edit route
+
+@enduml
