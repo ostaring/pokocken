@@ -30,6 +30,7 @@ Backenden innehaller just nu:
 - cookie-baserad bootstrap-auth for admin
 - fältspecifik requestvalidering for admin create/update
 - tidsbegransade adminsessions och konfigurerbar API-key fallback
+- hash-baserad verifiering av adminlosenord
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
 - SQLite-baserad receptpersistens i utvecklingslage
@@ -141,6 +142,13 @@ Utvecklingsuppgifter:
 
 - username: `admin`
 - password: `admin123`
+
+Adminlosenordet verifieras nu i forsta hand mot `Admin:PasswordHash`.
+Det gamla faltet `Admin:Password` finns kvar som tillfallig fallback under overgangen, men grundkonfigurationen anvander hashad lagring.
+
+Nuvarande hashformat:
+
+- `pbkdf2-sha256$<iterations>$<base64-salt>$<base64-hash>`
 
 Auth-endpoints:
 

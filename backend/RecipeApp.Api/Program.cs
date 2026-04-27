@@ -13,6 +13,7 @@ var sqliteConnectionString = builder.Configuration.GetConnectionString("RecipesD
 
 builder.Services.Configure<AdminAuthOptions>(builder.Configuration.GetSection("Admin"));
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<AdminPasswordHasher>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
@@ -107,13 +108,16 @@ app.MapPost("/api/auth/login", (
     LoginAdminRequest request,
     HttpContext httpContext,
     IOptions<AdminAuthOptions> authOptions,
+    AdminPasswordHasher passwordHasher,
     AdminSessionStore sessionStore) =>
 {
     var configuredUsername = authOptions.Value.Username;
-    var configuredPassword = authOptions.Value.Password;
 
     if (!string.Equals(request.Username, configuredUsername, StringComparison.Ordinal) ||
-        !string.Equals(request.Password, configuredPassword, StringComparison.Ordinal))
+        !passwordHasher.Verify(
+            request.Password,
+            authOptions.Value.PasswordHash,
+            authOptions.Value.Password))
     {
         return Results.Unauthorized();
     }

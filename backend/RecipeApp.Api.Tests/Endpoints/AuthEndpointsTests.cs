@@ -146,4 +146,44 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Login_AcceptsLegacyPasswordFallback_WhenHashIsMissing()
+    {
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+            {
+                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Admin:PasswordHash"] = "",
+                    ["Admin:Password"] = "admin123"
+                });
+            });
+        }).CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_RejectsPassword_WhenConfiguredHashDoesNotMatch()
+    {
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+            {
+                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Admin:PasswordHash"] = "pbkdf2-sha256$10000$MDEyMzQ1Njc4OWFiY2RlZg==$99Xj15CkY6Pj7vY0z9h6m1rVlV5uXQzQeQ8Q0v9b4wQ=",
+                    ["Admin:Password"] = ""
+                });
+            });
+        }).CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 }
