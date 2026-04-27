@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
@@ -13,6 +13,7 @@ import {
   recipeFormSchema,
   type RecipeFormValues,
 } from "../features/recipes/recipe-form-schema";
+import { RecipeValidationError } from "../lib/api/http/recipes-adapter";
 
 type AdminRecipeEditorPageProps = {
   mode: "create" | "edit";
@@ -28,12 +29,15 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const recipe = recipeQuery.data;
   const createRecipeMutation = useCreateRecipeMutation();
   const updateRecipeMutation = useUpdateRecipeMutation();
+  const [submissionErrorMessage, setSubmissionErrorMessage] = useState<string | null>(null);
 
   const {
     control,
     register,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     watch,
     formState: { errors, isSubmitting, isValid },
   } = useForm<RecipeFormValues>({
@@ -94,6 +98,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const slugPreview = createRecipeSlug(watchedTitle ?? "");
 
   async function onSubmit(values: RecipeFormValues) {
+    clearErrors(["title", "description", "category", "imageUrl", "prepTimeMinutes", "servings", "ingredients", "steps"]);
+    setSubmissionErrorMessage(null);
+
     const payload = {
       title: values.title.trim(),
       description: values.description.trim(),
@@ -106,24 +113,35 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
       isPublished: values.isPublished,
     };
 
-    if (mode === "create") {
-      const createdRecipe = await createRecipeMutation.mutateAsync(payload);
-      navigate(`/admin/recipes/${createdRecipe.id}/edit`, {
+    try {
+      if (mode === "create") {
+        const createdRecipe = await createRecipeMutation.mutateAsync(payload);
+        navigate(`/admin/recipes/${createdRecipe.id}/edit`, {
+          replace: true,
+          state: { feedbackMessage: "Receptet skapades." },
+        });
+        return;
+      }
+
+      if (!id) {
+        return;
+      }
+
+      await updateRecipeMutation.mutateAsync({ id, input: payload });
+      navigate("/admin", {
         replace: true,
-        state: { feedbackMessage: "Receptet skapades." },
+        state: { feedbackMessage: "Receptet uppdaterades." },
       });
-      return;
-    }
+    } catch (error) {
+      if (error instanceof RecipeValidationError) {
+        applyValidationErrors(error, setError);
+        return;
+      }
 
-    if (!id) {
-      return;
+      setSubmissionErrorMessage(
+        error instanceof Error ? error.message : "Kunde inte spara receptet.",
+      );
     }
-
-    await updateRecipeMutation.mutateAsync({ id, input: payload });
-    navigate("/admin", {
-      replace: true,
-      state: { feedbackMessage: "Receptet uppdaterades." },
-    });
   }
 
   if (mode === "edit" && recipeQuery.isLoading) {
@@ -163,6 +181,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   }
 
   const mutationError = createRecipeMutation.error ?? updateRecipeMutation.error;
+  const visibleErrorMessage =
+    submissionErrorMessage ??
+    (mutationError instanceof Error ? mutationError.message : mutationError ? "Kunde inte spara receptet." : null);
   const isSaving = isSubmitting || createRecipeMutation.isPending || updateRecipeMutation.isPending;
   const ingredientErrors = Array.isArray(errors.ingredients) ? errors.ingredients : [];
   const stepErrors = Array.isArray(errors.steps) ? errors.steps : [];
@@ -182,9 +203,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     >
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
-          {mutationError ? (
+          {visibleErrorMessage ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {mutationError instanceof Error ? mutationError.message : "Kunde inte spara receptet."}
+              {visibleErrorMessage}
             </div>
           ) : null}
 
@@ -427,4 +448,46 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
       </div>
     </AdminLayout>
   );
+}
+
+function applyValidationErrors(
+  error: RecipeValidationError,
+  setError: ReturnType<typeof useForm<RecipeFormValues>>["setError"],
+) {
+  for (const [field, messages] of Object.entries(error.fieldErrors)) {
+    const message = messages[0];
+    if (!message) {
+      continue;
+    }
+
+    switch (field) {
+      case "title":
+        setError("title", { type: "server", message });
+        break;
+      case "slug":
+        setError("title", { type: "server", message });
+        break;
+      case "description":
+        setError("description", { type: "server", message });
+        break;
+      case "category":
+        setError("category", { type: "server", message });
+        break;
+      case "imageUrl":
+        setError("imageUrl", { type: "server", message });
+        break;
+      case "prepTimeMinutes":
+        setError("prepTimeMinutes", { type: "server", message });
+        break;
+      case "servings":
+        setError("servings", { type: "server", message });
+        break;
+      case "ingredients":
+        setError("ingredients", { type: "server", message });
+        break;
+      case "steps":
+        setError("steps", { type: "server", message });
+        break;
+    }
+  }
 }

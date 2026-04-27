@@ -2,6 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminRecipeEditorPage } from "./AdminRecipeEditorPage";
+import { RecipeValidationError } from "../lib/api/http/recipes-adapter";
 import { renderWithProviders } from "../test/render";
 
 const mockCreateMutateAsync = vi.fn();
@@ -156,6 +157,32 @@ describe("AdminRecipeEditorPage", () => {
     expect(screen.queryByLabelText(/steg 2/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText(/ingrediens 1/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/steg 1/i)).toBeInTheDocument();
+  });
+
+  it("shows backend validation errors on the matching form fields", async () => {
+    const user = userEvent.setup();
+    mockCreateMutateAsync.mockRejectedValueOnce(
+      new RecipeValidationError({
+        slug: ["Titeln genererar en ogiltig slug. Anvand bokstaver, siffror och bindestreck."],
+      }),
+    );
+
+    renderWithProviders(<AdminRecipeEditorPage mode="create" />);
+
+    await user.type(screen.getByLabelText(/titel/i), "Crème brûlée");
+    await user.type(
+      screen.getByLabelText(/beskrivning/i),
+      "En len dessert med karamelliserat socker.",
+    );
+    await user.clear(screen.getByLabelText(/bild-url/i));
+    await user.type(screen.getByLabelText(/bild-url/i), "https://example.com/creme-brulee.jpg");
+    await user.type(screen.getByLabelText(/ingrediens 1/i), "Gradde");
+    await user.type(screen.getByLabelText(/steg 1/i), "Baka forsiktigt.");
+
+    await user.click(screen.getByRole("button", { name: /skapa recept/i }));
+
+    expect(await screen.findByText(/titeln genererar en ogiltig slug/i)).toBeInTheDocument();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it("updates the metadata preview while the admin edits the form", async () => {

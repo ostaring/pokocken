@@ -3,6 +3,16 @@ import { buildApiUrl } from "../http-client";
 import type { SaveRecipeInput } from "../mock/recipes-adapter";
 import type { RecipeFilters } from "../recipes";
 
+export class RecipeValidationError extends Error {
+  fieldErrors: Record<string, string[]>;
+
+  constructor(fieldErrors: Record<string, string[]>) {
+    super("Valideringen misslyckades.");
+    this.name = "RecipeValidationError";
+    this.fieldErrors = fieldErrors;
+  }
+}
+
 type BackendRecipeWriteRequest = SaveRecipeInput & {
   slug: string;
 };
@@ -34,6 +44,38 @@ function buildRecipeCollectionUrl(path: string, filters: RecipeFilters = {}) {
   }
 
   return url.toString();
+}
+
+function toSwedishValidationMessage(field: string, message: string) {
+  const translations: Record<string, string> = {
+    "Title is required.": "Titel kravs.",
+    "Description is required.": "Beskrivning kravs.",
+    "Category is required.": "Kategori kravs.",
+    "Image URL is required.": "Bild-URL kravs.",
+    "Image URL must be an absolute URL.": "Bildlanken maste vara en fullstandig URL.",
+    "Prep time must be greater than zero.": "Tillagningstiden maste vara storre an 0.",
+    "Servings must be greater than zero.": "Antal portioner maste vara storre an 0.",
+    "At least one ingredient is required.": "Lagg till minst en ingrediens.",
+    "At least one step is required.": "Lagg till minst ett steg.",
+    "Slug must contain lowercase letters, digits and hyphens only.":
+      field === "slug"
+        ? "Titeln genererar en ogiltig slug. Anvand bokstaver, siffror och bindestreck."
+        : "Vardet ar ogiltigt.",
+  };
+
+  return translations[message] ?? message;
+}
+
+async function parseValidationError(response: Response) {
+  const payload = (await response.json()) as { errors?: Record<string, string[]> };
+  const fieldErrors = Object.fromEntries(
+    Object.entries(payload.errors ?? {}).map(([field, messages]) => [
+      field,
+      messages.map((message) => toSwedishValidationMessage(field, message)),
+    ]),
+  );
+
+  return new RecipeValidationError(fieldErrors);
 }
 
 export async function fetchRecipesHttp(filters: RecipeFilters = {}): Promise<RecipeDetail[]> {
@@ -97,6 +139,10 @@ async function sendRecipeWriteRequest(
 
   if (response.status === 409) {
     throw new Error("Ett recept med den sluggen finns redan.");
+  }
+
+  if (response.status === 400) {
+    throw await parseValidationError(response);
   }
 
   if (!response.ok) {

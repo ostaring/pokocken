@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  RecipeValidationError,
   createRecipeHttp,
   deleteRecipeHttp,
   fetchAdminRecipeByIdHttp,
@@ -127,6 +128,45 @@ describe("http recipes adapter", () => {
       steps: ["Cook", "Mix"],
       isPublished: false,
     });
+  });
+
+  it("maps backend validation problems to a structured frontend error", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          errors: {
+            slug: ["Slug must contain lowercase letters, digits and hyphens only."],
+            ingredients: ["At least one ingredient is required."],
+          },
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+
+    await expect(
+      createRecipeHttp({
+        title: "Crème brûlée",
+        description: "Silky custard dessert.",
+        category: "Dessert",
+        prepTimeMinutes: 45,
+        servings: 6,
+        imageUrl: "https://example.com/creme-brulee.jpg",
+        ingredients: [],
+        steps: ["Bake gently"],
+        isPublished: false,
+      }),
+    ).rejects.toEqual(
+      expect.objectContaining<Partial<RecipeValidationError>>({
+        name: "RecipeValidationError",
+        fieldErrors: {
+          slug: ["Titeln genererar en ogiltig slug. Anvand bokstaver, siffror och bindestreck."],
+          ingredients: ["Lagg till minst en ingrediens."],
+        },
+      }),
+    );
   });
 
   it("deletes a recipe by first resolving its slug", async () => {
