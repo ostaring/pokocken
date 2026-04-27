@@ -1,11 +1,12 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminLoginPage } from "./AdminLoginPage";
 import { renderWithProviders } from "../test/render";
 
 const mockNavigate = vi.fn();
 const mockMutateAsync = vi.fn();
+let mockLocationState: unknown = null;
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
@@ -14,6 +15,7 @@ vi.mock("react-router-dom", async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useSearchParams: () => [new URLSearchParams()],
+    useLocation: () => ({ pathname: "/admin/login", search: "", state: mockLocationState }),
   };
 });
 
@@ -33,6 +35,12 @@ vi.mock("../features/auth/auth-hooks", async () => {
 });
 
 describe("AdminLoginPage", () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mockMutateAsync.mockReset();
+    mockLocationState = null;
+  });
+
   it("shows validation messages for invalid input", async () => {
     const user = userEvent.setup();
 
@@ -66,5 +74,17 @@ describe("AdminLoginPage", () => {
     });
 
     expect(mockNavigate).toHaveBeenCalledWith("/admin");
+  });
+
+  it("shows feedback when the user is redirected back after session expiry", () => {
+    mockLocationState = {
+      feedbackMessage: "Logga in igen for att fortsatta administrera recepten.",
+    };
+
+    renderWithProviders(<AdminLoginPage />);
+
+    expect(
+      screen.getByText("Logga in igen for att fortsatta administrera recepten."),
+    ).toBeInTheDocument();
   });
 });

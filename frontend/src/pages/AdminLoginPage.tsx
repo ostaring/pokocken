@@ -1,15 +1,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { PageFrame } from "../components/PageFrame";
 import { useLoginMutation } from "../features/auth/auth-hooks";
 import { loginSchema, type LoginFormValues } from "../features/auth/login-schema";
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const loginMutation = useLoginMutation();
   const redirect = searchParams.get("redirect") ?? "/admin";
+  const locationFeedback =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "feedbackMessage" in location.state &&
+    typeof location.state.feedbackMessage === "string"
+      ? location.state.feedbackMessage
+      : null;
 
   const {
     register,
@@ -37,6 +45,12 @@ export function AdminLoginPage() {
     >
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+          {locationFeedback ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {locationFeedback}
+            </div>
+          ) : null}
+
           <label className="block space-y-2">
             <span className="text-sm font-semibold text-slate-700">Användarnamn</span>
             <input
