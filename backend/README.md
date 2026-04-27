@@ -28,6 +28,7 @@ Backenden innehaller just nu:
 - publik receptlista och receptdetalj
 - adminskyddade CRUD-endpoints for recept
 - cookie-baserad bootstrap-auth for admin
+- fältspecifik requestvalidering for admin create/update
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
 - SQLite-baserad receptpersistens i utvecklingslage
@@ -185,6 +186,8 @@ Detta ar fortfarande en tillfallig losning fore riktig produktionsauth.
   "steps": ["Koka potatisen.", "Blanda dressingen.", "Vand ihop allt."]
 }
 ```
+
+Om payloaden ar ogiltig returnerar API:t `400 Bad Request` med fältspecifika valideringsfel i `errors`-objektet, till exempel for ogiltig slug, tomma ingredienslistor eller saknade obligatoriska fält.
 
 ## Koppling Till Frontend
 

@@ -156,6 +156,12 @@ app.MapGet("/api/admin/recipes/{slug}", (string slug, RecipeService recipeServic
 
 app.MapPost("/api/admin/recipes", (CreateRecipeRequest request, RecipeService recipeService) =>
 {
+    var validationErrors = RecipeRequestValidator.Validate(request);
+    if (validationErrors.Count > 0)
+    {
+        return Results.ValidationProblem(validationErrors);
+    }
+
     try
     {
         var createdRecipe = recipeService.CreateRecipe(request);
@@ -173,6 +179,12 @@ app.MapPost("/api/admin/recipes", (CreateRecipeRequest request, RecipeService re
 
 app.MapPut("/api/admin/recipes/{slug}", (string slug, UpdateRecipeRequest request, RecipeService recipeService) =>
 {
+    var validationErrors = RecipeRequestValidator.Validate(request);
+    if (validationErrors.Count > 0)
+    {
+        return Results.ValidationProblem(validationErrors);
+    }
+
     try
     {
         var updatedRecipe = recipeService.UpdateRecipe(slug, request);

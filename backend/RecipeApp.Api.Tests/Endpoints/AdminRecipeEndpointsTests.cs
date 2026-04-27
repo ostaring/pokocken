@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using RecipeApp.Api.Contracts;
 using RecipeApp.Api.Tests.Testing;
 using Xunit;
@@ -94,6 +95,30 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<RecipeApiFactory>
     }
 
     [Fact]
+    public async Task PostAdminRecipe_ReturnsValidationProblemForInvalidPayload()
+    {
+        using var client = await CreateAuthenticatedClientAsync();
+
+        var response = await client.PostAsJsonAsync("/api/admin/recipes", new CreateRecipeRequest(
+            " ",
+            "Bad Slug",
+            "",
+            "",
+            0,
+            0,
+            "not-a-url",
+            false,
+            [],
+            [" "]));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        await AssertValidationErrorAsync(response, "title", "Title is required.");
+        await AssertValidationErrorAsync(response, "slug", "Slug must contain lowercase letters, digits and hyphens only.");
+        await AssertValidationErrorAsync(response, "ingredients", "At least one ingredient is required.");
+    }
+
+    [Fact]
     public async Task PutAdminRecipe_ReturnsUpdatedRecipeWhenAuthorized()
     {
         using var client = await CreateAuthenticatedClientAsync();
@@ -139,6 +164,29 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<RecipeApiFactory>
     }
 
     [Fact]
+    public async Task PutAdminRecipe_ReturnsValidationProblemForInvalidPayload()
+    {
+        using var client = await CreateAuthenticatedClientAsync();
+
+        var response = await client.PutAsJsonAsync("/api/admin/recipes/draft-lemon-tart", new UpdateRecipeRequest(
+            "Lemon tart",
+            "invalid slug",
+            "A tart.",
+            "Dessert",
+            30,
+            8,
+            "https://example.com/lemon.jpg",
+            true,
+            ["Sugar"],
+            []));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        await AssertValidationErrorAsync(response, "slug", "Slug must contain lowercase letters, digits and hyphens only.");
+        await AssertValidationErrorAsync(response, "steps", "At least one step is required.");
+    }
+
+    [Fact]
     public async Task DeleteAdminRecipe_ReturnsNoContentWhenAuthorized()
     {
         using var client = await CreateAuthenticatedClientAsync();
@@ -167,5 +215,14 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<RecipeApiFactory>
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
         return client;
+    }
+
+    private static async Task AssertValidationErrorAsync(HttpResponseMessage response, string field, string expectedMessage)
+    {
+        using var jsonDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var errors = jsonDocument.RootElement.GetProperty("errors");
+        var fieldErrors = errors.GetProperty(field);
+
+        Assert.Contains(fieldErrors.EnumerateArray(), element => element.GetString() == expectedMessage);
     }
 }
