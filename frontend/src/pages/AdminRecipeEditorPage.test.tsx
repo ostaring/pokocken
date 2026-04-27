@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminRecipeEditorPage } from "./AdminRecipeEditorPage";
-import { RecipeValidationError } from "../lib/api/http/recipes-adapter";
+import { AdminSessionExpiredError, RecipeValidationError } from "../lib/api/http/recipes-adapter";
 import { renderWithProviders } from "../test/render";
 
 const mockCreateMutateAsync = vi.fn();
@@ -12,10 +12,12 @@ let recipeByIdQueryState: {
   data: unknown;
   isLoading: boolean;
   isError: boolean;
+  error: unknown;
 } = {
   data: undefined,
   isLoading: false,
   isError: false,
+  error: null,
 };
 
 vi.mock("react-router-dom", async () => {
@@ -25,6 +27,7 @@ vi.mock("react-router-dom", async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useParams: () => ({ id: "1" }),
+    useLocation: () => ({ pathname: "/admin/recipes/new", search: "" }),
   };
 });
 
@@ -76,6 +79,7 @@ describe("AdminRecipeEditorPage", () => {
       data: undefined,
       isLoading: false,
       isError: false,
+      error: null,
     };
   });
 
@@ -185,6 +189,29 @@ describe("AdminRecipeEditorPage", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
+  it("redirects to login when the admin session expires during save", async () => {
+    const user = userEvent.setup();
+    mockCreateMutateAsync.mockRejectedValueOnce(new AdminSessionExpiredError());
+
+    renderWithProviders(<AdminRecipeEditorPage mode="create" />);
+
+    await user.type(screen.getByLabelText(/titel/i), "Citronpaj");
+    await user.type(screen.getByLabelText(/beskrivning/i), "En frisk och len citronpaj for helgen.");
+    await user.clear(screen.getByLabelText(/bild-url/i));
+    await user.type(screen.getByLabelText(/bild-url/i), "https://example.com/citronpaj.jpg");
+    await user.type(screen.getByLabelText(/ingrediens 1/i), "Citroner");
+    await user.type(screen.getByLabelText(/steg 1/i), "Blanda fyllningen.");
+
+    await user.click(screen.getByRole("button", { name: /skapa recept/i }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/admin/login?redirect=%2Fadmin%2Frecipes%2Fnew", {
+        replace: true,
+        state: { feedbackMessage: "Logga in igen for att fortsatta administrera recepten." },
+      });
+    });
+  });
+
   it("updates the metadata preview while the admin edits the form", async () => {
     const user = userEvent.setup();
 
@@ -212,6 +239,7 @@ describe("AdminRecipeEditorPage", () => {
       data: undefined,
       isLoading: true,
       isError: false,
+      error: null,
     };
 
     renderWithProviders(<AdminRecipeEditorPage mode="edit" />);
@@ -238,6 +266,7 @@ describe("AdminRecipeEditorPage", () => {
       },
       isLoading: false,
       isError: false,
+      error: null,
     };
 
     renderWithProviders(<AdminRecipeEditorPage mode="edit" />);

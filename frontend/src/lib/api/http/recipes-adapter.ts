@@ -13,6 +13,13 @@ export class RecipeValidationError extends Error {
   }
 }
 
+export class AdminSessionExpiredError extends Error {
+  constructor() {
+    super("Adminsessionen har gatt ut. Logga in igen.");
+    this.name = "AdminSessionExpiredError";
+  }
+}
+
 type BackendRecipeWriteRequest = SaveRecipeInput & {
   slug: string;
 };
@@ -82,7 +89,7 @@ export async function fetchRecipesHttp(filters: RecipeFilters = {}): Promise<Rec
   const response = await fetch(buildRecipeCollectionUrl("/api/recipes", filters));
 
   if (!response.ok) {
-    throw new Error("Kunde inte hämta recepten.");
+    throw new Error("Kunde inte hamta recepten.");
   }
 
   return (await response.json()) as RecipeDetail[];
@@ -96,7 +103,7 @@ export async function fetchRecipeBySlugHttp(slug: string): Promise<RecipeDetail 
   }
 
   if (!response.ok) {
-    throw new Error("Kunde inte hämta receptet.");
+    throw new Error("Kunde inte hamta receptet.");
   }
 
   return (await response.json()) as RecipeDetail;
@@ -107,8 +114,12 @@ export async function fetchAdminRecipesHttp(filters: RecipeFilters = {}): Promis
     credentials: "include",
   });
 
+  if (response.status === 401) {
+    throw new AdminSessionExpiredError();
+  }
+
   if (!response.ok) {
-    throw new Error("Kunde inte hämta adminrecepten.");
+    throw new Error("Kunde inte hamta adminrecepten.");
   }
 
   return (await response.json()) as RecipeDetail[];
@@ -134,7 +145,7 @@ async function sendRecipeWriteRequest(
   });
 
   if (response.status === 401) {
-    throw new Error("Adminsessionen har gått ut. Logga in igen.");
+    throw new AdminSessionExpiredError();
   }
 
   if (response.status === 409) {
@@ -199,7 +210,7 @@ export async function deleteRecipeHttp(id: string): Promise<void> {
   });
 
   if (response.status === 401) {
-    throw new Error("Adminsessionen har gått ut. Logga in igen.");
+    throw new AdminSessionExpiredError();
   }
 
   if (!response.ok) {

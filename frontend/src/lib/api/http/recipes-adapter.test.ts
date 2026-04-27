@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  AdminSessionExpiredError,
   RecipeValidationError,
   createRecipeHttp,
   deleteRecipeHttp,
@@ -169,6 +170,12 @@ describe("http recipes adapter", () => {
     );
   });
 
+  it("throws a dedicated auth error when admin list fetch gets 401", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+    await expect(fetchAdminRecipesHttp()).rejects.toBeInstanceOf(AdminSessionExpiredError);
+  });
+
   it("deletes a recipe by first resolving its slug", async () => {
     fetchMock
       .mockResolvedValueOnce(
@@ -192,6 +199,19 @@ describe("http recipes adapter", () => {
         credentials: "include",
       },
     );
+  });
+
+  it("throws a dedicated auth error when deleting after session expiry", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ id: "1", slug: "brown-butter-pancakes" }]), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+    await expect(deleteRecipeHttp("1")).rejects.toBeInstanceOf(AdminSessionExpiredError);
   });
 
   it("toggles recipe published state by issuing an update request", async () => {

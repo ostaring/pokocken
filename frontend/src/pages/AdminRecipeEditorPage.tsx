@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { createRecipeSlug, getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
 import {
@@ -13,7 +13,7 @@ import {
   recipeFormSchema,
   type RecipeFormValues,
 } from "../features/recipes/recipe-form-schema";
-import { RecipeValidationError } from "../lib/api/http/recipes-adapter";
+import { AdminSessionExpiredError, RecipeValidationError } from "../lib/api/http/recipes-adapter";
 
 type AdminRecipeEditorPageProps = {
   mode: "create" | "edit";
@@ -24,6 +24,7 @@ const emptyRecipeListItem = { value: "" };
 export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const title = mode === "create" ? "Skapa recept" : "Redigera recept";
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const recipeQuery = useRecipeByIdQuery(mode === "edit" ? id : undefined);
   const recipe = recipeQuery.data;
@@ -96,6 +97,19 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const watchedServings = watch("servings");
   const watchedIsPublished = watch("isPublished");
   const slugPreview = createRecipeSlug(watchedTitle ?? "");
+  const redirectToLogin = () => {
+    const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
+    navigate(`/admin/login?redirect=${redirect}`, {
+      replace: true,
+      state: { feedbackMessage: "Logga in igen for att fortsatta administrera recepten." },
+    });
+  };
+
+  useEffect(() => {
+    if (recipeQuery.error instanceof AdminSessionExpiredError) {
+      redirectToLogin();
+    }
+  }, [recipeQuery.error]);
 
   async function onSubmit(values: RecipeFormValues) {
     clearErrors(["title", "description", "category", "imageUrl", "prepTimeMinutes", "servings", "ingredients", "steps"]);
@@ -133,6 +147,11 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
         state: { feedbackMessage: "Receptet uppdaterades." },
       });
     } catch (error) {
+      if (error instanceof AdminSessionExpiredError) {
+        redirectToLogin();
+        return;
+      }
+
       if (error instanceof RecipeValidationError) {
         applyValidationErrors(error, setError);
         return;

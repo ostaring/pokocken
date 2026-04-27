@@ -2,11 +2,22 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminDashboardPage } from "./AdminDashboardPage";
+import { AdminSessionExpiredError } from "../lib/api/http/recipes-adapter";
 import { renderWithMemoryRouter, renderWithProviders } from "../test/render";
 import { mockRecipes } from "../features/recipes/mock-recipes";
 
 const mockToggleMutateAsync = vi.fn();
 const mockDeleteMutateAsync = vi.fn();
+const mockNavigate = vi.fn();
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 vi.mock("../features/auth/auth-hooks", async () => {
   const actual = await vi.importActual<typeof import("../features/auth/auth-hooks")>(
@@ -57,6 +68,7 @@ describe("AdminDashboardPage", () => {
   beforeEach(() => {
     mockToggleMutateAsync.mockReset();
     mockDeleteMutateAsync.mockReset();
+    mockNavigate.mockReset();
     vi.restoreAllMocks();
   });
 
@@ -108,7 +120,7 @@ describe("AdminDashboardPage", () => {
   it("filters the visible list by selected status", async () => {
     const user = userEvent.setup();
 
-    renderWithProviders(<AdminDashboardPage />);
+    renderWithMemoryRouter(<AdminDashboardPage />, ["/admin"]);
 
     expect(screen.getByText("Brynt smor-pannkakor")).toBeInTheDocument();
     expect(screen.getByText("Mork chokladmousse")).toBeInTheDocument();
@@ -126,5 +138,20 @@ describe("AdminDashboardPage", () => {
     ]);
 
     expect(screen.getByText("Receptet uppdaterades.")).toBeInTheDocument();
+  });
+
+  it("redirects to login when the admin session expires during delete", async () => {
+    const user = userEvent.setup();
+    mockDeleteMutateAsync.mockRejectedValueOnce(new AdminSessionExpiredError());
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    renderWithMemoryRouter(<AdminDashboardPage />, ["/admin"]);
+
+    const deleteButtons = screen.getAllByRole("button", { name: "Ta bort" });
+    await user.click(deleteButtons[0]!);
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/admin/login?redirect=%2Fadmin", { replace: true });
+    });
   });
 });

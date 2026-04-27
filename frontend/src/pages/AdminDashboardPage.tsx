@@ -1,6 +1,6 @@
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { getRecipeCategoryLabel } from "../features/recipes/recipe-utils";
 import {
@@ -8,12 +8,14 @@ import {
   useDeleteRecipeMutation,
   useToggleRecipePublishedMutation,
 } from "../features/recipes/recipe-hooks";
+import { AdminSessionExpiredError } from "../lib/api/http/recipes-adapter";
 import type { RecipeCategory } from "../types/recipe";
 
 type AdminStatusFilter = "Alla" | "Publicerade" | "Utkast";
 
 export function AdminDashboardPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const locationFeedback =
     typeof location.state === "object" &&
     location.state !== null &&
@@ -35,6 +37,17 @@ export function AdminDashboardPage() {
   const recipes = recipesQuery.data ?? [];
   const publishedCount = recipes.filter((recipe) => recipe.isPublished).length;
   const draftCount = recipes.length - publishedCount;
+  const redirectToLogin = () => {
+    const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
+    navigate(`/admin/login?redirect=${redirect}`, { replace: true });
+  };
+
+  useEffect(() => {
+    if (recipesQuery.error instanceof AdminSessionExpiredError) {
+      redirectToLogin();
+    }
+  }, [recipesQuery.error]);
+
   const visibleRecipes = useMemo(() => {
     if (status === "Publicerade") {
       return recipes.filter((recipe) => recipe.isPublished);
@@ -49,7 +62,17 @@ export function AdminDashboardPage() {
 
   async function handleTogglePublished(id: string, nextActionLabel: "Publicera" | "Avpublicera") {
     setFeedbackMessage(null);
-    await togglePublishedMutation.mutateAsync(id);
+
+    try {
+      await togglePublishedMutation.mutateAsync(id);
+    } catch (error) {
+      if (error instanceof AdminSessionExpiredError) {
+        redirectToLogin();
+      }
+
+      return;
+    }
+
     setFeedbackMessage(
       nextActionLabel === "Publicera" ? "Receptet publicerades." : "Receptet flyttades tillbaka till utkast.",
     );
@@ -63,7 +86,16 @@ export function AdminDashboardPage() {
       return;
     }
 
-    await deleteRecipeMutation.mutateAsync(id);
+    try {
+      await deleteRecipeMutation.mutateAsync(id);
+    } catch (error) {
+      if (error instanceof AdminSessionExpiredError) {
+        redirectToLogin();
+      }
+
+      return;
+    }
+
     setFeedbackMessage("Receptet togs bort.");
   }
 
