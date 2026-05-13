@@ -15,7 +15,7 @@ export function RecipeDetailsPage() {
 
   if (recipeQuery.isLoading) {
     return (
-      <PageFrame eyebrow="Publikt" title="Laddar recept" description="Hamtar receptdetaljer.">
+      <PageFrame eyebrow="Publikt" title="Laddar recept" description="Hämtar receptdetaljer.">
         <p className="text-slate-700">Laddar receptdetaljer...</p>
       </PageFrame>
     );
@@ -25,10 +25,10 @@ export function RecipeDetailsPage() {
     return (
       <PageFrame
         eyebrow="Publikt"
-        title="Receptet ar inte tillgangligt"
-        description="Nagot gick fel nar receptet skulle laddas."
+        title="Receptet är inte tillgängligt"
+        description="Något gick fel när receptet skulle laddas."
       >
-        <p className="text-slate-700">Forsok igen lite senare.</p>
+        <p className="text-slate-700">Försök igen lite senare.</p>
       </PageFrame>
     );
   }
@@ -38,7 +38,7 @@ export function RecipeDetailsPage() {
       <PageFrame
         eyebrow="Publikt"
         title="Receptet hittades inte"
-        description="Vi kunde inte hitta nagot recept som matchar den har sluggen."
+        description="Vi kunde inte hitta något recept som matchar den här sluggen."
         actions={
           <Link
             className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
@@ -49,7 +49,7 @@ export function RecipeDetailsPage() {
         }
       >
         <p className="text-slate-700">
-          Den har routen ar redo for backenddriven hantering av saknade recept senare.
+          Den här routen är redo för backenddriven hantering av saknade recept senare.
         </p>
       </PageFrame>
     );
@@ -95,7 +95,7 @@ export function RecipeDetailsPage() {
 
         <aside className="space-y-6">
           <div className="rounded-[1.75rem] bg-slate-900 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/65">Oversikt</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-white/65">Översikt</p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-white/60">Kategori</p>
@@ -128,7 +128,7 @@ export function RecipeDetailsPage() {
 
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-2xl font-semibold text-slate-900">Gor sa har</h2>
+              <h2 className="text-2xl font-semibold text-slate-900">Gör så här</h2>
               <p className="text-sm text-slate-500">{recipe.steps.length} steg</p>
             </div>
             <ol className="grid gap-4">

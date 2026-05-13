@@ -48,7 +48,7 @@ describe("RecipesPage", () => {
           id: "1",
           title: "Rostad tomatpasta",
           slug: "rostad-tomatpasta",
-          description: "En snabb pasta med sota tomater.",
+          description: "En snabb pasta med söta tomater.",
           category: "Dinner",
           prepTimeMinutes: 35,
           servings: 3,
@@ -67,7 +67,7 @@ describe("RecipesPage", () => {
       "href",
       "/",
     );
-    expect(screen.getByRole("link", { name: /oppna recept/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /öppna recept/i })).toHaveAttribute(
       "href",
       "/recipes/rostad-tomatpasta",
     );
@@ -90,7 +90,7 @@ describe("RecipesPage", () => {
 
     expect(screen.getByDisplayValue("tomat")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: /kategori/i })).toHaveValue("Dinner");
-    expect(screen.getByText("Sokning: tomat")).toBeInTheDocument();
+    expect(screen.getByText("Sökning: tomat")).toBeInTheDocument();
     expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=tomat&category=Dinner");
     expect(mockUseRecipesQuery).toHaveBeenCalledWith({
@@ -110,7 +110,7 @@ describe("RecipesPage", () => {
                 id: "1",
                 title: "Rostad tomatpasta",
                 slug: "rostad-tomatpasta",
-                description: "En snabb pasta med sota tomater.",
+                description: "En snabb pasta med söta tomater.",
                 category: "Dinner",
                 prepTimeMinutes: 35,
                 servings: 3,
@@ -132,17 +132,17 @@ describe("RecipesPage", () => {
 
     expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
 
-    await user.type(screen.getByLabelText(/sok recept/i), "tomat");
+    await user.type(screen.getByLabelText(/sök recept/i), "tomat");
     await user.selectOptions(screen.getByLabelText(/kategori/i), "Dinner");
 
-    expect(await screen.findByText("Sokning: tomat")).toBeInTheDocument();
+    expect(await screen.findByText("Sökning: tomat")).toBeInTheDocument();
     expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /rensa filter/i })).toBeEnabled();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=tomat&category=Dinner");
 
     await user.click(screen.getByRole("button", { name: /rensa filter/i }));
 
-    expect(screen.queryByText("Sokning: tomat")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sökning: tomat")).not.toBeInTheDocument();
     expect(screen.queryByText("Kategori: Middag")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes");
@@ -159,7 +159,7 @@ describe("RecipesPage", () => {
                 id: "1",
                 title: "Rostad tomatpasta",
                 slug: "rostad-tomatpasta",
-                description: "En snabb pasta med sota tomater.",
+                description: "En snabb pasta med söta tomater.",
                 category: "Dinner",
                 prepTimeMinutes: 35,
                 servings: 3,
@@ -179,7 +179,7 @@ describe("RecipesPage", () => {
       ["/recipes"],
     );
 
-    await user.type(screen.getByLabelText(/sok recept/i), "zzz");
+    await user.type(screen.getByLabelText(/sök recept/i), "zzz");
 
     expect(await screen.findByText("Inga recept matchade")).toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=zzz");

@@ -50,7 +50,7 @@ export function RecipesPage() {
     <PageFrame
       eyebrow="Publikt"
       title="Recept"
-      description="Bladdra bland recept, filtrera pa kategori och hitta snabbt tillbaka till ratta vardagsfavorit eller helgmiddag."
+      description="Bläddra bland recept, filtrera på kategori och hitta snabbt tillbaka till rätt vardagsfavorit eller helgmiddag."
       actions={
         <Link
           className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
@@ -69,20 +69,20 @@ export function RecipesPage() {
 
         {recipesQuery.isError ? (
           <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-sm text-rose-700">
-            Kunde inte lasa in recepten.
+            Kunde inte läsa in recepten.
           </div>
         ) : null}
 
         <div className="rounded-[1.75rem] border border-slate-200 bg-white/75 p-5">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px_auto]">
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Sok recept</span>
+              <span className="text-sm font-semibold text-slate-700">Sök recept</span>
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none ring-0 transition focus:border-emerald-500"
                 type="search"
                 value={searchTerm}
                 onChange={(event) => updateFilters({ search: event.target.value })}
-                placeholder="Sok pa titel eller beskrivning"
+                placeholder="Sök på titel eller beskrivning"
               />
             </label>
 
@@ -121,7 +121,7 @@ export function RecipesPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               {trimmedSearchTerm ? (
                 <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-900">
-                  Sokning: {trimmedSearchTerm}
+                  Sökning: {trimmedSearchTerm}
                 </span>
               ) : null}
               {category !== "All" ? (
@@ -138,9 +138,7 @@ export function RecipesPage() {
             Visar <span className="font-semibold text-slate-900">{filteredRecipes.length}</span>{" "}
             recept
           </p>
-          <p className="text-sm text-slate-500">
-            Sokning och filter skickas vidare i datalagret.
-          </p>
+          <p className="text-sm text-slate-500">Sökning och filter skickas vidare i datalagret.</p>
         </div>
 
         {!recipesQuery.isLoading && !recipesQuery.isError && filteredRecipes.length > 0 ? (
@@ -173,7 +171,7 @@ export function RecipesPage() {
                     className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                     to={`/recipes/${recipe.slug}`}
                   >
-                    Oppna recept
+                    Öppna recept
                   </Link>
                 </div>
               </article>
@@ -185,7 +183,7 @@ export function RecipesPage() {
           <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center">
             <h2 className="text-xl font-semibold text-slate-900">Inga recept matchade</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Testa ett annat sokord eller rensa filtren for att se hela listan igen.
+              Testa ett annat sökord eller rensa filtren för att se hela listan igen.
             </p>
             <button
               className="mt-5 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"

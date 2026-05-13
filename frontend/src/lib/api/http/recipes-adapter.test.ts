@@ -131,6 +131,31 @@ describe("http recipes adapter", () => {
     });
   });
 
+  it("normalizes Swedish characters when building a slug for the backend", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ id: "11", slug: "rakmacka-med-aioli" }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await createRecipeHttp({
+      title: "Räkmacka med aioli",
+      description: "Klassisk smörgås med räkor.",
+      category: "Lunch",
+      prepTimeMinutes: 15,
+      servings: 2,
+      imageUrl: "https://example.com/rakmacka.jpg",
+      ingredients: ["Bröd", "Räkor"],
+      steps: ["Montera", "Servera"],
+      isPublished: true,
+    });
+
+    expect(JSON.parse(fetchMock.mock.calls[0]![1].body as string)).toMatchObject({
+      slug: "rakmacka-med-aioli",
+    });
+  });
+
   it("maps backend validation problems to a structured frontend error", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
@@ -163,8 +188,8 @@ describe("http recipes adapter", () => {
       expect.objectContaining<Partial<RecipeValidationError>>({
         name: "RecipeValidationError",
         fieldErrors: {
-          slug: ["Titeln genererar en ogiltig slug. Anvand bokstaver, siffror och bindestreck."],
-          ingredients: ["Lagg till minst en ingrediens."],
+          slug: ["Titeln genererar en ogiltig slug. Använd bokstäver, siffror och bindestreck."],
+          ingredients: ["Lägg till minst en ingrediens."],
         },
       }),
     );

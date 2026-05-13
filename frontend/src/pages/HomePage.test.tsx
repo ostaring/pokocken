@@ -36,7 +36,7 @@ describe("HomePage", () => {
           id: "1",
           title: "Rostad tomatpasta",
           slug: "rostad-tomatpasta",
-          description: "En snabb pasta med sota tomater.",
+          description: "En snabb pasta med söta tomater.",
           category: "Dinner",
           prepTimeMinutes: 35,
           servings: 3,
@@ -45,7 +45,7 @@ describe("HomePage", () => {
         },
         {
           id: "2",
-          title: "Mork chokladmousse",
+          title: "Mörk chokladmousse",
           slug: "mork-chokladmousse",
           description: "Luftig chokladdessert.",
           category: "Dessert",
@@ -63,16 +63,16 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Matlagning som kanns lugn, tydlig och enkel att komma tillbaka till.",
+        name: "Matlagning som känns lugn, tydlig och enkel att komma tillbaka till.",
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Mork chokladmousse" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Mörk chokladmousse" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /utforska recept/i })).toHaveAttribute(
       "href",
       "/recipes",
     );
-    expect(screen.getByRole("link", { name: /oppna admin/i })).toHaveAttribute("href", "/admin");
+    expect(screen.getByRole("link", { name: /öppna admin/i })).toHaveAttribute("href", "/admin");
   });
 
   it("shows an error state when featured recipes cannot be loaded", () => {
@@ -84,6 +84,6 @@ describe("HomePage", () => {
 
     renderWithMemoryRouter(<HomePage />, ["/"]);
 
-    expect(screen.getByText("Kunde inte lasa in startsidans recept just nu.")).toBeInTheDocument();
+    expect(screen.getByText("Kunde inte läsa in startsidans recept just nu.")).toBeInTheDocument();
   });
 });

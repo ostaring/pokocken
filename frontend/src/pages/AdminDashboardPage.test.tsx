@@ -122,14 +122,14 @@ describe("AdminDashboardPage", () => {
 
     renderWithMemoryRouter(<AdminDashboardPage />, ["/admin"]);
 
-    expect(screen.getByText("Brynt smor-pannkakor")).toBeInTheDocument();
-    expect(screen.getByText("Mork chokladmousse")).toBeInTheDocument();
+    expect(screen.getByText("Brynt smör-pannkakor")).toBeInTheDocument();
+    expect(screen.getByText("Mörk chokladmousse")).toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText(/status/i), "Utkast");
 
-    expect(screen.queryByText("Brynt smor-pannkakor")).not.toBeInTheDocument();
+    expect(screen.queryByText("Brynt smör-pannkakor")).not.toBeInTheDocument();
     expect(screen.queryByText("Rostad tomatpasta")).not.toBeInTheDocument();
-    expect(screen.queryByText("Mork chokladmousse")).not.toBeInTheDocument();
+    expect(screen.queryByText("Mörk chokladmousse")).not.toBeInTheDocument();
   });
 
   it("shows feedback passed back from another admin route", () => {

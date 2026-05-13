@@ -20,9 +20,9 @@ export function getRecipeCategoryLabel(category: RecipeCategory | "All") {
     case "Dinner":
       return "Middag";
     case "Dessert":
-      return "Efterratt";
+      return "Efterrätt";
     case "Snack":
-      return "Mellanmal";
+      return "Mellanmål";
   }
 }
 

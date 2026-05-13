@@ -78,13 +78,13 @@ describe("AdminLoginPage", () => {
 
   it("shows feedback when the user is redirected back after session expiry", () => {
     mockLocationState = {
-      feedbackMessage: "Logga in igen for att fortsatta administrera recepten.",
+      feedbackMessage: "Logga in igen för att fortsätta administrera recepten.",
     };
 
     renderWithProviders(<AdminLoginPage />);
 
     expect(
-      screen.getByText("Logga in igen for att fortsatta administrera recepten."),
+      screen.getByText("Logga in igen för att fortsätta administrera recepten."),
     ).toBeInTheDocument();
   });
 });

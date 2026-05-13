@@ -15,7 +15,7 @@ export class RecipeValidationError extends Error {
 
 export class AdminSessionExpiredError extends Error {
   constructor() {
-    super("Adminsessionen har gatt ut. Logga in igen.");
+    super("Adminsessionen har gått ut. Logga in igen.");
     this.name = "AdminSessionExpiredError";
   }
 }
@@ -28,6 +28,9 @@ function createSlug(title: string) {
   return title
     .trim()
     .toLowerCase()
+    .replaceAll("å", "a")
+    .replaceAll("ä", "a")
+    .replaceAll("ö", "o")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
@@ -55,19 +58,19 @@ function buildRecipeCollectionUrl(path: string, filters: RecipeFilters = {}) {
 
 function toSwedishValidationMessage(field: string, message: string) {
   const translations: Record<string, string> = {
-    "Title is required.": "Titel kravs.",
-    "Description is required.": "Beskrivning kravs.",
-    "Category is required.": "Kategori kravs.",
-    "Image URL is required.": "Bild-URL kravs.",
-    "Image URL must be an absolute URL.": "Bildlanken maste vara en fullstandig URL.",
-    "Prep time must be greater than zero.": "Tillagningstiden maste vara storre an 0.",
-    "Servings must be greater than zero.": "Antal portioner maste vara storre an 0.",
-    "At least one ingredient is required.": "Lagg till minst en ingrediens.",
-    "At least one step is required.": "Lagg till minst ett steg.",
+    "Title is required.": "Titel krävs.",
+    "Description is required.": "Beskrivning krävs.",
+    "Category is required.": "Kategori krävs.",
+    "Image URL is required.": "Bild-URL krävs.",
+    "Image URL must be an absolute URL.": "Bildlänken måste vara en fullständig URL.",
+    "Prep time must be greater than zero.": "Tillagningstiden måste vara större än 0.",
+    "Servings must be greater than zero.": "Antal portioner måste vara större än 0.",
+    "At least one ingredient is required.": "Lägg till minst en ingrediens.",
+    "At least one step is required.": "Lägg till minst ett steg.",
     "Slug must contain lowercase letters, digits and hyphens only.":
       field === "slug"
-        ? "Titeln genererar en ogiltig slug. Anvand bokstaver, siffror och bindestreck."
-        : "Vardet ar ogiltigt.",
+        ? "Titeln genererar en ogiltig slug. Använd bokstäver, siffror och bindestreck."
+        : "Värdet är ogiltigt.",
   };
 
   return translations[message] ?? message;
@@ -89,7 +92,7 @@ export async function fetchRecipesHttp(filters: RecipeFilters = {}): Promise<Rec
   const response = await fetch(buildRecipeCollectionUrl("/api/recipes", filters));
 
   if (!response.ok) {
-    throw new Error("Kunde inte hamta recepten.");
+    throw new Error("Kunde inte hämta recepten.");
   }
 
   return (await response.json()) as RecipeDetail[];
@@ -103,7 +106,7 @@ export async function fetchRecipeBySlugHttp(slug: string): Promise<RecipeDetail 
   }
 
   if (!response.ok) {
-    throw new Error("Kunde inte hamta receptet.");
+    throw new Error("Kunde inte hämta receptet.");
   }
 
   return (await response.json()) as RecipeDetail;
@@ -119,7 +122,7 @@ export async function fetchAdminRecipesHttp(filters: RecipeFilters = {}): Promis
   }
 
   if (!response.ok) {
-    throw new Error("Kunde inte hamta adminrecepten.");
+    throw new Error("Kunde inte hämta adminrecepten.");
   }
 
   return (await response.json()) as RecipeDetail[];

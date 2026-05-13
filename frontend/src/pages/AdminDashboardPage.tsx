@@ -74,7 +74,9 @@ export function AdminDashboardPage() {
     }
 
     setFeedbackMessage(
-      nextActionLabel === "Publicera" ? "Receptet publicerades." : "Receptet flyttades tillbaka till utkast.",
+      nextActionLabel === "Publicera"
+        ? "Receptet publicerades."
+        : "Receptet flyttades tillbaka till utkast.",
     );
   }
 
@@ -221,7 +223,9 @@ export function AdminDashboardPage() {
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Kategori</p>
-                    <p className="mt-2 text-sm font-medium text-slate-800">{getRecipeCategoryLabel(recipe.category)}</p>
+                    <p className="mt-2 text-sm font-medium text-slate-800">
+                      {getRecipeCategoryLabel(recipe.category)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Status</p>

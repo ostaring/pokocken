@@ -101,7 +101,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
     navigate(`/admin/login?redirect=${redirect}`, {
       replace: true,
-      state: { feedbackMessage: "Logga in igen for att fortsatta administrera recepten." },
+      state: { feedbackMessage: "Logga in igen för att fortsätta administrera recepten." },
     });
   };
 
@@ -112,7 +112,16 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   }, [recipeQuery.error]);
 
   async function onSubmit(values: RecipeFormValues) {
-    clearErrors(["title", "description", "category", "imageUrl", "prepTimeMinutes", "servings", "ingredients", "steps"]);
+    clearErrors([
+      "title",
+      "description",
+      "category",
+      "imageUrl",
+      "prepTimeMinutes",
+      "servings",
+      "ingredients",
+      "steps",
+    ]);
     setSubmissionErrorMessage(null);
 
     const payload = {
@@ -165,10 +174,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
   if (mode === "edit" && recipeQuery.isLoading) {
     return (
-      <AdminLayout
-        title="Laddar recept"
-        description="Hamtar receptdata till editorn."
-      >
+      <AdminLayout title="Laddar recept" description="Hämtar receptdata till editorn.">
         <p className="text-slate-700">Laddar recepteditorn...</p>
       </AdminLayout>
     );
@@ -177,10 +183,10 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   if (mode === "edit" && recipeQuery.isError) {
     return (
       <AdminLayout
-        title="Editorn ar inte tillganglig"
-        description="Nagot gick fel nar receptet skulle laddas."
+        title="Editorn är inte tillgänglig"
+        description="Något gick fel när receptet skulle laddas."
       >
-        <p className="text-slate-700">Forsok igen senare.</p>
+        <p className="text-slate-700">Försök igen senare.</p>
       </AdminLayout>
     );
   }
@@ -189,11 +195,11 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
     return (
       <AdminLayout
         title="Receptet hittades inte"
-        description="Vi kunde inte hitta nagot recept som matchar den har adminrouten."
+        description="Vi kunde inte hitta något recept som matchar den här adminrouten."
       >
         <p className="text-slate-700">
-          Nar backend ar inkopplad fullt ut ska detta motsvara en autentiserad adminhamtning och ett
-          tydligt not-found-lage.
+          När backend är inkopplad fullt ut ska detta motsvara en autentiserad adminhämtning och ett
+          tydligt not-found-läge.
         </p>
       </AdminLayout>
     );
@@ -202,7 +208,11 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   const mutationError = createRecipeMutation.error ?? updateRecipeMutation.error;
   const visibleErrorMessage =
     submissionErrorMessage ??
-    (mutationError instanceof Error ? mutationError.message : mutationError ? "Kunde inte spara receptet." : null);
+    (mutationError instanceof Error
+      ? mutationError.message
+      : mutationError
+        ? "Kunde inte spara receptet."
+        : null);
   const isSaving = isSubmitting || createRecipeMutation.isPending || updateRecipeMutation.isPending;
   const ingredientErrors = Array.isArray(errors.ingredients) ? errors.ingredients : [];
   const stepErrors = Array.isArray(errors.steps) ? errors.steps : [];
@@ -210,13 +220,13 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
   return (
     <AdminLayout
       title={title}
-      description="En gemensam admineditor for bade skapa- och redigeralage. Formkontraktet ar nu tillrackligt stabilt for att kopplas till backendens create- och update-endpoints."
+      description="En gemensam admineditor för både skapa- och redigeraläge. Formkontraktet är nu tillräckligt stabilt för att kopplas till backendens create- och update-endpoints."
       actions={
         <Link
           className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
           to="/admin"
         >
-          Tillbaka till oversikten
+          Tillbaka till översikten
         </Link>
       }
     >
@@ -244,7 +254,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               <span className="text-sm font-semibold text-slate-700">Beskrivning</span>
               <textarea
                 className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
-                placeholder="En snabb pasta med sota rostade tomater..."
+                placeholder="En snabb pasta med söta rostade tomater..."
                 {...register("description")}
               />
               {errors.description ? (
@@ -262,7 +272,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
                 <option value="Lunch">Lunch</option>
                 <option value="Dinner">Middag</option>
                 <option value="Dessert">Dessert</option>
-                <option value="Snack">Mellanmal</option>
+                <option value="Snack">Mellanmål</option>
               </select>
               {errors.category ? (
                 <p className="text-sm text-rose-600">{errors.category.message}</p>
@@ -308,10 +318,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
 
             <section className="space-y-3 md:col-span-2" aria-labelledby="ingredients-heading">
               <div className="flex items-center justify-between gap-3">
-                <h2
-                  id="ingredients-heading"
-                  className="text-sm font-semibold text-slate-700"
-                >
+                <h2 id="ingredients-heading" className="text-sm font-semibold text-slate-700">
                   Ingredienser
                 </h2>
                 <button
@@ -319,7 +326,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
                   type="button"
                   onClick={() => ingredientsFieldArray.append({ ...emptyRecipeListItem })}
                 >
-                  Lagg till ingrediens
+                  Lägg till ingrediens
                 </button>
               </div>
               <div className="space-y-3">
@@ -365,7 +372,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
                   type="button"
                   onClick={() => stepsFieldArray.append({ ...emptyRecipeListItem })}
                 >
-                  Lagg till steg
+                  Lägg till steg
                 </button>
               </div>
               <div className="space-y-3">
@@ -413,7 +420,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               type="submit"
               disabled={!isValid || isSaving}
             >
-              {isSaving ? "Sparar..." : mode === "create" ? "Skapa recept" : "Spara andringar"}
+              {isSaving ? "Sparar..." : mode === "create" ? "Skapa recept" : "Spara ändringar"}
             </button>
             <button
               className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
@@ -428,16 +435,16 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">
             Editorinfo
           </p>
-          <h2 className="text-2xl font-semibold">Redo for backendkoppling</h2>
+          <h2 className="text-2xl font-semibold">Redo för backendkoppling</h2>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50">
-              Forhandsvisning
+              Förhandsvisning
             </p>
             <dl className="mt-4 grid gap-3 text-sm text-white/85">
               <div className="flex items-start justify-between gap-4">
                 <dt className="text-white/55">Slug</dt>
                 <dd className="font-mono text-right text-white">
-                  {slugPreview || "skapas-fran-titeln"}
+                  {slugPreview || "skapas-från-titeln"}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
@@ -459,8 +466,8 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </dl>
           </div>
           <ul className="space-y-3 text-sm leading-6 text-white/80">
-            <li>Skapa- och redigeralage delar samma validerade formkontrakt.</li>
-            <li>Ingredienser och steg redigeras nu som strukturerade listor i formularet.</li>
+            <li>Skapa- och redigeraläge delar samma validerade formkontrakt.</li>
+            <li>Ingredienser och steg redigeras nu som strukturerade listor i formuläret.</li>
             <li>Submit mappas fortfarande direkt till backendens DTO-format.</li>
           </ul>
         </aside>

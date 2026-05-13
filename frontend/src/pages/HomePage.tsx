@@ -9,9 +9,9 @@ export function HomePage() {
 
   return (
     <PageFrame
-      eyebrow="Receptappen"
-      title="Matlagning som kanns lugn, tydlig och enkel att komma tillbaka till."
-      description="En svensk receptapp med publika recept, tydliga steg och ett adminflode dar du kan bygga upp ditt eget receptbibliotek over tid."
+      eyebrow="Pokocken"
+      title="Matlagning som känns lugn, tydlig och enkel att komma tillbaka till."
+      description="En svensk receptapp med publika recept, tydliga steg och ett adminflöde där du kan bygga upp ditt eget receptbibliotek över tid."
       actions={
         <>
           <Link
@@ -24,7 +24,7 @@ export function HomePage() {
             className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-white/70"
             to="/admin"
           >
-            Oppna admin
+            Öppna admin
           </Link>
         </>
       }
@@ -33,26 +33,32 @@ export function HomePage() {
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
           <div className="rounded-[1.75rem] bg-slate-900 px-6 py-7 text-white">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/60">
-              Varfor appen finns
+              Varför appen finns
             </p>
-            <h2 className="mt-3 text-3xl font-semibold">Allt samlat pa ett stalle</h2>
+            <h2 className="mt-3 text-3xl font-semibold">Allt samlat på ett ställe</h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/80">
-              Recepten ska vara enkla att hitta, snabba att laga och lata att underhalla. Den
-              publika delen fokuserar pa lasbarhet och inspiration medan adminytan ar byggd for
-              att du ska kunna redigera, publicera och strukturera innehallet utan extra brus.
+              Recepten ska vara enkla att hitta, snabba att laga och lätta att underhålla. Den
+              publika delen fokuserar på läsbarhet och inspiration medan adminytan är byggd för
+              att du ska kunna redigera, publicera och strukturera innehållet utan extra brus.
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                 <p className="text-sm font-semibold">Publika recept</p>
-                <p className="mt-2 text-sm text-white/70">Bladdra, filtrera och oppna detaljerade receptkort.</p>
+                <p className="mt-2 text-sm text-white/70">
+                  Bläddra, filtrera och öppna detaljerade receptkort.
+                </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                 <p className="text-sm font-semibold">Tydliga steg</p>
-                <p className="mt-2 text-sm text-white/70">Ingredienser och tillagningssteg presenteras separat och luftigt.</p>
+                <p className="mt-2 text-sm text-white/70">
+                  Ingredienser och tillagningssteg presenteras separat och luftigt.
+                </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-semibold">Adminflode</p>
-                <p className="mt-2 text-sm text-white/70">Skapa, uppdatera och publicera recept i samma verktyg.</p>
+                <p className="text-sm font-semibold">Adminflöde</p>
+                <p className="mt-2 text-sm text-white/70">
+                  Skapa, uppdatera och publicera recept i samma verktyg.
+                </p>
               </div>
             </div>
           </div>
@@ -64,15 +70,21 @@ export function HomePage() {
             <ol className="mt-5 space-y-4">
               <li className="rounded-2xl bg-emerald-50 px-4 py-4">
                 <p className="text-sm font-semibold text-slate-900">1. Hitta ett recept</p>
-                <p className="mt-1 text-sm text-slate-600">Borja i receptlistan och filtrera fram det du ar sugen pa.</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Börja i receptlistan och filtrera fram det du är sugen på.
+                </p>
               </li>
               <li className="rounded-2xl bg-orange-50 px-4 py-4">
-                <p className="text-sm font-semibold text-slate-900">2. Oppna detaljsidan</p>
-                <p className="mt-1 text-sm text-slate-600">Fa oversikt over tid, portioner, ingredienser och steg.</p>
+                <p className="text-sm font-semibold text-slate-900">2. Öppna detaljsidan</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Få översikt över tid, portioner, ingredienser och steg.
+                </p>
               </li>
               <li className="rounded-2xl bg-slate-100 px-4 py-4">
-                <p className="text-sm font-semibold text-slate-900">3. Hantera innehall i admin</p>
-                <p className="mt-1 text-sm text-slate-600">Nar du ar inloggad kan du skapa och redigera recepten sjalv.</p>
+                <p className="text-sm font-semibold text-slate-900">3. Hantera innehåll i admin</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  När du är inloggad kan du skapa och redigera recepten själv.
+                </p>
               </li>
             </ol>
           </aside>
@@ -84,7 +96,7 @@ export function HomePage() {
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
                 Utvalda recept
               </p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Bora har</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Börja här</h2>
             </div>
             <Link
               className="text-sm font-semibold text-slate-700 transition hover:text-slate-900"
@@ -102,7 +114,7 @@ export function HomePage() {
 
           {recipesQuery.isError ? (
             <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
-              Kunde inte lasa in startsidans recept just nu.
+              Kunde inte läsa in startsidans recept just nu.
             </div>
           ) : null}
 
@@ -135,7 +147,7 @@ export function HomePage() {
                       className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                       to={`/recipes/${recipe.slug}`}
                     >
-                      Oppna recept
+                      Öppna recept
                     </Link>
                   </div>
                 </article>

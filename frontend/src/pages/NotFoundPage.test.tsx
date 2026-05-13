@@ -8,10 +8,7 @@ describe("NotFoundPage", () => {
     renderWithMemoryRouter(<NotFoundPage />, ["/saknas"]);
 
     expect(screen.getByText("Vi hittade inte sidan du letade efter.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /gå till startsidan/i })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(screen.getByRole("link", { name: /gå till startsidan/i })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /visa recept/i })).toHaveAttribute("href", "/recipes");
   });
 });

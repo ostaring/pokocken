@@ -26,19 +26,19 @@ describe("filterRecipes", () => {
 
 describe("createRecipeSlug", () => {
   it("creates a stable slug from a Swedish recipe title", () => {
-    expect(createRecipeSlug("  Frasch pastasallad med orter!  ")).toBe(
+    expect(createRecipeSlug("  Fräsch pastasallad med örter!  ")).toBe(
       "frasch-pastasallad-med-orter",
     );
   });
 
   it("normalizes Swedish characters before building the slug", () => {
-    expect(createRecipeSlug("Rakor med brod och aioli")).toBe("rakor-med-brod-och-aioli");
+    expect(createRecipeSlug("Räkor med bröd och aioli")).toBe("rakor-med-brod-och-aioli");
   });
 });
 
 describe("getRecipeCategoryLabel", () => {
   it("returns Swedish category labels for the UI", () => {
-    expect(getRecipeCategoryLabel("Dessert")).toBe("Efterratt");
-    expect(getRecipeCategoryLabel("Snack")).toBe("Mellanmal");
+    expect(getRecipeCategoryLabel("Dessert")).toBe("Efterrätt");
+    expect(getRecipeCategoryLabel("Snack")).toBe("Mellanmål");
   });
 });

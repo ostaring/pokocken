@@ -96,25 +96,22 @@ describe("AdminRecipeEditorPage", () => {
     );
     await user.selectOptions(screen.getByLabelText(/kategori/i), "Lunch");
     await user.clear(screen.getByLabelText(/bild-url/i));
-    await user.type(
-      screen.getByLabelText(/bild-url/i),
-      "https://example.com/pasta-salad.jpg",
-    );
+    await user.type(screen.getByLabelText(/bild-url/i), "https://example.com/pasta-salad.jpg");
     await user.clear(screen.getByLabelText(/tillagningstid/i));
     await user.type(screen.getByLabelText(/tillagningstid/i), "22");
     await user.clear(screen.getByLabelText(/portioner/i));
     await user.type(screen.getByLabelText(/portioner/i), "5");
 
     await user.type(screen.getByLabelText(/ingrediens 1/i), "200 g pasta");
-    await user.click(screen.getByRole("button", { name: /lagg till ingrediens/i }));
+    await user.click(screen.getByRole("button", { name: /lägg till ingrediens/i }));
     await user.type(screen.getByLabelText(/ingrediens 2/i), "1 lemon");
-    await user.click(screen.getByRole("button", { name: /lagg till ingrediens/i }));
+    await user.click(screen.getByRole("button", { name: /lägg till ingrediens/i }));
     await user.type(screen.getByLabelText(/ingrediens 3/i), "Fresh herbs");
 
     await user.type(screen.getByLabelText(/steg 1/i), "Cook the pasta");
-    await user.click(screen.getByRole("button", { name: /lagg till steg/i }));
+    await user.click(screen.getByRole("button", { name: /lägg till steg/i }));
     await user.type(screen.getByLabelText(/steg 2/i), "Mix the dressing");
-    await user.click(screen.getByRole("button", { name: /lagg till steg/i }));
+    await user.click(screen.getByRole("button", { name: /lägg till steg/i }));
     await user.type(screen.getByLabelText(/steg 3/i), "Combine and serve");
 
     await user.click(screen.getByLabelText(/publicerad/i));
@@ -148,8 +145,8 @@ describe("AdminRecipeEditorPage", () => {
     expect(screen.getByLabelText(/ingrediens 1/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/steg 1/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /lagg till ingrediens/i }));
-    await user.click(screen.getByRole("button", { name: /lagg till steg/i }));
+    await user.click(screen.getByRole("button", { name: /lägg till ingrediens/i }));
+    await user.click(screen.getByRole("button", { name: /lägg till steg/i }));
 
     expect(screen.getByLabelText(/ingrediens 2/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/steg 2/i)).toBeInTheDocument();
@@ -167,7 +164,7 @@ describe("AdminRecipeEditorPage", () => {
     const user = userEvent.setup();
     mockCreateMutateAsync.mockRejectedValueOnce(
       new RecipeValidationError({
-        slug: ["Titeln genererar en ogiltig slug. Anvand bokstaver, siffror och bindestreck."],
+        slug: ["Titeln genererar en ogiltig slug. Använd bokstäver, siffror och bindestreck."],
       }),
     );
 
@@ -180,8 +177,8 @@ describe("AdminRecipeEditorPage", () => {
     );
     await user.clear(screen.getByLabelText(/bild-url/i));
     await user.type(screen.getByLabelText(/bild-url/i), "https://example.com/creme-brulee.jpg");
-    await user.type(screen.getByLabelText(/ingrediens 1/i), "Gradde");
-    await user.type(screen.getByLabelText(/steg 1/i), "Baka forsiktigt.");
+    await user.type(screen.getByLabelText(/ingrediens 1/i), "Grädde");
+    await user.type(screen.getByLabelText(/steg 1/i), "Baka försiktigt.");
 
     await user.click(screen.getByRole("button", { name: /skapa recept/i }));
 
@@ -196,7 +193,7 @@ describe("AdminRecipeEditorPage", () => {
     renderWithProviders(<AdminRecipeEditorPage mode="create" />);
 
     await user.type(screen.getByLabelText(/titel/i), "Citronpaj");
-    await user.type(screen.getByLabelText(/beskrivning/i), "En frisk och len citronpaj for helgen.");
+    await user.type(screen.getByLabelText(/beskrivning/i), "En frisk och len citronpaj för helgen.");
     await user.clear(screen.getByLabelText(/bild-url/i));
     await user.type(screen.getByLabelText(/bild-url/i), "https://example.com/citronpaj.jpg");
     await user.type(screen.getByLabelText(/ingrediens 1/i), "Citroner");
@@ -207,7 +204,7 @@ describe("AdminRecipeEditorPage", () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith("/admin/login?redirect=%2Fadmin%2Frecipes%2Fnew", {
         replace: true,
-        state: { feedbackMessage: "Logga in igen for att fortsatta administrera recepten." },
+        state: { feedbackMessage: "Logga in igen för att fortsätta administrera recepten." },
       });
     });
   });
@@ -217,7 +214,7 @@ describe("AdminRecipeEditorPage", () => {
 
     renderWithProviders(<AdminRecipeEditorPage mode="create" />);
 
-    expect(screen.getByText("skapas-fran-titeln")).toBeInTheDocument();
+    expect(screen.getByText("skapas-från-titeln")).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/titel/i), "Fresh Pasta Salad");
     await user.selectOptions(screen.getByLabelText(/kategori/i), "Lunch");
@@ -234,7 +231,7 @@ describe("AdminRecipeEditorPage", () => {
     expect(screen.getAllByText("Publicerad").length).toBeGreaterThan(1);
   });
 
-  it("shows the loading state for edit mode while recipe data is being fetched", async () => {
+  it("shows the loading state for edit mode while recipe data is being fetched", () => {
     recipeByIdQueryState = {
       data: undefined,
       isLoading: true,
@@ -260,7 +257,7 @@ describe("AdminRecipeEditorPage", () => {
         prepTimeMinutes: 25,
         servings: 4,
         imageUrl: "https://example.com/pancakes.jpg",
-        ingredients: ["Mjol", "Mjolk"],
+        ingredients: ["Mjöl", "Mjölk"],
         steps: ["Vispa ihop", "Stek"],
         isPublished: true,
       },
@@ -273,14 +270,14 @@ describe("AdminRecipeEditorPage", () => {
 
     await user.clear(screen.getByLabelText(/titel/i));
     await user.type(screen.getByLabelText(/titel/i), "Brown butter pancakes deluxe");
-    await user.click(screen.getByRole("button", { name: /spara andringar/i }));
+    await user.click(screen.getByRole("button", { name: /spara ändringar/i }));
 
     await waitFor(() => {
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: "1",
         input: expect.objectContaining({
           title: "Brown butter pancakes deluxe",
-          ingredients: ["Mjol", "Mjolk"],
+          ingredients: ["Mjöl", "Mjölk"],
           steps: ["Vispa ihop", "Stek"],
         }),
       });

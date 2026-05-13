@@ -71,7 +71,7 @@ describe("RecipeDetailsPage", () => {
       prepTimeMinutes: 25,
       servings: 4,
       imageUrl: "https://example.com/pancakes.jpg",
-      ingredients: ["Mjol", "Mjolk", "Smor"],
+      ingredients: ["Mjöl", "Mjölk", "Smör"],
       steps: ["Vispa ihop", "Stek", "Servera"],
       isPublished: true,
     };
