@@ -8,11 +8,16 @@ public sealed class GalleryService
 {
     private readonly IGalleryRepository _galleryRepository;
     private readonly TimeProvider _timeProvider;
+    private readonly ILogger<GalleryService> _logger;
 
-    public GalleryService(IGalleryRepository galleryRepository, TimeProvider timeProvider)
+    public GalleryService(
+        IGalleryRepository galleryRepository,
+        TimeProvider timeProvider,
+        ILogger<GalleryService> logger)
     {
         _galleryRepository = galleryRepository;
         _timeProvider = timeProvider;
+        _logger = logger;
     }
 
     public IReadOnlyList<GalleryImageResponse> GetAllImages() => _galleryRepository
@@ -27,16 +32,19 @@ public sealed class GalleryService
 
         if (string.IsNullOrWhiteSpace(normalizedImageUrl))
         {
+            _logger.LogWarning("Rejected gallery image create because image URL was empty");
             throw new ArgumentException("Image URL is required.");
         }
 
         if (!Uri.TryCreate(normalizedImageUrl, UriKind.Absolute, out _))
         {
+            _logger.LogWarning("Rejected gallery image create because image URL was invalid");
             throw new ArgumentException("Image URL must be an absolute URL.");
         }
 
         if (string.IsNullOrWhiteSpace(normalizedAltText))
         {
+            _logger.LogWarning("Rejected gallery image create because alt text was empty");
             throw new ArgumentException("Alt text is required.");
         }
 
@@ -48,10 +56,25 @@ public sealed class GalleryService
             CreatedAtUtc = _timeProvider.GetUtcNow()
         };
 
-        return MapToResponse(_galleryRepository.Add(image));
+        var createdImage = _galleryRepository.Add(image);
+        _logger.LogInformation("Created gallery image {GalleryImageId}", createdImage.Id);
+        return MapToResponse(createdImage);
     }
 
-    public bool DeleteImage(Guid id) => _galleryRepository.Delete(id);
+    public bool DeleteImage(Guid id)
+    {
+        var deleted = _galleryRepository.Delete(id);
+        if (deleted)
+        {
+            _logger.LogInformation("Deleted gallery image {GalleryImageId}", id);
+        }
+        else
+        {
+            _logger.LogWarning("Gallery image delete requested for missing id {GalleryImageId}", id);
+        }
+
+        return deleted;
+    }
 
     private static GalleryImageResponse MapToResponse(GalleryImage image) =>
         new(image.Id, image.ImageUrl, image.AltText, image.CreatedAtUtc);

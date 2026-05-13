@@ -1,0 +1,47 @@
+using Microsoft.AspNetCore.Mvc;
+using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Infrastructure;
+using RecipeApp.Api.Services;
+
+namespace RecipeApp.Api.Controllers;
+
+[ApiController]
+[Route("api/admin/gallery")]
+[AdminAuthorize]
+public sealed class AdminGalleryController : ControllerBase
+{
+    private readonly GalleryService _galleryService;
+
+    public AdminGalleryController(GalleryService galleryService)
+    {
+        _galleryService = galleryService;
+    }
+
+    [HttpGet]
+    public ActionResult<IReadOnlyList<GalleryImageResponse>> GetAllImages()
+    {
+        var images = _galleryService.GetAllImages();
+        return Ok(images);
+    }
+
+    [HttpPost]
+    public ActionResult<GalleryImageResponse> CreateImage([FromBody] CreateGalleryImageRequest request)
+    {
+        try
+        {
+            var createdImage = _galleryService.CreateImage(request);
+            return Created($"/api/admin/gallery/{createdImage.Id}", createdImage);
+        }
+        catch (ArgumentException exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    public IActionResult DeleteImage(Guid id)
+    {
+        var deleted = _galleryService.DeleteImage(id);
+        return deleted ? NoContent() : NotFound();
+    }
+}

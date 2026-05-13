@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using RecipeApp.Api.Data;
 using RecipeApp.Api.Domain;
@@ -22,7 +23,7 @@ public sealed class SqliteGalleryRepositoryTests : IDisposable
     {
         await using (var dbContext = CreateDbContext())
         {
-            var initializer = new RecipeDbInitializer(dbContext);
+            var initializer = new RecipeDbInitializer(dbContext, NullLogger<RecipeDbInitializer>.Instance);
             await initializer.InitializeAsync();
         }
 
@@ -100,7 +101,7 @@ public sealed class SqliteGalleryRepositoryTests : IDisposable
     private async Task InitializeDatabaseAsync()
     {
         await using var dbContext = CreateDbContext();
-        var initializer = new RecipeDbInitializer(dbContext);
+        var initializer = new RecipeDbInitializer(dbContext, NullLogger<RecipeDbInitializer>.Instance);
         await initializer.InitializeAsync();
     }
 

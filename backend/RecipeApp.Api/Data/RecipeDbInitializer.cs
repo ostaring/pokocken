@@ -7,14 +7,17 @@ namespace RecipeApp.Api.Data;
 public sealed class RecipeDbInitializer
 {
     private readonly RecipeDbContext _dbContext;
+    private readonly ILogger<RecipeDbInitializer> _logger;
 
-    public RecipeDbInitializer(RecipeDbContext dbContext)
+    public RecipeDbInitializer(RecipeDbContext dbContext, ILogger<RecipeDbInitializer> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Applying database migrations");
         await _dbContext.Database.MigrateAsync(cancellationToken);
 
         var hasRecipes = await _dbContext.Recipes.AnyAsync(cancellationToken);
@@ -22,6 +25,7 @@ public sealed class RecipeDbInitializer
 
         if (hasRecipes && hasGalleryImages)
         {
+            _logger.LogInformation("Database already contains recipe and gallery seed data");
             return;
         }
 
@@ -32,6 +36,7 @@ public sealed class RecipeDbInitializer
                 .ToList();
 
             await _dbContext.Recipes.AddRangeAsync(seedRecipeEntities, cancellationToken);
+            _logger.LogInformation("Queued {RecipeCount} seed recipes for initialization", seedRecipeEntities.Count);
         }
 
         if (!hasGalleryImages)
@@ -41,9 +46,13 @@ public sealed class RecipeDbInitializer
                 .ToList();
 
             await _dbContext.GalleryImages.AddRangeAsync(seedGalleryEntities, cancellationToken);
+            _logger.LogInformation(
+                "Queued {GalleryImageCount} seed gallery images for initialization",
+                seedGalleryEntities.Count);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("Database initialization completed");
     }
 
     internal static RecipeEntity MapToEntity(Recipe recipe) =>

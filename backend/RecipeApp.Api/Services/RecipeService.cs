@@ -7,10 +7,12 @@ namespace RecipeApp.Api.Services;
 public sealed class RecipeService
 {
     private readonly IRecipeRepository _recipeRepository;
+    private readonly ILogger<RecipeService> _logger;
 
-    public RecipeService(IRecipeRepository recipeRepository)
+    public RecipeService(IRecipeRepository recipeRepository, ILogger<RecipeService> logger)
     {
         _recipeRepository = recipeRepository;
+        _logger = logger;
     }
 
     public IReadOnlyList<RecipeResponse> GetPublishedRecipes(string? search, string? category)
@@ -62,6 +64,7 @@ public sealed class RecipeService
 
         if (_recipeRepository.GetBySlug(payload.Slug) is not null)
         {
+            _logger.LogWarning("Rejected recipe create because slug {RecipeSlug} already exists", payload.Slug);
             throw new InvalidOperationException($"A recipe with slug '{payload.Slug}' already exists.");
         }
 
@@ -80,7 +83,14 @@ public sealed class RecipeService
             Steps = payload.Steps
         };
 
-        return MapToResponse(_recipeRepository.Add(recipe));
+        var createdRecipe = _recipeRepository.Add(recipe);
+        _logger.LogInformation(
+            "Created recipe {RecipeSlug} with id {RecipeId} (published: {IsPublished})",
+            createdRecipe.Slug,
+            createdRecipe.Id,
+            createdRecipe.IsPublished);
+
+        return MapToResponse(createdRecipe);
     }
 
     public RecipeResponse? UpdateRecipe(string currentSlug, UpdateRecipeRequest request)
@@ -88,6 +98,7 @@ public sealed class RecipeService
         var existingRecipe = _recipeRepository.GetBySlug(currentSlug);
         if (existingRecipe is null)
         {
+            _logger.LogWarning("Recipe update requested for missing slug {RecipeSlug}", currentSlug);
             return null;
         }
 
@@ -98,6 +109,10 @@ public sealed class RecipeService
         if (conflictingRecipe is not null &&
             !string.Equals(conflictingRecipe.Slug, currentSlug, StringComparison.OrdinalIgnoreCase))
         {
+            _logger.LogWarning(
+                "Rejected recipe update from slug {CurrentSlug} to duplicate slug {TargetSlug}",
+                currentSlug,
+                payload.Slug);
             throw new InvalidOperationException($"A recipe with slug '{payload.Slug}' already exists.");
         }
 
@@ -116,10 +131,37 @@ public sealed class RecipeService
         };
 
         var storedRecipe = _recipeRepository.Replace(currentSlug, updatedRecipe);
-        return storedRecipe is null ? null : MapToResponse(storedRecipe);
+        if (storedRecipe is null)
+        {
+            _logger.LogWarning(
+                "Recipe replace returned null for slug {RecipeSlug} after successful lookup",
+                currentSlug);
+            return null;
+        }
+
+        _logger.LogInformation(
+            "Updated recipe {OriginalSlug} to slug {UpdatedSlug} (published: {IsPublished})",
+            currentSlug,
+            storedRecipe.Slug,
+            storedRecipe.IsPublished);
+
+        return MapToResponse(storedRecipe);
     }
 
-    public bool DeleteRecipe(string slug) => _recipeRepository.Delete(slug);
+    public bool DeleteRecipe(string slug)
+    {
+        var deleted = _recipeRepository.Delete(slug);
+        if (deleted)
+        {
+            _logger.LogInformation("Deleted recipe {RecipeSlug}", slug);
+        }
+        else
+        {
+            _logger.LogWarning("Recipe delete requested for missing slug {RecipeSlug}", slug);
+        }
+
+        return deleted;
+    }
 
     private static bool MatchesFilters(Recipe recipe, string? normalizedSearch, string? normalizedCategory) =>
         (string.IsNullOrWhiteSpace(normalizedSearch) ||

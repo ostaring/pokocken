@@ -1,6 +1,6 @@
+using RecipeApp.Api.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using RecipeApp.Api.Contracts;
 using RecipeApp.Api.Data;
 using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Repositories;
@@ -14,6 +14,8 @@ var sqliteConnectionString = builder.Configuration.GetConnectionString("RecipesD
 builder.Services.Configure<AdminAuthOptions>(builder.Configuration.GetSection("Admin"));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<AdminPasswordHasher>();
+builder.Services.AddScoped<AdminAuthorizationFilter>();
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
@@ -70,12 +72,24 @@ builder.Services.AddScoped<GalleryService>();
 
 var app = builder.Build();
 app.UseCors("FrontendDevClient");
+app.Logger.LogInformation(
+    "Starting RecipeApp API in {Environment} with persistence mode {PersistenceMode}",
+    app.Environment.EnvironmentName,
+    persistenceMode);
 
 if (string.Equals(persistenceMode, "Sqlite", StringComparison.OrdinalIgnoreCase))
 {
     using var scope = app.Services.CreateScope();
     var initializer = scope.ServiceProvider.GetRequiredService<RecipeDbInitializer>();
-    await initializer.InitializeAsync();
+    try
+    {
+        await initializer.InitializeAsync();
+    }
+    catch (Exception exception)
+    {
+        app.Logger.LogError(exception, "Database initialization failed");
+        throw;
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -85,172 +99,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
-app.MapGet("/health", () => Results.Ok(new
-{
-    status = "ok",
-    persistenceMode = builder.Configuration["Persistence:Mode"] ?? "Memory"
-}));
-
-app.MapGet("/api/recipes", (
-    string? search,
-    string? category,
-    RecipeService recipeService) =>
-{
-    var recipes = recipeService.GetPublishedRecipes(search, category);
-    return Results.Ok(recipes);
-});
-
-app.MapGet("/api/recipes/{slug}", (string slug, RecipeService recipeService) =>
-{
-    var recipe = recipeService.GetPublishedRecipeBySlug(slug);
-    return recipe is null ? Results.NotFound() : Results.Ok(recipe);
-});
-
-app.MapGet("/api/gallery", (GalleryService galleryService) =>
-{
-    var images = galleryService.GetAllImages();
-    return Results.Ok(images);
-});
-
-app.MapGet("/api/auth/me", (HttpContext httpContext, AdminSessionStore sessionStore) =>
-{
-    var session = sessionStore.GetSession(httpContext.Request.Cookies[AdminAuthConstants.SessionCookieName]);
-    return session is null ? Results.Unauthorized() : Results.Ok(new AdminSessionResponse(session.Username));
-});
-
-app.MapPost("/api/auth/login", (
-    LoginAdminRequest request,
-    HttpContext httpContext,
-    IOptions<AdminAuthOptions> authOptions,
-    AdminPasswordHasher passwordHasher,
-    AdminSessionStore sessionStore) =>
-{
-    var configuredUsername = authOptions.Value.Username;
-
-    if (!string.Equals(request.Username, configuredUsername, StringComparison.Ordinal) ||
-        !passwordHasher.Verify(
-            request.Password,
-            authOptions.Value.PasswordHash,
-            authOptions.Value.Password))
-    {
-        return Results.Unauthorized();
-    }
-
-    var session = sessionStore.CreateSession(configuredUsername!);
-    httpContext.Response.Cookies.Append(
-        AdminAuthConstants.SessionCookieName,
-        session.Id,
-        new CookieOptions
-        {
-            HttpOnly = true,
-            SameSite = SameSiteMode.Strict,
-            Secure = httpContext.Request.IsHttps,
-            IsEssential = true,
-            Expires = session.ExpiresAtUtc
-        });
-
-    return Results.Ok(new AdminSessionResponse(session.Username));
-});
-
-app.MapPost("/api/auth/logout", (HttpContext httpContext, AdminSessionStore sessionStore) =>
-{
-    var sessionId = httpContext.Request.Cookies[AdminAuthConstants.SessionCookieName];
-    sessionStore.RemoveSession(sessionId);
-    httpContext.Response.Cookies.Delete(AdminAuthConstants.SessionCookieName);
-    return Results.NoContent();
-});
-
-app.MapGet("/api/admin/recipes", (
-    string? search,
-    string? category,
-    RecipeService recipeService) =>
-{
-    var recipes = recipeService.GetAllRecipes(search, category);
-    return Results.Ok(recipes);
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapGet("/api/admin/recipes/{slug}", (string slug, RecipeService recipeService) =>
-{
-    var recipe = recipeService.GetRecipeBySlug(slug);
-    return recipe is null ? Results.NotFound() : Results.Ok(recipe);
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapPost("/api/admin/recipes", (CreateRecipeRequest request, RecipeService recipeService) =>
-{
-    var validationErrors = RecipeRequestValidator.Validate(request);
-    if (validationErrors.Count > 0)
-    {
-        return Results.ValidationProblem(validationErrors);
-    }
-
-    try
-    {
-        var createdRecipe = recipeService.CreateRecipe(request);
-        return Results.Created($"/api/admin/recipes/{createdRecipe.Slug}", createdRecipe);
-    }
-    catch (ArgumentException exception)
-    {
-        return Results.BadRequest(new { message = exception.Message });
-    }
-    catch (InvalidOperationException exception)
-    {
-        return Results.Conflict(new { message = exception.Message });
-    }
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapPut("/api/admin/recipes/{slug}", (string slug, UpdateRecipeRequest request, RecipeService recipeService) =>
-{
-    var validationErrors = RecipeRequestValidator.Validate(request);
-    if (validationErrors.Count > 0)
-    {
-        return Results.ValidationProblem(validationErrors);
-    }
-
-    try
-    {
-        var updatedRecipe = recipeService.UpdateRecipe(slug, request);
-        return updatedRecipe is null ? Results.NotFound() : Results.Ok(updatedRecipe);
-    }
-    catch (ArgumentException exception)
-    {
-        return Results.BadRequest(new { message = exception.Message });
-    }
-    catch (InvalidOperationException exception)
-    {
-        return Results.Conflict(new { message = exception.Message });
-    }
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapDelete("/api/admin/recipes/{slug}", (string slug, RecipeService recipeService) =>
-{
-    var deleted = recipeService.DeleteRecipe(slug);
-    return deleted ? Results.NoContent() : Results.NotFound();
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapGet("/api/admin/gallery", (GalleryService galleryService) =>
-{
-    var images = galleryService.GetAllImages();
-    return Results.Ok(images);
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapPost("/api/admin/gallery", (CreateGalleryImageRequest request, GalleryService galleryService) =>
-{
-    try
-    {
-        var createdImage = galleryService.CreateImage(request);
-        return Results.Created($"/api/admin/gallery/{createdImage.Id}", createdImage);
-    }
-    catch (ArgumentException exception)
-    {
-        return Results.BadRequest(new { message = exception.Message });
-    }
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
-
-app.MapDelete("/api/admin/gallery/{id:guid}", (Guid id, GalleryService galleryService) =>
-{
-    var deleted = galleryService.DeleteImage(id);
-    return deleted ? Results.NoContent() : Results.NotFound();
-}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+app.MapControllers();
 
 app.Run();
 

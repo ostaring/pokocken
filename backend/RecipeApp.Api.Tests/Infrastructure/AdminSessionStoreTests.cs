@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using RecipeApp.Api.Infrastructure;
 using Xunit;
@@ -14,7 +15,7 @@ public sealed class AdminSessionStoreTests
         {
             SessionDurationHours = 1
         });
-        var sessionStore = new AdminSessionStore(timeProvider, options);
+        var sessionStore = new AdminSessionStore(timeProvider, options, NullLogger<AdminSessionStore>.Instance);
 
         var session = sessionStore.CreateSession("admin");
         timeProvider.Advance(TimeSpan.FromHours(2));
@@ -33,7 +34,7 @@ public sealed class AdminSessionStoreTests
         {
             SessionDurationHours = 12
         });
-        var sessionStore = new AdminSessionStore(timeProvider, options);
+        var sessionStore = new AdminSessionStore(timeProvider, options, NullLogger<AdminSessionStore>.Instance);
 
         var session = sessionStore.CreateSession("admin");
 

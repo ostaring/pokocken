@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using RecipeApp.Api.Data;
 using Xunit;
 
@@ -21,7 +22,7 @@ public sealed class RecipeDbInitializerTests : IDisposable
     {
         await using (var dbContext = CreateDbContext())
         {
-            var initializer = new RecipeDbInitializer(dbContext);
+            var initializer = new RecipeDbInitializer(dbContext, NullLogger<RecipeDbInitializer>.Instance);
             await initializer.InitializeAsync();
         }
 
@@ -45,7 +46,7 @@ public sealed class RecipeDbInitializerTests : IDisposable
     {
         await using (var dbContext = CreateDbContext())
         {
-            var initializer = new RecipeDbInitializer(dbContext);
+            var initializer = new RecipeDbInitializer(dbContext, NullLogger<RecipeDbInitializer>.Instance);
             await initializer.InitializeAsync();
             await initializer.InitializeAsync();
         }
