@@ -17,16 +17,32 @@ public sealed class RecipeDbInitializer
     {
         await _dbContext.Database.MigrateAsync(cancellationToken);
 
-        if (await _dbContext.Recipes.AnyAsync(cancellationToken))
+        var hasRecipes = await _dbContext.Recipes.AnyAsync(cancellationToken);
+        var hasGalleryImages = await _dbContext.GalleryImages.AnyAsync(cancellationToken);
+
+        if (hasRecipes && hasGalleryImages)
         {
             return;
         }
 
-        var seedEntities = RecipeSeedData.CreateRecipes()
-            .Select(MapToEntity)
-            .ToList();
+        if (!hasRecipes)
+        {
+            var seedRecipeEntities = RecipeSeedData.CreateRecipes()
+                .Select(MapToEntity)
+                .ToList();
 
-        await _dbContext.Recipes.AddRangeAsync(seedEntities, cancellationToken);
+            await _dbContext.Recipes.AddRangeAsync(seedRecipeEntities, cancellationToken);
+        }
+
+        if (!hasGalleryImages)
+        {
+            var seedGalleryEntities = GallerySeedData.CreateImages()
+                .Select(GalleryDbMapper.MapToEntity)
+                .ToList();
+
+            await _dbContext.GalleryImages.AddRangeAsync(seedGalleryEntities, cancellationToken);
+        }
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

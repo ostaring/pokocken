@@ -29,7 +29,7 @@ describe("HomePage", () => {
     expect(screen.getByText("Laddar utvalda recept...")).toBeInTheDocument();
   });
 
-  it("renders featured recipes and public entry actions", () => {
+  it("renders featured recipes together with public navigation actions", () => {
     mockUseRecipesQuery.mockReturnValue({
       data: [
         {
@@ -72,6 +72,7 @@ describe("HomePage", () => {
       "href",
       "/recipes",
     );
+    expect(screen.getByRole("link", { name: /se galleriet/i })).toHaveAttribute("href", "/gallery");
     expect(screen.queryByRole("link", { name: /öppna admin/i })).not.toBeInTheDocument();
   });
 

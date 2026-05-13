@@ -13,12 +13,20 @@ export function HomePage() {
       title="Recept samlade för vardag, helg och allt däremellan."
       description="Här finns recepten jag vill kunna dela med familj och vänner utan att behöva skriva om dem varje gång. Enkelt att hitta tillbaka till, lätt att laga från."
       actions={
-        <Link
-          className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:text-white focus-visible:text-white"
-          to="/recipes"
-        >
-          Utforska recept
-        </Link>
+        <>
+          <Link
+            className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:text-white focus-visible:text-white"
+            to="/recipes"
+          >
+            Utforska recept
+          </Link>
+          <Link
+            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-white/70"
+            to="/gallery"
+          >
+            Se galleriet
+          </Link>
+        </>
       }
     >
       <div className="space-y-8">
@@ -47,9 +55,9 @@ export function HomePage() {
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-semibold">Egna favoriter</p>
+                <p className="text-sm font-semibold">Matgalleri</p>
                 <p className="mt-2 text-sm text-white/70">
-                  Recepten här är till för att användas om och om igen, inte bara inspirera.
+                  Små köksögonblick får också en egen plats när recepten inte räcker till.
                 </p>
               </div>
             </div>
@@ -73,9 +81,9 @@ export function HomePage() {
                 </p>
               </li>
               <li className="rounded-2xl bg-slate-100 px-4 py-4">
-                <p className="text-sm font-semibold text-slate-900">3. Dela vidare enkelt</p>
+                <p className="text-sm font-semibold text-slate-900">3. Kika i galleriet</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  När någon frågar efter receptet räcker det att dela länken hit.
+                  När du bara vill ha inspiration kan du bläddra bland matbilderna och förstora dem.
                 </p>
               </li>
             </ol>

@@ -10,6 +10,7 @@ public sealed class RecipeDbContext : DbContext
     }
 
     public DbSet<RecipeEntity> Recipes => Set<RecipeEntity>();
+    public DbSet<GalleryImageEntity> GalleryImages => Set<GalleryImageEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,5 +26,13 @@ public sealed class RecipeDbContext : DbContext
         recipe.Property(entity => entity.ImageUrl).HasMaxLength(2000).IsRequired();
         recipe.Property(entity => entity.IngredientsJson).IsRequired();
         recipe.Property(entity => entity.StepsJson).IsRequired();
+
+        var galleryImage = modelBuilder.Entity<GalleryImageEntity>();
+
+        galleryImage.ToTable("GalleryImages");
+        galleryImage.HasKey(entity => entity.Id);
+        galleryImage.Property(entity => entity.ImageUrl).HasMaxLength(2000).IsRequired();
+        galleryImage.Property(entity => entity.AltText).HasMaxLength(400).IsRequired();
+        galleryImage.Property(entity => entity.CreatedAtUtc).IsRequired();
     }
 }

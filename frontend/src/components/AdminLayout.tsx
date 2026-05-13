@@ -65,6 +65,12 @@ export function AdminLayout({ title, description, actions, children }: AdminLayo
               </Link>
               <Link
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-800 transition hover:border-slate-300 hover:bg-white/80"
+                to="/admin/gallery"
+              >
+                Galleri
+              </Link>
+              <Link
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-800 transition hover:border-slate-300 hover:bg-white/80"
                 to="/recipes"
               >
                 Visa publika sidan

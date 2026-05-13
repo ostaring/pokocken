@@ -28,6 +28,12 @@ describe("AppRoutes", () => {
     expect(screen.getByRole("heading", { name: "Recept att hitta tillbaka till" })).toBeInTheDocument();
   });
 
+  it("renders the gallery route", () => {
+    renderWithMemoryRouter(<AppRoutes />, ["/gallery"]);
+
+    expect(screen.getByRole("heading", { name: "Matgalleri" })).toBeInTheDocument();
+  });
+
   it("renders the not found page for unknown routes", () => {
     renderWithMemoryRouter(<AppRoutes />, ["/den-har-sidan-finns-inte"]);
 

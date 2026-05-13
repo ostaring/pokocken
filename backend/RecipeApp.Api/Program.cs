@@ -42,6 +42,7 @@ if (string.Equals(persistenceMode, "Sqlite", StringComparison.OrdinalIgnoreCase)
         options.UseSqlite(sqliteConnectionString);
     });
     builder.Services.AddScoped<IRecipeRepository, SqliteRecipeRepository>();
+    builder.Services.AddScoped<IGalleryRepository, SqliteGalleryRepository>();
     builder.Services.AddScoped<RecipeDbInitializer>();
 }
 else if (string.Equals(persistenceMode, "File", StringComparison.OrdinalIgnoreCase))
@@ -51,14 +52,21 @@ else if (string.Equals(persistenceMode, "File", StringComparison.OrdinalIgnoreCa
         var storagePath = builder.Configuration["Persistence:RecipesFilePath"];
         return new FileRecipeRepository(storagePath!);
     });
+    builder.Services.AddSingleton<IGalleryRepository>(_ =>
+    {
+        var storagePath = builder.Configuration["Persistence:GalleryFilePath"];
+        return new FileGalleryRepository(storagePath!);
+    });
 }
 else
 {
     builder.Services.AddSingleton<IRecipeRepository, InMemoryRecipeRepository>();
+    builder.Services.AddSingleton<IGalleryRepository, InMemoryGalleryRepository>();
 }
 
 builder.Services.AddSingleton<AdminSessionStore>();
 builder.Services.AddScoped<RecipeService>();
+builder.Services.AddScoped<GalleryService>();
 
 var app = builder.Build();
 app.UseCors("FrontendDevClient");
@@ -96,6 +104,12 @@ app.MapGet("/api/recipes/{slug}", (string slug, RecipeService recipeService) =>
 {
     var recipe = recipeService.GetPublishedRecipeBySlug(slug);
     return recipe is null ? Results.NotFound() : Results.Ok(recipe);
+});
+
+app.MapGet("/api/gallery", (GalleryService galleryService) =>
+{
+    var images = galleryService.GetAllImages();
+    return Results.Ok(images);
 });
 
 app.MapGet("/api/auth/me", (HttpContext httpContext, AdminSessionStore sessionStore) =>
@@ -210,6 +224,31 @@ app.MapPut("/api/admin/recipes/{slug}", (string slug, UpdateRecipeRequest reques
 app.MapDelete("/api/admin/recipes/{slug}", (string slug, RecipeService recipeService) =>
 {
     var deleted = recipeService.DeleteRecipe(slug);
+    return deleted ? Results.NoContent() : Results.NotFound();
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+
+app.MapGet("/api/admin/gallery", (GalleryService galleryService) =>
+{
+    var images = galleryService.GetAllImages();
+    return Results.Ok(images);
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+
+app.MapPost("/api/admin/gallery", (CreateGalleryImageRequest request, GalleryService galleryService) =>
+{
+    try
+    {
+        var createdImage = galleryService.CreateImage(request);
+        return Results.Created($"/api/admin/gallery/{createdImage.Id}", createdImage);
+    }
+    catch (ArgumentException exception)
+    {
+        return Results.BadRequest(new { message = exception.Message });
+    }
+}).AddEndpointFilter<AdminApiKeyEndpointFilter>();
+
+app.MapDelete("/api/admin/gallery/{id:guid}", (Guid id, GalleryService galleryService) =>
+{
+    var deleted = galleryService.DeleteImage(id);
     return deleted ? Results.NoContent() : Results.NotFound();
 }).AddEndpointFilter<AdminApiKeyEndpointFilter>();
 
