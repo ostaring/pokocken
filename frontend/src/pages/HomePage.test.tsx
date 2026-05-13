@@ -63,7 +63,7 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Matlagning som känns lugn, tydlig och enkel att komma tillbaka till.",
+        name: "Recept samlade för vardag, helg och allt däremellan.",
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe("HomePage", () => {
       "href",
       "/recipes",
     );
-    expect(screen.getByRole("link", { name: /öppna admin/i })).toHaveAttribute("href", "/admin");
+    expect(screen.queryByRole("link", { name: /öppna admin/i })).not.toBeInTheDocument();
   });
 
   it("shows an error state when featured recipes cannot be loaded", () => {

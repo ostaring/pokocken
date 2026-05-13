@@ -10,54 +10,46 @@ export function HomePage() {
   return (
     <PageFrame
       eyebrow="Pokocken"
-      title="Matlagning som känns lugn, tydlig och enkel att komma tillbaka till."
-      description="En svensk receptapp med publika recept, tydliga steg och ett adminflöde där du kan bygga upp ditt eget receptbibliotek över tid."
+      title="Recept samlade för vardag, helg och allt däremellan."
+      description="Här finns recepten jag vill kunna dela med familj och vänner utan att behöva skriva om dem varje gång. Enkelt att hitta tillbaka till, lätt att laga från."
       actions={
-        <>
-          <Link
-            className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:text-white focus-visible:text-white"
-            to="/recipes"
-          >
-            Utforska recept
-          </Link>
-          <Link
-            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-white/70"
-            to="/admin"
-          >
-            Öppna admin
-          </Link>
-        </>
+        <Link
+          className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:text-white focus-visible:text-white"
+          to="/recipes"
+        >
+          Utforska recept
+        </Link>
       }
     >
       <div className="space-y-8">
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
           <div className="rounded-[1.75rem] bg-slate-900 px-6 py-7 text-white">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/60">
-              Varför appen finns
+              För familj och vänner
             </p>
-            <h2 className="mt-3 text-3xl font-semibold">Allt samlat på ett ställe</h2>
+            <h2 className="mt-3 text-3xl font-semibold">Alla favoriter på ett ställe</h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/80">
-              Recepten ska vara enkla att hitta, snabba att laga och lätta att underhålla. Den
-              publika delen fokuserar på läsbarhet och inspiration medan adminytan är byggd för
-              att du ska kunna redigera, publicera och strukturera innehållet utan extra brus.
+              Pokocken är min egen receptsamling för sådant jag vill laga igen och kunna dela vidare.
+              Här ska det vara lätt att hitta rätt rätt, se ingredienserna direkt och följa stegen utan
+              att behöva leta bland gamla chattar, anteckningar eller lösa länkar.
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-semibold">Publika recept</p>
+                <p className="text-sm font-semibold">Lätt att dela</p>
                 <p className="mt-2 text-sm text-white/70">
-                  Bläddra, filtrera och öppna detaljerade receptkort.
+                  Skicka en länk i stället för att skriva om receptet från början.
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                 <p className="text-sm font-semibold">Tydliga steg</p>
                 <p className="mt-2 text-sm text-white/70">
-                  Ingredienser och tillagningssteg presenteras separat och luftigt.
+                  Ingredienser, tid och tillagning finns samlat i ett lugnt format.
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-semibold">Adminflöde</p>
+                <p className="text-sm font-semibold">Egna favoriter</p>
                 <p className="mt-2 text-sm text-white/70">
-                  Skapa, uppdatera och publicera recept i samma verktyg.
+                  Recepten här är till för att användas om och om igen, inte bara inspirera.
                 </p>
               </div>
             </div>
@@ -65,25 +57,25 @@ export function HomePage() {
 
           <aside className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-6">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
-              Snabbstart
+              Så använder du sidan
             </p>
             <ol className="mt-5 space-y-4">
               <li className="rounded-2xl bg-emerald-50 px-4 py-4">
-                <p className="text-sm font-semibold text-slate-900">1. Hitta ett recept</p>
+                <p className="text-sm font-semibold text-slate-900">1. Bläddra bland recepten</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Börja i receptlistan och filtrera fram det du är sugen på.
+                  Börja i receptlistan och filtrera fram det som passar dagen.
                 </p>
               </li>
               <li className="rounded-2xl bg-orange-50 px-4 py-4">
-                <p className="text-sm font-semibold text-slate-900">2. Öppna detaljsidan</p>
+                <p className="text-sm font-semibold text-slate-900">2. Öppna det du vill laga</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Få översikt över tid, portioner, ingredienser och steg.
+                  Se tid, portioner, ingredienser och tillagningssteg samlat på ett ställe.
                 </p>
               </li>
               <li className="rounded-2xl bg-slate-100 px-4 py-4">
-                <p className="text-sm font-semibold text-slate-900">3. Hantera innehåll i admin</p>
+                <p className="text-sm font-semibold text-slate-900">3. Dela vidare enkelt</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  När du är inloggad kan du skapa och redigera recepten själv.
+                  När någon frågar efter receptet räcker det att dela länken hit.
                 </p>
               </li>
             </ol>

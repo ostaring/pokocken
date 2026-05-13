@@ -15,7 +15,7 @@ export function RecipeDetailsPage() {
 
   if (recipeQuery.isLoading) {
     return (
-      <PageFrame eyebrow="Publikt" title="Laddar recept" description="Hämtar receptdetaljer.">
+      <PageFrame eyebrow="Recept" title="Laddar recept" description="Hämtar receptdetaljer.">
         <p className="text-slate-700">Laddar receptdetaljer...</p>
       </PageFrame>
     );
@@ -24,7 +24,7 @@ export function RecipeDetailsPage() {
   if (recipeQuery.isError) {
     return (
       <PageFrame
-        eyebrow="Publikt"
+        eyebrow="Recept"
         title="Receptet är inte tillgängligt"
         description="Något gick fel när receptet skulle laddas."
       >
@@ -36,9 +36,9 @@ export function RecipeDetailsPage() {
   if (!recipe) {
     return (
       <PageFrame
-        eyebrow="Publikt"
+        eyebrow="Recept"
         title="Receptet hittades inte"
-        description="Vi kunde inte hitta något recept som matchar den här sluggen."
+        description="Vi kunde inte hitta något recept som matchar länken du öppnade."
         actions={
           <Link
             className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
@@ -49,7 +49,7 @@ export function RecipeDetailsPage() {
         }
       >
         <p className="text-slate-700">
-          Den här routen är redo för backenddriven hantering av saknade recept senare.
+          Prova att gå tillbaka till receptlistan och välj ett annat recept därifrån.
         </p>
       </PageFrame>
     );
@@ -57,7 +57,7 @@ export function RecipeDetailsPage() {
 
   return (
     <PageFrame
-      eyebrow="Publikt"
+      eyebrow="Recept"
       title={recipe.title}
       description={recipe.description}
       actions={
@@ -108,12 +108,6 @@ export function RecipeDetailsPage() {
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-white/60">Portioner</p>
                 <p className="mt-1 text-lg font-semibold">{recipe.servings}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-white/60">Status</p>
-                <p className="mt-1 text-lg font-semibold">
-                  {recipe.isPublished ? "Publicerat" : "Utkast"}
-                </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-white/60">Ingredienser</p>

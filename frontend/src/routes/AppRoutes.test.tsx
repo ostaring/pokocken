@@ -25,7 +25,7 @@ describe("AppRoutes", () => {
   it("renders the public recipe list route", () => {
     renderWithMemoryRouter(<AppRoutes />, ["/recipes"]);
 
-    expect(screen.getByRole("heading", { name: "Recept" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recept att hitta tillbaka till" })).toBeInTheDocument();
   });
 
   it("renders the not found page for unknown routes", () => {

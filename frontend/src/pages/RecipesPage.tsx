@@ -48,9 +48,9 @@ export function RecipesPage() {
 
   return (
     <PageFrame
-      eyebrow="Publikt"
-      title="Recept"
-      description="Bläddra bland recept, filtrera på kategori och hitta snabbt tillbaka till rätt vardagsfavorit eller helgmiddag."
+      eyebrow="Pokocken"
+      title="Recept att hitta tillbaka till"
+      description="Bläddra bland recepten, filtrera på kategori och hitta snabbt det du vill laga eller dela vidare."
       actions={
         <Link
           className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
@@ -138,7 +138,9 @@ export function RecipesPage() {
             Visar <span className="font-semibold text-slate-900">{filteredRecipes.length}</span>{" "}
             recept
           </p>
-          <p className="text-sm text-slate-500">Sökning och filter skickas vidare i datalagret.</p>
+          <p className="text-sm text-slate-500">
+            Spara gärna länken till dina favoriter och dela vidare.
+          </p>
         </div>
 
         {!recipesQuery.isLoading && !recipesQuery.isError && filteredRecipes.length > 0 ? (
