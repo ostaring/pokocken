@@ -8,9 +8,9 @@ namespace RecipeApp.Api.Controllers;
 [Route("api/gallery")]
 public sealed class GalleryController : ControllerBase
 {
-    private readonly GalleryService _galleryService;
+    private readonly IGalleryService _galleryService;
 
-    public GalleryController(GalleryService galleryService)
+    public GalleryController(IGalleryService galleryService)
     {
         _galleryService = galleryService;
     }

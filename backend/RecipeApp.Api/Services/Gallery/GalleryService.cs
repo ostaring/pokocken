@@ -4,7 +4,7 @@ using RecipeApp.Api.Repositories;
 
 namespace RecipeApp.Api.Services;
 
-public sealed class GalleryService
+public sealed class GalleryService : IGalleryService
 {
     private readonly IGalleryRepository _galleryRepository;
     private readonly TimeProvider _timeProvider;

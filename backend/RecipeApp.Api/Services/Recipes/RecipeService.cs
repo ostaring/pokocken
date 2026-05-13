@@ -4,7 +4,7 @@ using RecipeApp.Api.Repositories;
 
 namespace RecipeApp.Api.Services;
 
-public sealed class RecipeService
+public sealed class RecipeService : IRecipeService
 {
     private readonly IRecipeRepository _recipeRepository;
     private readonly ILogger<RecipeService> _logger;

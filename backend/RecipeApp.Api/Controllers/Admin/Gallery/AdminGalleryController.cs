@@ -10,9 +10,9 @@ namespace RecipeApp.Api.Controllers;
 [AdminAuthorize]
 public sealed class AdminGalleryController : ControllerBase
 {
-    private readonly GalleryService _galleryService;
+    private readonly IGalleryService _galleryService;
 
-    public AdminGalleryController(GalleryService galleryService)
+    public AdminGalleryController(IGalleryService galleryService)
     {
         _galleryService = galleryService;
     }

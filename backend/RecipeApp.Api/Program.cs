@@ -67,8 +67,8 @@ else
 }
 
 builder.Services.AddSingleton<AdminSessionStore>();
-builder.Services.AddScoped<RecipeService>();
-builder.Services.AddScoped<GalleryService>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IGalleryService, GalleryService>();
 
 var app = builder.Build();
 app.UseCors("FrontendDevClient");

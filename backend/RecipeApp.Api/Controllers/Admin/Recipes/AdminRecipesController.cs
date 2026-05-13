@@ -10,9 +10,9 @@ namespace RecipeApp.Api.Controllers;
 [AdminAuthorize]
 public sealed class AdminRecipesController : ControllerBase
 {
-    private readonly RecipeService _recipeService;
+    private readonly IRecipeService _recipeService;
 
-    public AdminRecipesController(RecipeService recipeService)
+    public AdminRecipesController(IRecipeService recipeService)
     {
         _recipeService = recipeService;
     }
