@@ -1,0 +1,33 @@
+@startuml
+title Backend DI Runtime Flow
+
+actor Client
+participant "ASP.NET Core\nRouting" as Routing
+participant "AdminRecipesController" as Controller
+participant "IRecipeService" as IService
+participant "RecipeService" as Service
+participant "IRecipeRepository" as IRepository
+participant "SqliteRecipeRepository" as Repository
+database "RecipeDbContext" as DbContext
+
+Client -> Routing: HTTP GET /api/admin/recipes
+Routing -> Controller: Resolve controller from DI
+note right of Routing
+Program.cs has registered:
+- AddControllers()
+- AddScoped<IRecipeService, RecipeService>()
+- AddScoped<IRecipeRepository, SqliteRecipeRepository>()
+end note
+
+Controller -> IService: GetAllRecipes(search, category)
+IService -> Service: RecipeService instance
+Service -> IRepository: GetAll()
+IRepository -> Repository: SqliteRecipeRepository instance
+Repository -> DbContext: Recipes.ToList()
+DbContext --> Repository: Recipe entities
+Repository --> Service: Domain recipes
+Service --> Controller: RecipeResponse list
+Controller --> Routing: Ok(...)
+Routing --> Client: HTTP 200 JSON
+
+@enduml

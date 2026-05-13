@@ -11,7 +11,7 @@ Fullstack-repo for en svensk receptapp med React i frontend och ASP.NET Core i b
 ## Stack
 
 - frontend: React, TypeScript, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS
-- backend: ASP.NET Core minimal API, .NET 10, xUnit, EF Core, SQLite
+- backend: ASP.NET Core controllers, .NET 10, xUnit, EF Core, SQLite
 
 ## Kom Igang
 
@@ -92,10 +92,10 @@ dotnet test .\RecipeApp.sln
 - admineditor for att skapa och redigera recept
 - explicit 404-sida i frontend
 - SQLite-baserad backend i utvecklingslage
+- interface-baserad dependency injection for service- och repositorylager
 - health-endpoint for lokal diagnostik
 
 ## Vidare Arbete
 
-- lagga till migrationer och fler databashardningar runt EF Core-lagret
 - ersatta bootstrap-auth med mer riktig autentisering
 - lagga till e2e-tester nar huvudflodena satt sig helt

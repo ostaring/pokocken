@@ -30,6 +30,8 @@ Det ar fullt mojligt att senare komplettera med Mermaid for enklare README-visua
   Visar exakt funktionskedja for adminlogin.
 - `09-admin-save-recipe-function-sequence.puml`
   Visar exakt funktionskedja for admin skapa/uppdatera recept.
+- `10-backend-di-runtime-flow.puml`
+  Visar hur ASP.NET Core, controllers, serviceinterfaces, services och repositories kopplas ihop under runtime.
 
 ## Viktiga use cases som dokumenteras
 
@@ -39,6 +41,7 @@ Det ar fullt mojligt att senare komplettera med Mermaid for enklare README-visua
 4. Admin hamtar recept i dashboard.
 5. Admin skapar eller uppdaterar recept.
 6. Backend valjer repository beroende pa konfiguration.
+7. Dependency injection skapar controller- och servicekedjan under runtime.
 
 ## Diagramnivaer
 
@@ -72,14 +75,16 @@ Frontend:
 Backend:
 
 - `backend/RecipeApp.Api/Program.cs`
-- `backend/RecipeApp.Api/Services/RecipeService.cs`
-- `backend/RecipeApp.Api/Infrastructure/AdminApiKeyEndpointFilter.cs`
-- `backend/RecipeApp.Api/Repositories/IRecipeRepository.cs`
-- `backend/RecipeApp.Api/Repositories/InMemoryRecipeRepository.cs`
-- `backend/RecipeApp.Api/Repositories/FileRecipeRepository.cs`
-- `backend/RecipeApp.Api/Repositories/SqliteRecipeRepository.cs`
-- `backend/RecipeApp.Api/Data/RecipeDbContext.cs`
-- `backend/RecipeApp.Api/Data/RecipeDbInitializer.cs`
+- `backend/RecipeApp.Api/Controllers/Admin/Recipes/AdminRecipesController.cs`
+- `backend/RecipeApp.Api/Services/Recipes/IRecipeService.cs`
+- `backend/RecipeApp.Api/Services/Recipes/RecipeService.cs`
+- `backend/RecipeApp.Api/Infrastructure/Auth/AdminAuthorizationFilter.cs`
+- `backend/RecipeApp.Api/Repositories/Recipes/IRecipeRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Recipes/InMemoryRecipeRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Recipes/FileRecipeRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Recipes/SqliteRecipeRepository.cs`
+- `backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs`
+- `backend/RecipeApp.Api/Data/Initialization/RecipeDbInitializer.cs`
 
 ## Hur man renderar
 
@@ -98,6 +103,7 @@ Om du kor VS Code ar PlantUML-plugin eller IntelliJ-plugin ocksa ett bra alterna
 2. fortsatt med sekvensdiagrammen `02` och `03`
 3. ga sedan till `04-backend-class-overview.puml`
 4. ga vidare till funktionssekvenserna `06` till `09`
-5. avsluta med `05-persistence-modes.puml`
+5. titta sedan pa `10-backend-di-runtime-flow.puml`
+6. avsluta med `05-persistence-modes.puml`
 
 Det ger forst helhetsbilden, sedan use cases, och sist implementation och driftval.
