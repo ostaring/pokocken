@@ -16,22 +16,22 @@ import {
 
 export type { SaveGalleryImageInput } from "@/lib/api/gallery/mock/gallery-adapter";
 
-function useHttpApi() {
+function shouldUseHttpApi() {
   return resolveAppConfig().apiMode === "http";
 }
 
 export async function fetchGalleryImages(): Promise<GalleryImage[]> {
-  return useHttpApi() ? fetchGalleryImagesHttp() : fetchGalleryImagesMock();
+  return shouldUseHttpApi() ? fetchGalleryImagesHttp() : fetchGalleryImagesMock();
 }
 
 export async function fetchAdminGalleryImages(): Promise<GalleryImage[]> {
-  return useHttpApi() ? fetchAdminGalleryImagesHttp() : fetchAdminGalleryImagesMock();
+  return shouldUseHttpApi() ? fetchAdminGalleryImagesHttp() : fetchAdminGalleryImagesMock();
 }
 
 export async function createGalleryImage(input: SaveGalleryImageInput): Promise<GalleryImage> {
-  return useHttpApi() ? createGalleryImageHttp(input) : createGalleryImageMock(input);
+  return shouldUseHttpApi() ? createGalleryImageHttp(input) : createGalleryImageMock(input);
 }
 
 export async function deleteGalleryImage(id: string): Promise<void> {
-  return useHttpApi() ? deleteGalleryImageHttp(id) : deleteGalleryImageMock(id);
+  return shouldUseHttpApi() ? deleteGalleryImageHttp(id) : deleteGalleryImageMock(id);
 }
