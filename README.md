@@ -1,111 +1,83 @@
-# Recipe App
+# Pokocken
 
-Fullstack-repo for en svensk receptapp med React i frontend och ASP.NET Core i backend.
+Pokocken ar en fullstack-receptapp for familj och vanner. Den publika delen visar recept och galleri, medan adminytan anvands for att logga in, skapa recept, publicera recept och hantera galleribilder.
 
-## Delprojekt
+## Projekt
 
-- `frontend/` innehaller den publika webbappen och admingranssnittet
-- `backend/` innehaller API, auth-bootstrap, PostgreSQL-persistens och tester
-- `docs/` innehaller system- och arkitekturdokumentation
-- `tools/` innehaller lokal Node-runtime som frontendens skript anvander
+- `frontend/` - React, TypeScript, Vite, React Router, TanStack Query och Tailwind CSS.
+- `backend/` - ASP.NET Core API med controllers, services, repositories, EF Core och PostgreSQL.
+- `docs/` - systemdokumentation och arkitekturanteckningar.
 
-## Stack
+## Systemkrav
 
-- frontend: React, TypeScript, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS
-- backend: ASP.NET Core controllers, .NET 10, xUnit, EF Core, PostgreSQL
-- lokal drift: Docker Compose for backend + PostgreSQL
-- backendtester: Testcontainers for PostgreSQL-integrationsfloden
+- Git
+- Node.js och npm for frontend
+- .NET SDK for backend och tester
+- Docker Desktop med WSL 2-integration for PostgreSQL och Docker Compose
 
-## Kom Igang
+I WSL bor `node`, `npm` och `docker` komma fran Linux/WSL-miljon:
 
-### Frontend i mock-lage
+```bash
+which node
+which npm
+docker version
+```
 
-```powershell
+## Launch
+
+Frontend med mockdata:
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Frontend startar da mot mockdata.
+Backend och PostgreSQL:
 
-### Backend + PostgreSQL via Docker Compose
-
-Fran repo-roten:
-
-```powershell
+```bash
 docker compose up --build
 ```
 
-Det startar:
+Backend finns pa `http://localhost:5080`, med `/health` och `/swagger`. Frontend finns normalt pa `http://localhost:5173`.
 
-- PostgreSQL pa `localhost:5432`
-- backend pa `http://localhost:5080`
+## Kora Fullstack
 
-Snabbkontroller for backend:
+Starta backend och PostgreSQL med Docker Compose. Skapa sedan en lokal frontend-env:
 
-- `http://localhost:5080/health`
-- `http://localhost:5080/swagger`
-
-### Fullstack med frontend lokalt
-
-Starta backend och databas via Docker Compose enligt ovan. Starta sedan frontend i ett annat terminalfonster:
-
-```powershell
+```bash
 cd frontend
-copy .env.example .env.local
+cp .env.example .env.local
 ```
 
-Satt i `frontend/.env.local`:
+Satt:
 
 ```env
 VITE_API_MODE=http
 VITE_API_BASE_URL=http://localhost:5080
 ```
 
-Och starta frontend:
+Starta frontend:
 
-```powershell
-cd frontend
+```bash
 npm run dev
 ```
 
 ## Tester
 
-Frontend:
-
-```powershell
+```bash
 cd frontend
-npm run test -- --run
+npm run lint
+npm run test
 npm run build
 ```
 
-Backend:
-
-```powershell
+```bash
 cd backend
-dotnet build .\RecipeApp.sln
-dotnet test .\RecipeApp.sln
+dotnet build ./RecipeApp.sln
+dotnet test ./RecipeApp.sln
 ```
 
 Backendtesterna anvander Testcontainers och kraver att Docker ar igang.
 
-## Nuvarande Funktioner
-
-- publik startsida med utvalda recept
-- publik receptlista med filter i URL
-- publik receptdetaljsida med relaterade recept
-- publikt galleri
-- admininloggning med bootstrap-auth
-- adminoversikt med filter, publicering och borttagning
-- admineditor for att skapa och redigera recept
-- admingalleri for att lagga till och ta bort bilder
-- explicit 404-sida i frontend
-- PostgreSQL-baserad backend med EF Core-migrationer
-- interface-baserad dependency injection for service- och repositorylager
-- health-endpoint for lokal diagnostik
-
-## Vidare Arbete
-
-- ersatta bootstrap-auth med mer riktig autentisering
-- containerisera frontend nar backend + databasflodet sitter
-- lagga till e2e-tester nar huvudflodena satt sig helt
+Mer detaljer finns i `frontend/README.md`, `backend/README.md`, `docs/backend-architecture.md` och `docs/system/`.
