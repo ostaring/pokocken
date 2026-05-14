@@ -12,8 +12,8 @@ participant "fetchAdminRecipeByIdHttp()" as FetchAdminByIdHttp
 participant "fetchAdminRecipesHttp()" as FetchAdminRecipesHttp
 participant "sendRecipeWriteRequest()" as SendWriteRequest
 participant "buildApiUrl()" as BuildApiUrl
-participant "Program.cs\nMapPost/MapPut admin recipe endpoints" as AdminEndpoint
-participant "AdminApiKeyEndpointFilter.InvokeAsync()" as Filter
+participant "AdminRecipesController\nPOST/PUT admin recipe actions" as AdminEndpoint
+participant "AdminAuthorizationFilter.OnAuthorizationAsync()" as Filter
 participant "AdminSessionStore.GetSession()" as GetSession
 participant "RecipeService.CreateRecipe() /\nRecipeService.UpdateRecipe()" as RecipeService
 participant "SqliteRecipeRepository.GetBySlug()" as RepoGetBySlug
@@ -40,7 +40,7 @@ else Edit mode
   FetchAdminRecipesHttp -> BuildApiUrl : buildApiUrl("/api/admin/recipes")
   BuildApiUrl --> FetchAdminRecipesHttp : absolute URL
   FetchAdminRecipesHttp -> AdminEndpoint : GET /api/admin/recipes
-  AdminEndpoint -> Filter : InvokeAsync(context, next)
+  AdminEndpoint -> Filter : OnAuthorizationAsync(context)
   Filter -> GetSession : GetSession(cookie)
   GetSession --> Filter : session exists
   Filter --> AdminEndpoint : continue
@@ -53,7 +53,7 @@ end
 SendWriteRequest -> BuildApiUrl : buildApiUrl(path)
 BuildApiUrl --> SendWriteRequest : absolute URL
 SendWriteRequest -> AdminEndpoint : POST/PUT admin recipe request
-AdminEndpoint -> Filter : InvokeAsync(context, next)
+AdminEndpoint -> Filter : OnAuthorizationAsync(context)
 Filter -> GetSession : GetSession(cookie)
 GetSession --> Filter : session exists
 Filter --> AdminEndpoint : continue

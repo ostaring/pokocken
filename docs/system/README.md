@@ -1,56 +1,58 @@
-# Systemdokumentation
+# System Documentation
 
-Den har mappen samlar arkitektur- och flodesdokumentation for receptappen.
+This folder collects architecture and flow documentation for the recipe app.
 
-Jag valde PlantUML eftersom du uttryckligen namnde det och fordiagramtyperna vi behover nu ar:
+PlantUML is the main format because the current documentation needs:
 
-- oversiktsdiagram
-- sekvensdiagram for use cases
-- klass- och ansvarsbilder
+- overview diagrams
+- sequence diagrams for use cases
+- class and responsibility diagrams
 
-Det ar fullt mojligt att senare komplettera med Mermaid for enklare README-visualiseringar, men PlantUML ar ett bra huvudformat for teknisk systemdokumentation.
+Mermaid can still be added later for simpler README-level visuals.
 
-## Innehall
+## Contents
 
 - `01-system-overview.puml`
-  Beskriver huvuddelarna i frontend, backend och lagringslagret.
+  Describes the main frontend, backend, and storage parts.
 - `02-public-recipe-browse-sequence.puml`
-  Visar flodet for publik receptlista och receptdetalj.
+  Shows the flow for public recipe list and recipe detail.
 - `03-admin-login-and-edit-sequence.puml`
-  Visar adminlogin och skapa/uppdatera recept.
+  Shows admin login and create/update recipe.
 - `04-backend-class-overview.puml`
-  Visar centrala backendklasser och deras relationer.
+  Shows central backend classes and their relationships.
 - `05-persistence-modes.puml`
-  Visar hur backend kan kora mot minne, fil eller SQLite.
+  Shows how the backend can run against memory, file, or SQLite.
 - `06-public-list-function-sequence.puml`
-  Visar exakt funktionskedja for publik receptlista.
+  Shows the function chain for the public recipe list.
 - `07-public-detail-function-sequence.puml`
-  Visar exakt funktionskedja for publik receptdetalj och relaterade recept.
+  Shows the function chain for public recipe detail and related recipes.
 - `08-admin-login-function-sequence.puml`
-  Visar exakt funktionskedja for adminlogin.
+  Shows the function chain for admin login.
 - `09-admin-save-recipe-function-sequence.puml`
-  Visar exakt funktionskedja for admin skapa/uppdatera recept.
+  Shows the function chain for admin create/update recipe.
 - `10-backend-di-runtime-flow.puml`
-  Visar hur ASP.NET Core, controllers, serviceinterfaces, services och repositories kopplas ihop under runtime.
+  Shows how ASP.NET Core, controllers, service interfaces, services, and repositories are connected at runtime.
 
-## Viktiga use cases som dokumenteras
+## Documented Use Cases
 
-1. Besokare oppnar startsida eller receptlista.
-2. Besokare filtrerar recept och oppnar en receptdetalj.
-3. Admin loggar in.
-4. Admin hamtar recept i dashboard.
-5. Admin skapar eller uppdaterar recept.
-6. Backend valjer repository beroende pa konfiguration.
-7. Dependency injection skapar controller- och servicekedjan under runtime.
+1. Visitor opens the home page or recipe list.
+2. Visitor filters recipes and opens a recipe detail page.
+3. Visitor opens the gallery page.
+4. Admin logs in.
+5. Admin fetches recipes in the dashboard.
+6. Admin creates or updates a recipe.
+7. Admin manages gallery images.
+8. Backend chooses repository implementation from configuration.
+9. Dependency injection creates the controller and service chain at runtime.
 
-## Diagramnivaer
+## Diagram Levels
 
-Det finns nu tva nivaer av sekvensdiagram:
+There are two levels of sequence diagrams:
 
-- oversiktssekvenser i `02` och `03`
-- detaljerade funktionssekvenser i `06` till `09`
+- overview sequences in `02` and `03`
+- detailed function sequences in `06` through `09`
 
-De detaljerade sekvenserna ar skrivna pa engelska och anvander faktiska funktionsnamn fran koden, till exempel:
+The detailed sequences use function names from the code, for example:
 
 - `useRecipesQuery`
 - `fetchRecipes`
@@ -62,48 +64,58 @@ De detaljerade sekvenserna ar skrivna pa engelska och anvander faktiska funktion
 - `CreateRecipe`
 - `SqliteRecipeRepository.Add`
 
-## Viktiga kodpunkter
+## Important Code Points
 
 Frontend:
 
-- `frontend/src/routes/AppRoutes.tsx`
-- `frontend/src/features/recipes/recipe-hooks.ts`
-- `frontend/src/features/auth/auth-hooks.ts`
-- `frontend/src/lib/api/recipes.ts`
-- `frontend/src/lib/api/auth.ts`
+- `frontend/src/routes/app/AppRoutes.tsx`
+- `frontend/src/features/recipes/hooks/recipe-hooks.ts`
+- `frontend/src/features/auth/hooks/auth-hooks.ts`
+- `frontend/src/features/gallery/hooks/gallery-hooks.ts`
+- `frontend/src/lib/api/recipes/recipes.ts`
+- `frontend/src/lib/api/auth/auth.ts`
+- `frontend/src/lib/api/gallery/gallery.ts`
 
 Backend:
 
 - `backend/RecipeApp.Api/Program.cs`
 - `backend/RecipeApp.Api/Controllers/Admin/Recipes/AdminRecipesController.cs`
+- `backend/RecipeApp.Api/Controllers/Admin/Gallery/AdminGalleryController.cs`
+- `backend/RecipeApp.Api/Controllers/Auth/AuthController.cs`
 - `backend/RecipeApp.Api/Services/Recipes/IRecipeService.cs`
 - `backend/RecipeApp.Api/Services/Recipes/RecipeService.cs`
+- `backend/RecipeApp.Api/Services/Gallery/IGalleryService.cs`
+- `backend/RecipeApp.Api/Services/Gallery/GalleryService.cs`
 - `backend/RecipeApp.Api/Infrastructure/Auth/AdminAuthorizationFilter.cs`
 - `backend/RecipeApp.Api/Repositories/Recipes/IRecipeRepository.cs`
 - `backend/RecipeApp.Api/Repositories/Recipes/InMemoryRecipeRepository.cs`
 - `backend/RecipeApp.Api/Repositories/Recipes/FileRecipeRepository.cs`
 - `backend/RecipeApp.Api/Repositories/Recipes/SqliteRecipeRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Gallery/IGalleryRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Gallery/InMemoryGalleryRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Gallery/FileGalleryRepository.cs`
+- `backend/RecipeApp.Api/Repositories/Gallery/SqliteGalleryRepository.cs`
 - `backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs`
 - `backend/RecipeApp.Api/Data/Initialization/RecipeDbInitializer.cs`
 
-## Hur man renderar
+## How To Render
 
-Exempel med PlantUML CLI om du har det installerat:
+Example with PlantUML CLI if installed:
 
 ```powershell
 cd docs/system
 plantuml *.puml
 ```
 
-Om du kor VS Code ar PlantUML-plugin eller IntelliJ-plugin ocksa ett bra alternativ.
+If you use VS Code, a PlantUML plugin is also a good option.
 
-## Lasordning
+## Reading Order
 
-1. borja med `01-system-overview.puml`
-2. fortsatt med sekvensdiagrammen `02` och `03`
-3. ga sedan till `04-backend-class-overview.puml`
-4. ga vidare till funktionssekvenserna `06` till `09`
-5. titta sedan pa `10-backend-di-runtime-flow.puml`
-6. avsluta med `05-persistence-modes.puml`
+1. Start with `01-system-overview.puml`.
+2. Continue with sequence diagrams `02` and `03`.
+3. Read `04-backend-class-overview.puml`.
+4. Move to the function sequences `06` through `09`.
+5. Read `10-backend-di-runtime-flow.puml`.
+6. Finish with `05-persistence-modes.puml`.
 
-Det ger forst helhetsbilden, sedan use cases, och sist implementation och driftval.
+This gives the whole picture first, then use cases, then implementation and runtime choices.

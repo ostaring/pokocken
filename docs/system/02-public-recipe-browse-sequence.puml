@@ -3,7 +3,7 @@
 actor "Besokare" as Visitor
 participant "RecipesPage /\nRecipeDetailsPage" as Page
 participant "useRecipesQuery /\nuseRecipeBySlugQuery" as Hook
-participant "lib/api/recipes.ts" as ApiFacade
+participant "lib/api/recipes/recipes.ts" as ApiFacade
 participant "HTTP adapter or\nmock adapter" as Adapter
 participant "API endpoint" as Endpoint
 participant "RecipeService" as Service

@@ -1,29 +1,31 @@
 # Backend Architecture
 
-Det här dokumentet beskriver hur backendens lager är kopplade efter refaktorn till controllers och interface-baserad dependency injection.
+This document describes how the backend layers are connected after the controller and interface-based dependency injection refactor.
 
-## Översikt
+## Overview
 
-Backenden är nu uppdelad i tydliga lager:
+The backend is split into clear layers:
 
 - `Controllers`
-  Tar emot HTTP-anrop, mappar routes, läser requestdata och returnerar HTTP-svar.
+  Receive HTTP requests, map routes, read request data, and return HTTP responses.
 - `Services`
-  Innehåller affärslogik och arbetar mot serviceinterfaces som `IRecipeService` och `IGalleryService`.
+  Contain business logic and work behind service interfaces such as `IRecipeService` and `IGalleryService`.
 - `Repositories`
-  Innehåller persistenslogik och abstraherar minne, fil och SQLite bakom interfaces som `IRecipeRepository` och `IGalleryRepository`.
+  Contain persistence logic and abstract memory, file, and SQLite storage behind interfaces such as `IRecipeRepository` and `IGalleryRepository`.
 - `Data`
-  Innehåller EF Core-kontext, entities, mappning och databasinitialisering.
+  Contains the EF Core context, entities, mapping, migrations, and database initialization.
 - `Infrastructure`
-  Innehåller tvärgående tekniska delar som adminauth, authorization filter, password hashing och requestvalidering.
+  Contains cross-cutting technical pieces such as admin auth, authorization filters, password hashing, session storage, and request validation.
 - `Contracts`
-  Innehåller DTO:er för request/response mellan API och klient.
+  Contains request/response DTOs between the API and the client.
+- `Domain`
+  Contains the domain records used by services and repositories.
 
-## Hur `Program.cs` kopplar ihop allt
+## How `Program.cs` Wires The App
 
-Det viktiga i [backend/RecipeApp.Api/Program.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Program.cs) är att vi registrerar relationer i DI-containern i stället för att manuellt skriva `new` för hela objektgrafen.
+The important part of [backend/RecipeApp.Api/Program.cs](../backend/RecipeApp.Api/Program.cs) is that relationships are registered in the DI container instead of manually constructing the object graph with `new`.
 
-Exempel:
+Example:
 
 ```csharp
 builder.Services.AddScoped<IRecipeService, RecipeService>();
@@ -32,24 +34,37 @@ builder.Services.AddScoped<IRecipeRepository, SqliteRecipeRepository>();
 builder.Services.AddControllers();
 ```
 
-Det betyder:
+That means:
 
-1. Om någon begär `IRecipeService`, skapa en `RecipeService`.
-2. Om någon begär `IRecipeRepository`, skapa en `SqliteRecipeRepository`.
-3. Controller-systemet är aktiverat via `AddControllers()`.
-4. Routes kopplas in via `app.MapControllers()`.
+1. If something asks for `IRecipeService`, create a `RecipeService`.
+2. If something asks for `IRecipeRepository`, create the repository implementation selected by persistence configuration.
+3. The controller system is enabled through `AddControllers()`.
+4. Routes are connected through `app.MapControllers()`.
 
-## Runtime-flöde
+## Persistence Modes
 
-När en HTTP-request kommer in händer i praktiken detta:
+`Program.cs` selects repository implementations from `Persistence:Mode`:
 
-1. ASP.NET matchar requesten mot en controller-route.
-2. Frameworket försöker skapa rätt controller.
-3. Controllerns constructor talar om vilka beroenden som behövs.
-4. DI-containern skapar dessa beroenden rekursivt.
-5. När hela objektgrafen är redo körs action-metoden.
+- `Sqlite`
+  Registers `RecipeDbContext`, `SqliteRecipeRepository`, `SqliteGalleryRepository`, and `RecipeDbInitializer`.
+- `File`
+  Registers file-backed recipe and gallery repositories.
+- Any other value
+  Registers in-memory recipe and gallery repositories.
 
-Exempel för adminrecept:
+Development configuration currently uses `Sqlite`; base `appsettings.json` defaults to `Memory`.
+
+## Runtime Flow
+
+When an HTTP request arrives, this happens in practice:
+
+1. ASP.NET matches the request to a controller route.
+2. The framework creates the correct controller.
+3. The controller constructor declares which dependencies it needs.
+4. The DI container creates those dependencies recursively.
+5. When the object graph is ready, the action method runs.
+
+Example for admin recipes in SQLite mode:
 
 ```text
 HTTP request
@@ -61,62 +76,64 @@ HTTP request
 -> RecipeDbContext
 ```
 
-## Exempel: Controller beroende på interface
+Example for admin gallery in SQLite mode:
 
-I stället för att controllern beror direkt på den konkreta implementationen:
+```text
+HTTP request
+-> AdminGalleryController
+-> IGalleryService
+-> GalleryService
+-> IGalleryRepository
+-> SqliteGalleryRepository
+-> RecipeDbContext
+```
+
+## Controller Dependencies
+
+Controllers depend on interfaces, not concrete service implementations.
+
+Instead of:
 
 ```csharp
 private readonly RecipeService _recipeService;
 ```
 
-beror den nu på kontraktet:
+they use:
 
 ```csharp
 private readonly IRecipeService _recipeService;
 ```
 
-Det gör att controllern bara känner till vad servicen kan göra, inte exakt hur den är implementerad.
+That keeps controllers aware of what the service can do, not exactly how it does it.
 
-## Varför det här är nyttigt
+## Why This Is Useful
 
-Det här ger flera fördelar:
+- looser coupling between layers
+- simpler implementation swaps later
+- clearer contracts per domain
+- more idiomatic ASP.NET Core architecture
+- easier to understand the object graph as the project grows
 
-- lösare koppling mellan lager
-- enklare att byta implementation senare
-- tydligare kontrakt per domän
-- mer idiomatisk enterprise-arkitektur i ASP.NET Core
-- lättare att förstå objektgrafen när projektet växer
+## Important Code Points
 
-## Hur det skiljer sig från manuell C++-wiring
+- [backend/RecipeApp.Api/Program.cs](../backend/RecipeApp.Api/Program.cs)
+- [backend/RecipeApp.Api/Controllers/Admin/Recipes/AdminRecipesController.cs](../backend/RecipeApp.Api/Controllers/Admin/Recipes/AdminRecipesController.cs)
+- [backend/RecipeApp.Api/Controllers/Admin/Gallery/AdminGalleryController.cs](../backend/RecipeApp.Api/Controllers/Admin/Gallery/AdminGalleryController.cs)
+- [backend/RecipeApp.Api/Controllers/Auth/AuthController.cs](../backend/RecipeApp.Api/Controllers/Auth/AuthController.cs)
+- [backend/RecipeApp.Api/Services/Recipes/IRecipeService.cs](../backend/RecipeApp.Api/Services/Recipes/IRecipeService.cs)
+- [backend/RecipeApp.Api/Services/Recipes/RecipeService.cs](../backend/RecipeApp.Api/Services/Recipes/RecipeService.cs)
+- [backend/RecipeApp.Api/Services/Gallery/IGalleryService.cs](../backend/RecipeApp.Api/Services/Gallery/IGalleryService.cs)
+- [backend/RecipeApp.Api/Services/Gallery/GalleryService.cs](../backend/RecipeApp.Api/Services/Gallery/GalleryService.cs)
+- [backend/RecipeApp.Api/Repositories/Recipes/IRecipeRepository.cs](../backend/RecipeApp.Api/Repositories/Recipes/IRecipeRepository.cs)
+- [backend/RecipeApp.Api/Repositories/Recipes/SqliteRecipeRepository.cs](../backend/RecipeApp.Api/Repositories/Recipes/SqliteRecipeRepository.cs)
+- [backend/RecipeApp.Api/Repositories/Gallery/IGalleryRepository.cs](../backend/RecipeApp.Api/Repositories/Gallery/IGalleryRepository.cs)
+- [backend/RecipeApp.Api/Repositories/Gallery/SqliteGalleryRepository.cs](../backend/RecipeApp.Api/Repositories/Gallery/SqliteGalleryRepository.cs)
+- [backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs](../backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs)
 
-I ett mer manuellt C++-upplägg skulle man ofta se:
+## Diagrams
 
-- explicita `new`
-- explicita factories
-- explicita ägarkedjor
-- smartpekare mellan lager
+See also:
 
-I ASP.NET Core är mycket av detta bortabstraherat:
-
-- DI-containern fungerar som factory-lager
-- livstider definieras med `Singleton`, `Scoped` och `Transient`
-- objekt skapas när frameworket behöver dem
-
-Det gör koden kortare, men kräver att man förstår registreringarna i `Program.cs`.
-
-## Viktiga kodpunkter
-
-- [backend/RecipeApp.Api/Program.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Program.cs)
-- [backend/RecipeApp.Api/Controllers/Admin/Recipes/AdminRecipesController.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Controllers/Admin/Recipes/AdminRecipesController.cs)
-- [backend/RecipeApp.Api/Services/Recipes/IRecipeService.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Services/Recipes/IRecipeService.cs)
-- [backend/RecipeApp.Api/Services/Recipes/RecipeService.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Services/Recipes/RecipeService.cs)
-- [backend/RecipeApp.Api/Repositories/Recipes/IRecipeRepository.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Repositories/Recipes/IRecipeRepository.cs)
-- [backend/RecipeApp.Api/Repositories/Recipes/SqliteRecipeRepository.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Repositories/Recipes/SqliteRecipeRepository.cs)
-- [backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs](C:/Users/Oscar/Documents/New%20project/backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs)
-
-## Diagram
-
-Se även:
-
-- [docs/system/10-backend-di-runtime-flow.puml](C:/Users/Oscar/Documents/New%20project/docs/system/10-backend-di-runtime-flow.puml)
-- [docs/system/04-backend-class-overview.puml](C:/Users/Oscar/Documents/New%20project/docs/system/04-backend-class-overview.puml)
+- [docs/system/10-backend-di-runtime-flow.puml](system/10-backend-di-runtime-flow.puml)
+- [docs/system/04-backend-class-overview.puml](system/04-backend-class-overview.puml)
+- [docs/system/05-persistence-modes.puml](system/05-persistence-modes.puml)

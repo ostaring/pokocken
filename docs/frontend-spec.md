@@ -5,12 +5,13 @@
 The frontend is responsible for:
 
 - rendering the public recipe experience
+- rendering the public gallery
 - rendering the admin interface
 - handling navigation and page composition
 - validating user input before submitting to the API
 - consuming the backend API and presenting clear UI states
 
-The frontend will not own business-critical rules. The backend remains source of truth for authentication, authorization, and persistence.
+The frontend will not own business-critical rules. The backend remains the source of truth for authentication, authorization, and persistence.
 
 ## 2. Technology Stack
 
@@ -36,6 +37,7 @@ The frontend will not own business-critical rules. The backend remains source of
 ### Public routes
 
 - `/`
+- `/gallery`
 - `/recipes`
 - `/recipes/:slug`
 
@@ -43,8 +45,11 @@ The frontend will not own business-critical rules. The backend remains source of
 
 - `/admin/login`
 - `/admin`
+- `/admin/gallery`
 - `/admin/recipes/new`
 - `/admin/recipes/:id/edit`
+
+The admin editor route still uses `:id` on the client. In HTTP mode the API adapter resolves that id to the current recipe slug before calling the backend update/delete endpoints.
 
 ## 5. Page Specifications
 
@@ -53,6 +58,12 @@ The frontend will not own business-critical rules. The backend remains source of
 - Show latest published recipes
 - Show quick entry points to browse categories
 - Highlight search entry
+
+### Gallery page
+
+- Show public gallery images
+- Support loading, empty, and error states
+- Use backend API data in HTTP mode and fixtures in mock mode
 
 ### Recipe listing page
 
@@ -64,7 +75,7 @@ The frontend will not own business-critical rules. The backend remains source of
 ### Recipe detail page
 
 - Show title, image, description, ingredients, steps, prep time, servings, and category
-- Show only published recipes to public users
+- Show only published recipes to public users in HTTP mode
 - Handle not-found state cleanly
 
 ### Admin login page
@@ -78,6 +89,13 @@ The frontend will not own business-critical rules. The backend remains source of
 - List all recipes including drafts
 - Quick actions for create, edit, delete, publish, and unpublish
 - Show recipe status clearly
+
+### Admin gallery page
+
+- List gallery images
+- Allow admin to add gallery image URL and alt text
+- Allow admin to delete gallery images
+- Show loading and error states
 
 ### Admin recipe editor
 
@@ -113,42 +131,36 @@ Use TanStack Query for:
 - fetching published recipes
 - fetching recipe details
 - fetching admin recipe lists
+- fetching gallery images
 - mutations for login/logout and recipe CRUD
+- mutations for gallery create/delete
 
 ## 7. Data Contracts Consumed by Frontend
 
-### Public recipe list item
+### Recipe summary
 
 - `id`
 - `title`
 - `slug`
 - `description`
-- `category`
-- `imageUrl`
-- `prepTimeMinutes`
-- `servings`
-
-### Recipe detail model
-
-- `id`
-- `title`
-- `slug`
-- `description`
-- `ingredients`
-- `steps`
 - `category`
 - `imageUrl`
 - `prepTimeMinutes`
 - `servings`
 - `isPublished`
-- `updatedAtUtc`
 
-### Admin recipe model
+### Recipe detail model
 
-- includes all recipe detail fields
-- includes internal identifier
-- includes publish state
-- includes created and updated timestamps
+- all recipe summary fields
+- `ingredients`
+- `steps`
+
+### Gallery image model
+
+- `id`
+- `imageUrl`
+- `altText`
+- `createdAtUtc`
 
 ## 8. API Interaction Rules
 
@@ -156,12 +168,13 @@ Use TanStack Query for:
 - Components should not build fetch calls inline.
 - Query and mutation hooks should be centralized by feature.
 - Authentication state should be derived from backend/session behavior, not guessed purely on the client.
+- API access can run in `mock` mode or `http` mode through `VITE_API_MODE`.
 
 ## 9. Auth Model
 
-Preferred frontend auth behavior:
+Current frontend auth behavior:
 
-- use secure session/cookie-based login if feasible
+- use backend session-cookie login in HTTP mode
 - keep admin session handling simple
 - protect admin routes by checking authenticated session
 - redirect unauthenticated users to `/admin/login`
@@ -176,19 +189,29 @@ If we later switch to token-based auth, we should keep that change isolated to t
 - Clear distinction between public browsing and admin workspace
 - Accessible forms with labels, errors, and focus states
 
-## 11. Suggested Frontend Folder Structure
+## 11. Frontend Folder Structure
 
 ```text
 /frontend/src
   /app
   /components
+    /layout
   /features
-    /recipes
-    /admin
     /auth
+    /gallery
+    /recipes
   /lib
+    /api
+    /config
+    /query
   /pages
+    /admin
+    /public
+    /system
   /routes
+    /admin
+    /app
+  /test
   /types
 ```
 
@@ -211,7 +234,9 @@ If we later switch to token-based auth, we should keep that change isolated to t
 ## 14. Frontend Acceptance Criteria
 
 - A visitor can browse and read published recipes.
+- A visitor can view gallery images.
 - An admin can log in and manage recipes.
+- An admin can manage gallery images.
 - All key pages work on mobile and desktop.
 - API failures surface usable UI feedback.
 - Form input is validated before submission.

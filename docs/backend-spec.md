@@ -5,10 +5,11 @@
 The backend is responsible for:
 
 - exposing API endpoints for public recipe reads and admin recipe management
+- exposing API endpoints for public gallery reads and admin gallery management
 - authenticating and authorizing admin access
 - validating requests
 - enforcing domain rules
-- persisting application data in PostgreSQL
+- persisting application data through repository abstractions
 
 The backend is the source of truth for business logic and data integrity.
 
@@ -17,8 +18,7 @@ The backend is the source of truth for business logic and data integrity.
 - ASP.NET Core Web API
 - C#
 - Entity Framework Core
-- Npgsql Entity Framework provider
-- PostgreSQL
+- SQLite provider for local relational persistence
 - Swagger / OpenAPI
 - xUnit for tests
 
@@ -38,22 +38,29 @@ The backend is the source of truth for business logic and data integrity.
 - `Title: string`
 - `Slug: string`
 - `Description: string`
-- `Ingredients: string`
-- `Steps: string`
+- `Ingredients: IReadOnlyList<string>`
+- `Steps: IReadOnlyList<string>`
 - `PrepTimeMinutes: int`
 - `Servings: int`
 - `Category: string`
-- `ImageUrl: string?`
+- `ImageUrl: string`
 - `IsPublished: bool`
-- `CreatedAtUtc: DateTime`
-- `UpdatedAtUtc: DateTime`
 
-### AdminUser
+The current recipe domain model does not expose created/updated timestamps.
+
+### GalleryImage
 
 - `Id: Guid`
+- `ImageUrl: string`
+- `AltText: string`
+- `CreatedAtUtc: DateTimeOffset`
+
+### Admin credentials
+
 - `Username: string`
 - `PasswordHash: string`
-- `CreatedAtUtc: DateTime`
+
+Admin credentials are currently configured through application configuration rather than stored as an EF entity.
 
 ## 5. Business Rules
 
@@ -61,10 +68,13 @@ The backend is the source of truth for business logic and data integrity.
 - Recipe slug is required and unique.
 - Ingredients are required.
 - Steps are required.
-- Prep time must be non-negative.
+- Prep time must be greater than zero.
 - Servings must be positive.
 - Only authenticated admin users may access admin endpoints.
-- Public endpoints must never expose unpublished recipes.
+- Public recipe endpoints must never expose unpublished recipes.
+- Gallery images are publicly readable.
+- Gallery image creation requires image URL and alt text.
+- Only authenticated admin users may create or delete gallery images.
 
 ## 6. API Surface
 
@@ -72,6 +82,8 @@ The backend is the source of truth for business logic and data integrity.
 
 - `GET /api/recipes`
 - `GET /api/recipes/{slug}`
+- `GET /api/gallery`
+- `GET /health`
 
 ### Admin auth endpoints
 
@@ -82,10 +94,16 @@ The backend is the source of truth for business logic and data integrity.
 ### Admin recipe endpoints
 
 - `GET /api/admin/recipes`
-- `GET /api/admin/recipes/{id}`
+- `GET /api/admin/recipes/{slug}`
 - `POST /api/admin/recipes`
-- `PUT /api/admin/recipes/{id}`
-- `DELETE /api/admin/recipes/{id}`
+- `PUT /api/admin/recipes/{slug}`
+- `DELETE /api/admin/recipes/{slug}`
+
+### Admin gallery endpoints
+
+- `GET /api/admin/gallery`
+- `POST /api/admin/gallery`
+- `DELETE /api/admin/gallery/{id}`
 
 ## 7. Endpoint Behavior
 
@@ -95,7 +113,7 @@ The backend is the source of truth for business logic and data integrity.
 - Supports optional query parameters:
   - `search`
   - `category`
-- Sorted by newest updated or created timestamp in MVP
+- Returns published recipes matching the current repository ordering
 
 ### `GET /api/recipes/{slug}`
 
@@ -106,11 +124,11 @@ The backend is the source of truth for business logic and data integrity.
 
 - Validates admin credentials
 - Creates authenticated session
-- Returns success/failure result suitable for frontend auth flow
+- Returns an admin session response suitable for frontend auth flow
 
 ### `POST /api/auth/logout`
 
-- Ends authenticated session
+- Ends authenticated session and deletes the session cookie
 
 ### `GET /api/auth/me`
 
@@ -120,11 +138,12 @@ The backend is the source of truth for business logic and data integrity.
 ### `GET /api/admin/recipes`
 
 - Returns all recipes including drafts
+- Supports optional `search` and `category` query parameters
 - Authentication required
 
-### `GET /api/admin/recipes/{id}`
+### `GET /api/admin/recipes/{slug}`
 
-- Returns a single recipe by internal id
+- Returns a single recipe by slug
 - Authentication required
 
 ### `POST /api/admin/recipes`
@@ -132,14 +151,33 @@ The backend is the source of truth for business logic and data integrity.
 - Creates a new recipe
 - Authentication required
 
-### `PUT /api/admin/recipes/{id}`
+### `PUT /api/admin/recipes/{slug}`
 
 - Updates an existing recipe
 - Authentication required
 
-### `DELETE /api/admin/recipes/{id}`
+### `DELETE /api/admin/recipes/{slug}`
 
 - Deletes an existing recipe
+- Authentication required
+
+### `GET /api/gallery`
+
+- Returns gallery images
+
+### `GET /api/admin/gallery`
+
+- Returns gallery images for admin management
+- Authentication required
+
+### `POST /api/admin/gallery`
+
+- Creates a gallery image
+- Authentication required
+
+### `DELETE /api/admin/gallery/{id}`
+
+- Deletes a gallery image by Guid id
 - Authentication required
 
 ## 8. Request and Response Model Direction
@@ -149,6 +187,7 @@ Use dedicated DTOs rather than exposing EF entities directly.
 ### Create/update recipe request
 
 - `title`
+- `slug`
 - `description`
 - `ingredients`
 - `steps`
@@ -158,35 +197,56 @@ Use dedicated DTOs rather than exposing EF entities directly.
 - `imageUrl`
 - `isPublished`
 
-### Public recipe response
+### Public and admin recipe response
 
-- omit admin-only or unnecessary fields where possible
-- include stable fields required by the frontend
+- `id`
+- `title`
+- `slug`
+- `description`
+- `category`
+- `prepTimeMinutes`
+- `servings`
+- `imageUrl`
+- `isPublished`
+- `ingredients`
+- `steps`
 
-### Admin recipe response
+### Create gallery image request
 
-- include internal identifier
-- include status metadata
-- include timestamps
+- `imageUrl`
+- `altText`
+
+### Gallery image response
+
+- `id`
+- `imageUrl`
+- `altText`
+- `createdAtUtc`
 
 ## 9. Authentication Strategy
 
-Recommended MVP approach:
+Current MVP approach:
 
-- ASP.NET Core cookie authentication
-- single admin user seeded initially or created through configuration/bootstrap
+- single bootstrap admin user from configuration
+- password hash verification through `AdminPasswordHasher`
+- server-side `AdminSessionStore`
+- HTTP-only session cookie
+- optional development API-key fallback
 
 Why this approach:
 
-- simpler than rolling JWT for a single-admin MVP
+- simple enough for a single-admin MVP
 - good fit for browser-based admin flows
-- fewer moving parts in the frontend
+- keeps auth details centralized in backend infrastructure
 
 ## 10. Persistence Strategy
 
-- PostgreSQL as primary database
-- Entity Framework Core migrations for schema management
-- seed one admin account in a controlled way for local/dev startup
+- Repository interfaces isolate persistence from controllers and services.
+- Supported modes are `Memory`, `File`, and `Sqlite`.
+- Development configuration uses SQLite.
+- EF Core migrations manage the SQLite schema.
+- Recipe and gallery seed data initialize an empty SQLite database.
+- PostgreSQL is a possible future deployment option, not the active implementation.
 
 ## 11. Error Handling Rules
 
@@ -195,32 +255,40 @@ Why this approach:
 - Return `403` if authenticated but forbidden
 - Return `404` for missing resources
 - Return `409` for slug conflicts if applicable
-- Return consistent error payloads
+- Return consistent error payloads where the current endpoint supports them
 
 ## 12. Logging and Observability
 
 - Use standard ASP.NET Core logging
 - Log auth failures at appropriate level without leaking secrets
-- Log unhandled exceptions
+- Log recipe and gallery mutations
+- Log database initialization failure
 - Add structured request logging later if needed
 
-## 13. Suggested Backend Folder Structure
+## 13. Backend Folder Structure
 
 ```text
 /backend
-  /Controllers
-  /Contracts
-  /Domain
-  /Infrastructure
-  /Services
-  /Data
+  /RecipeApp.Api
+    /Controllers
+      /Admin
+      /Auth
+      /Public
+      /System
+    /Contracts
+    /Data
+    /Domain
+    /Infrastructure
+    /Repositories
+    /Services
+  /RecipeApp.Api.Tests
 ```
 
 ## 14. Non-Functional Backend Requirements
 
 - Clear separation between API contracts and persistence entities
 - Reasonable unit/integration test coverage for core logic
-- Easy local startup against Docker PostgreSQL
+- Easy local startup with SQLite
 - Safe defaults for auth and validation
 
 ## 15. Backend Out of Scope for MVP
@@ -235,7 +303,9 @@ Why this approach:
 ## 16. Backend Acceptance Criteria
 
 - Public users can fetch published recipes only.
+- Public users can fetch gallery images.
 - Admin can authenticate and manage recipes.
+- Admin can manage gallery images.
 - Draft recipes remain private.
 - Invalid requests are rejected with clear status codes.
-- Database schema is managed through migrations.
+- Database schema is managed through migrations when SQLite mode is used.

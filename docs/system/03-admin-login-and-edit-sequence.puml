@@ -3,15 +3,15 @@
 actor "Admin" as Admin
 participant "AdminLoginPage" as LoginPage
 participant "useLoginMutation" as LoginHook
-participant "lib/api/auth.ts" as AuthApi
+participant "lib/api/auth/auth.ts" as AuthApi
 participant "Auth endpoints" as AuthEndpoint
 participant "AdminSessionStore" as SessionStore
 
 participant "AdminRecipeEditorPage" as EditorPage
 participant "useCreateRecipeMutation /\nuseUpdateRecipeMutation" as RecipeHook
-participant "lib/api/recipes.ts" as RecipeApi
+participant "lib/api/recipes/recipes.ts" as RecipeApi
 participant "Admin recipe endpoints" as AdminEndpoint
-participant "AdminApiKeyEndpointFilter" as Filter
+participant "AdminAuthorizationFilter" as Filter
 participant "RecipeService" as Service
 participant "IRecipeRepository" as Repo
 

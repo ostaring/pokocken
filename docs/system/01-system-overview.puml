@@ -8,50 +8,62 @@ rectangle "Frontend (React + Vite)" {
   component "HomePage" as HomePage
   component "RecipesPage" as RecipesPage
   component "RecipeDetailsPage" as RecipeDetailsPage
+  component "GalleryPage" as GalleryPage
   component "AdminLoginPage" as AdminLoginPage
   component "AdminDashboardPage" as AdminDashboardPage
+  component "AdminGalleryPage" as AdminGalleryPage
   component "AdminRecipeEditorPage" as AdminRecipeEditorPage
   component "React Query hooks" as Hooks
-  component "API facade\nlib/api/*.ts" as ApiFacade
+  component "API facades\nlib/api/*/*.ts" as ApiFacade
 }
 
-rectangle "Backend (ASP.NET Core minimal API)" {
-  component "Program.cs endpoints" as Endpoints
-  component "AdminApiKeyEndpointFilter" as Filter
+rectangle "Backend (ASP.NET Core controllers)" {
+  component "Controllers" as Controllers
+  component "AdminAuthorizationFilter" as Filter
   component "AdminSessionStore" as SessionStore
   component "RecipeService" as RecipeService
+  component "GalleryService" as GalleryService
   interface "IRecipeRepository" as Repo
+  interface "IGalleryRepository" as GalleryRepo
 }
 
 database "Memory repository" as MemoryRepo
 database "File repository\nrecipes.json" as FileRepo
 database "SQLite repository\nrecipes.db" as SqliteRepo
+database "Gallery repositories" as GalleryRepos
 
 Visitor --> HomePage
 Visitor --> RecipesPage
 Visitor --> RecipeDetailsPage
+Visitor --> GalleryPage
 Admin --> AdminLoginPage
 Admin --> AdminDashboardPage
+Admin --> AdminGalleryPage
 Admin --> AdminRecipeEditorPage
 
 HomePage --> Hooks
 RecipesPage --> Hooks
 RecipeDetailsPage --> Hooks
+GalleryPage --> Hooks
 AdminLoginPage --> Hooks
 AdminDashboardPage --> Hooks
+AdminGalleryPage --> Hooks
 AdminRecipeEditorPage --> Hooks
 
 Hooks --> ApiFacade
-ApiFacade --> Endpoints
+ApiFacade --> Controllers
 
-Endpoints --> Filter
+Controllers --> Filter
 Filter --> SessionStore
-Endpoints --> RecipeService
+Controllers --> RecipeService
+Controllers --> GalleryService
 RecipeService --> Repo
+GalleryService --> GalleryRepo
 
 Repo <|.. MemoryRepo
 Repo <|.. FileRepo
 Repo <|.. SqliteRepo
+GalleryRepo <|.. GalleryRepos
 
 note right of Repo
 Valjs via konfiguration:

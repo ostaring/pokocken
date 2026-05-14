@@ -6,15 +6,19 @@ package "Contracts" {
   class CreateRecipeRequest
   class UpdateRecipeRequest
   class RecipeResponse
+  class CreateGalleryImageRequest
+  class GalleryImageResponse
   class LoginAdminRequest
   class AdminSessionResponse
 }
 
 package "Domain" {
   class Recipe
+  class GalleryImage
 }
 
 package "Services" {
+  interface IRecipeService
   class RecipeService {
     +GetPublishedRecipes(search, category)
     +GetPublishedRecipeBySlug(slug)
@@ -24,10 +28,19 @@ package "Services" {
     +UpdateRecipe(currentSlug, request)
     +DeleteRecipe(slug)
   }
+
+  interface IGalleryService
+  class GalleryService {
+    +GetAllImages()
+    +CreateImage(request)
+    +DeleteImage(id)
+  }
 }
 
 package "Infrastructure" {
-  class AdminApiKeyEndpointFilter
+  class AdminAuthorizationFilter {
+    +OnAuthorizationAsync(context)
+  }
   class AdminSessionStore
 }
 
@@ -44,32 +57,61 @@ package "Repositories" {
   class FileRecipeRepository
   class SqliteRecipeRepository
   class RecipeSeedData
+
+  interface IGalleryRepository {
+    +GetAll()
+    +GetById(id)
+    +Add(image)
+    +Delete(id)
+  }
+
+  class InMemoryGalleryRepository
+  class FileGalleryRepository
+  class SqliteGalleryRepository
+  class GallerySeedData
 }
 
 package "Data" {
   class RecipeDbContext
   class RecipeDbInitializer
   class RecipeEntity
+  class GalleryImageEntity
 }
 
+IRecipeService <|.. RecipeService
 RecipeService --> IRecipeRepository
 RecipeService ..> CreateRecipeRequest
 RecipeService ..> UpdateRecipeRequest
 RecipeService ..> RecipeResponse
 RecipeService ..> Recipe
 
-AdminApiKeyEndpointFilter --> AdminSessionStore
+IGalleryService <|.. GalleryService
+GalleryService --> IGalleryRepository
+GalleryService ..> CreateGalleryImageRequest
+GalleryService ..> GalleryImageResponse
+GalleryService ..> GalleryImage
+
+AdminAuthorizationFilter --> AdminSessionStore
 
 IRecipeRepository <|.. InMemoryRecipeRepository
 IRecipeRepository <|.. FileRecipeRepository
 IRecipeRepository <|.. SqliteRecipeRepository
 
+IGalleryRepository <|.. InMemoryGalleryRepository
+IGalleryRepository <|.. FileGalleryRepository
+IGalleryRepository <|.. SqliteGalleryRepository
+
 InMemoryRecipeRepository ..> RecipeSeedData
 FileRecipeRepository ..> RecipeSeedData
 SqliteRecipeRepository --> RecipeDbContext
+InMemoryGalleryRepository ..> GallerySeedData
+FileGalleryRepository ..> GallerySeedData
+SqliteGalleryRepository --> RecipeDbContext
 RecipeDbInitializer --> RecipeDbContext
 RecipeDbInitializer ..> RecipeSeedData
+RecipeDbInitializer ..> GallerySeedData
 RecipeDbContext --> RecipeEntity
+RecipeDbContext --> GalleryImageEntity
 
 note right of RecipeService
 Innehaller:
@@ -79,7 +121,7 @@ Innehaller:
 - mapping till RecipeResponse
 end note
 
-note right of AdminApiKeyEndpointFilter
+note right of AdminAuthorizationFilter
 Tillater adminanrop via:
 - session cookie
 - fallback API key header
