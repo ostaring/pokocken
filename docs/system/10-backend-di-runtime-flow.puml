@@ -1,33 +1,29 @@
-@startuml
-title Backend DI Runtime Flow
+@startuml Backend DI runtime flow
 
-actor Client
-participant "ASP.NET Core\nRouting" as Routing
-participant "AdminRecipesController" as Controller
-participant "IRecipeService" as IService
-participant "RecipeService" as Service
-participant "IRecipeRepository" as IRepository
-participant "SqliteRecipeRepository" as Repository
-database "RecipeDbContext" as DbContext
+title Backend dependency injection runtime flow
 
-Client -> Routing: HTTP GET /api/admin/recipes
-Routing -> Controller: Resolve controller from DI
-note right of Routing
-Program.cs has registered:
-- AddControllers()
-- AddScoped<IRecipeService, RecipeService>()
-- AddScoped<IRecipeRepository, SqliteRecipeRepository>()
-end note
+actor "HTTP request" as Request
+participant "ASP.NET Core routing" as Routing
+participant "Controller" as Controller
+participant "IRecipeService /\nIGalleryService" as IService
+participant "RecipeService /\nGalleryService" as Service
+participant "IRecipeRepository /\nIGalleryRepository" as IRepository
+participant "EfRecipeRepository /\nEfGalleryRepository" as Repository
+participant "RecipeDbContext" as DbContext
+database "PostgreSQL" as Postgres
 
-Controller -> IService: GetAllRecipes(search, category)
-IService -> Service: RecipeService instance
-Service -> IRepository: GetAll()
-IRepository -> Repository: SqliteRecipeRepository instance
-Repository -> DbContext: Recipes.ToList()
-DbContext --> Repository: Recipe entities
-Repository --> Service: Domain recipes
-Service --> Controller: RecipeResponse list
-Controller --> Routing: Ok(...)
-Routing --> Client: HTTP 200 JSON
+Request -> Routing : route match
+Routing -> Controller : create controller through DI
+Controller -> IService : constructor dependency
+IService -> Service : scoped service instance
+Service -> IRepository : constructor dependency
+IRepository -> Repository : scoped EF repository instance
+Repository -> DbContext : scoped EF DbContext
+DbContext -> Postgres : Npgsql connection
+
+Controller -> Service : action calls service method
+Service -> Repository : query or mutate data
+Repository -> DbContext : EF Core operation
+DbContext -> Postgres : SQL
 
 @enduml

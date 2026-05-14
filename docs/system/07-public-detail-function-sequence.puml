@@ -9,14 +9,14 @@ participant "fetchRecipeBySlugHttp()" as FetchBySlugHttp
 participant "buildApiUrl()" as BuildApiUrl
 participant "Program.cs\nMapGet(/api/recipes/{slug})" as DetailEndpoint
 participant "RecipeService.GetPublishedRecipeBySlug()" as GetPublishedBySlug
-participant "SqliteRecipeRepository.GetBySlug()" as RepoGetBySlug
+participant "EfRecipeRepository.GetBySlug()" as RepoGetBySlug
 
 participant "useRecipesQuery()" as UseRelatedRecipes
 participant "fetchRecipes()" as FetchRecipes
 participant "fetchRecipesHttp()" as FetchRecipesHttp
 participant "Program.cs\nMapGet(/api/recipes)" as ListEndpoint
 participant "RecipeService.GetPublishedRecipes()" as GetPublishedRecipes
-participant "SqliteRecipeRepository.GetAll()" as RepoGetAll
+participant "EfRecipeRepository.GetAll()" as RepoGetAll
 
 == Load detail ==
 User -> DetailsPage : Open /recipes/{slug}

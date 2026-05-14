@@ -16,8 +16,8 @@ participant "AdminRecipesController\nPOST/PUT admin recipe actions" as AdminEndp
 participant "AdminAuthorizationFilter.OnAuthorizationAsync()" as Filter
 participant "AdminSessionStore.GetSession()" as GetSession
 participant "RecipeService.CreateRecipe() /\nRecipeService.UpdateRecipe()" as RecipeService
-participant "SqliteRecipeRepository.GetBySlug()" as RepoGetBySlug
-participant "SqliteRecipeRepository.Add() /\nReplace()" as RepoWrite
+participant "EfRecipeRepository.GetBySlug()" as RepoGetBySlug
+participant "EfRecipeRepository.Add() /\nReplace()" as RepoWrite
 participant "queryClient.invalidateQueries()" as InvalidateQueries
 participant "useNavigate()" as Navigate
 

@@ -1,44 +1,30 @@
-@startuml Backend persistence modes
+@startuml Backend PostgreSQL persistence
 
-left to right direction
+title Backend persistence - PostgreSQL only
 
-rectangle "Program.cs" as Program
-rectangle "RecipeService" as Service
-interface "IRecipeRepository" as Repo
+component "Program.cs" as Program
+component "RecipeDbInitializer" as Initializer
+component "RecipeDbContext" as DbContext
+component "EfRecipeRepository" as RecipeRepo
+component "EfGalleryRepository" as GalleryRepo
+database "PostgreSQL" as Postgres
 
-database "Memory mode" as MemoryMode
-database "File mode\nApp_Data/recipes.json" as FileMode
-database "Sqlite mode\nApp_Data/recipes.db" as SqliteMode
+Program --> DbContext : UseNpgsql(connection string)
+Program --> RecipeRepo : AddScoped<IRecipeRepository, EfRecipeRepository>
+Program --> GalleryRepo : AddScoped<IGalleryRepository, EfGalleryRepository>
+Program --> Initializer : startup initialization
 
-rectangle "RecipeDbContext" as DbContext
-rectangle "RecipeDbInitializer" as DbInitializer
+RecipeRepo --> DbContext
+GalleryRepo --> DbContext
+Initializer --> DbContext : Migrate + seed
+DbContext --> Postgres
 
-Program --> Service
-Service --> Repo
+note right of Postgres
+Local runtime:
+- docker compose db service
 
-Repo <|.. MemoryMode
-Repo <|.. FileMode
-Repo <|.. SqliteMode
-
-SqliteMode --> DbContext
-Program --> DbInitializer
-DbInitializer --> DbContext
-
-note bottom of Program
-Val via appsettings:
-- Memory
-- File
-- Sqlite
-end note
-
-note right of SqliteMode
-Aktivt standardlage i
-appsettings.Development.json
-end note
-
-note left of MemoryMode
-Anvands som stabil baseline
-och i endpointtester
+Tests:
+- Testcontainers PostgreSQL
 end note
 
 @enduml

@@ -11,7 +11,7 @@ participant "buildRecipeCollectionUrl()" as BuildCollectionUrl
 participant "buildApiUrl()" as BuildApiUrl
 participant "Program.cs\nMapGet(/api/recipes)" as RecipesEndpoint
 participant "RecipeService.GetPublishedRecipes()" as GetPublishedRecipes
-participant "SqliteRecipeRepository.GetAll()" as RepoGetAll
+participant "EfRecipeRepository.GetAll()" as RepoGetAll
 
 == Initial page load ==
 User -> RecipesPage : Open /recipes?search&category

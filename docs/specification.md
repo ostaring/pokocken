@@ -4,12 +4,11 @@
 
 We are building a full-stack recipe web application for family and friends with:
 
-- a public frontend for browsing recipes
-- a public gallery
-- an admin interface for managing recipes
-- an admin interface for managing gallery images
+- a public frontend for browsing recipes and gallery images
+- an admin interface for managing recipes and gallery images
 - a backend API with authentication, authorization, validation, and persistence
-- EF Core persistence using SQLite for local development
+- EF Core persistence using PostgreSQL
+- Docker Compose for local backend + database runtime
 
 The goal is to keep the product intentionally small at MVP level, while still designing it like a real deployable production-style system.
 
@@ -17,14 +16,14 @@ The goal is to keep the product intentionally small at MVP level, while still de
 
 - Frontend: React + TypeScript + Vite
 - Backend: ASP.NET Core Web API
-- Active local database: SQLite
+- Database: PostgreSQL
 - ORM: Entity Framework Core
 - Frontend styling: Tailwind CSS
 - Frontend server-state management: TanStack Query
 - Frontend validation: Zod
 - API documentation: Swagger / OpenAPI
-- Backend persistence modes: Memory, File, SQLite
-- Local fullstack mode: ASP.NET Core API plus Vite frontend
+- Local backend runtime: Docker Compose
+- Backend integration tests: Testcontainers for PostgreSQL
 
 ## 3. Product Scope
 
@@ -49,6 +48,7 @@ The goal is to keep the product intentionally small at MVP level, while still de
 - Favorites
 - Ratings/comments
 - Shopping list export
+- Frontend containerization
 
 ## 4. Core Domain Rules
 
@@ -85,25 +85,16 @@ The goal is to keep the product intentionally small at MVP level, while still de
 
 - Durable storage for recipes
 - Durable storage for gallery images
-- Schema management through EF Core migrations where relational persistence is used
+- Schema management through EF Core migrations
 
-### Current authentication note
-
-Admin authentication currently uses a configured bootstrap admin account, hashed password verification, an in-memory session store, and an HTTP-only session cookie. A development API-key fallback can be enabled in development configuration.
-
-## 6. Deployment Direction
+## 6. Local Runtime
 
 Current local setup:
 
-- Frontend runs through Vite.
-- Backend runs as ASP.NET Core.
-- Development persistence uses SQLite at `backend/RecipeApp.Api/App_Data/recipes.db`.
-
-Possible later deployment direction:
-
-- Frontend on Vercel or another static host.
-- Backend on Render, Railway, Azure, or similar.
-- Database can remain SQLite for simple hosting or move to PostgreSQL when the product needs a managed multi-user database.
+- Frontend runs through Vite on the host machine.
+- Backend runs in Docker Compose.
+- PostgreSQL runs in Docker Compose with a persistent volume.
+- Backend is exposed at `http://localhost:5080`.
 
 ## 7. Project Layout
 
@@ -112,28 +103,22 @@ Possible later deployment direction:
 /backend
 /docs
 /tools
+/docker-compose.yml
 ```
 
-## 8. Specification Documents
-
-- Frontend specification: [frontend-spec.md](frontend-spec.md)
-- Backend specification: [backend-spec.md](backend-spec.md)
-- Backend architecture notes: [backend-architecture.md](backend-architecture.md)
-- System diagrams: [system/README.md](system/README.md)
-
-## 9. Current Build State
+## 8. Current Build State
 
 Completed or active:
 
 1. Frontend and backend are scaffolded.
 2. Public home, recipe, and gallery pages exist.
 3. Admin login, dashboard, recipe editor, and gallery management exist.
-4. Backend is controller-based with services, repositories, contracts, domain models, infrastructure, and EF Core SQLite persistence.
-5. Frontend and backend are organized into clearer subdirectories.
-6. System documentation exists under `docs/system/`.
+4. Backend is controller-based with services, repositories, contracts, domain models, infrastructure, and EF Core PostgreSQL persistence.
+5. Backend and PostgreSQL can run through Docker Compose.
+6. Backend integration tests target PostgreSQL through Testcontainers.
 
 Likely next work:
 
-1. Decide whether production persistence should stay SQLite or move to PostgreSQL.
+1. Containerize the frontend once backend + database runtime is stable.
 2. Harden authentication beyond the bootstrap admin/session approach.
 3. Add e2e tests once the main user flows settle.

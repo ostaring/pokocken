@@ -19,55 +19,23 @@ package "Domain" {
 
 package "Services" {
   interface IRecipeService
-  class RecipeService {
-    +GetPublishedRecipes(search, category)
-    +GetPublishedRecipeBySlug(slug)
-    +GetAllRecipes(search, category)
-    +GetRecipeBySlug(slug)
-    +CreateRecipe(request)
-    +UpdateRecipe(currentSlug, request)
-    +DeleteRecipe(slug)
-  }
-
+  class RecipeService
   interface IGalleryService
-  class GalleryService {
-    +GetAllImages()
-    +CreateImage(request)
-    +DeleteImage(id)
-  }
+  class GalleryService
 }
 
 package "Infrastructure" {
-  class AdminAuthorizationFilter {
-    +OnAuthorizationAsync(context)
-  }
+  class AdminAuthorizationFilter
   class AdminSessionStore
 }
 
 package "Repositories" {
-  interface IRecipeRepository {
-    +GetAll()
-    +GetBySlug(slug)
-    +Add(recipe)
-    +Replace(currentSlug, recipe)
-    +Delete(slug)
-  }
-
-  class InMemoryRecipeRepository
-  class FileRecipeRepository
-  class SqliteRecipeRepository
+  interface IRecipeRepository
+  class EfRecipeRepository
   class RecipeSeedData
 
-  interface IGalleryRepository {
-    +GetAll()
-    +GetById(id)
-    +Add(image)
-    +Delete(id)
-  }
-
-  class InMemoryGalleryRepository
-  class FileGalleryRepository
-  class SqliteGalleryRepository
+  interface IGalleryRepository
+  class EfGalleryRepository
   class GallerySeedData
 }
 
@@ -76,55 +44,32 @@ package "Data" {
   class RecipeDbInitializer
   class RecipeEntity
   class GalleryImageEntity
+  class RecipeDbMapper
+  class GalleryDbMapper
 }
 
 IRecipeService <|.. RecipeService
-RecipeService --> IRecipeRepository
-RecipeService ..> CreateRecipeRequest
-RecipeService ..> UpdateRecipeRequest
-RecipeService ..> RecipeResponse
-RecipeService ..> Recipe
-
 IGalleryService <|.. GalleryService
+
+RecipeService --> IRecipeRepository
 GalleryService --> IGalleryRepository
-GalleryService ..> CreateGalleryImageRequest
-GalleryService ..> GalleryImageResponse
-GalleryService ..> GalleryImage
 
-AdminAuthorizationFilter --> AdminSessionStore
+IRecipeRepository <|.. EfRecipeRepository
+IGalleryRepository <|.. EfGalleryRepository
 
-IRecipeRepository <|.. InMemoryRecipeRepository
-IRecipeRepository <|.. FileRecipeRepository
-IRecipeRepository <|.. SqliteRecipeRepository
+EfRecipeRepository --> RecipeDbContext
+EfGalleryRepository --> RecipeDbContext
+EfRecipeRepository ..> RecipeDbMapper
+EfGalleryRepository ..> GalleryDbMapper
 
-IGalleryRepository <|.. InMemoryGalleryRepository
-IGalleryRepository <|.. FileGalleryRepository
-IGalleryRepository <|.. SqliteGalleryRepository
-
-InMemoryRecipeRepository ..> RecipeSeedData
-FileRecipeRepository ..> RecipeSeedData
-SqliteRecipeRepository --> RecipeDbContext
-InMemoryGalleryRepository ..> GallerySeedData
-FileGalleryRepository ..> GallerySeedData
-SqliteGalleryRepository --> RecipeDbContext
 RecipeDbInitializer --> RecipeDbContext
 RecipeDbInitializer ..> RecipeSeedData
 RecipeDbInitializer ..> GallerySeedData
+RecipeDbInitializer ..> RecipeDbMapper
+RecipeDbInitializer ..> GalleryDbMapper
+
 RecipeDbContext --> RecipeEntity
 RecipeDbContext --> GalleryImageEntity
-
-note right of RecipeService
-Innehaller:
-- filtrering
-- payload-normalisering
-- slug-krockskontroll
-- mapping till RecipeResponse
-end note
-
-note right of AdminAuthorizationFilter
-Tillater adminanrop via:
-- session cookie
-- fallback API key header
-end note
+AdminAuthorizationFilter --> AdminSessionStore
 
 @enduml

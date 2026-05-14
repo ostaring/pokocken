@@ -23,14 +23,14 @@ rectangle "Backend (ASP.NET Core controllers)" {
   component "AdminSessionStore" as SessionStore
   component "RecipeService" as RecipeService
   component "GalleryService" as GalleryService
-  interface "IRecipeRepository" as Repo
+  interface "IRecipeRepository" as RecipeRepo
   interface "IGalleryRepository" as GalleryRepo
+  component "EfRecipeRepository" as EfRecipeRepo
+  component "EfGalleryRepository" as EfGalleryRepo
+  component "RecipeDbContext" as DbContext
 }
 
-database "Memory repository" as MemoryRepo
-database "File repository\nrecipes.json" as FileRepo
-database "SQLite repository\nrecipes.db" as SqliteRepo
-database "Gallery repositories" as GalleryRepos
+database "PostgreSQL\nDocker Compose / Testcontainers" as Postgres
 
 Visitor --> HomePage
 Visitor --> RecipesPage
@@ -57,19 +57,12 @@ Controllers --> Filter
 Filter --> SessionStore
 Controllers --> RecipeService
 Controllers --> GalleryService
-RecipeService --> Repo
+RecipeService --> RecipeRepo
 GalleryService --> GalleryRepo
-
-Repo <|.. MemoryRepo
-Repo <|.. FileRepo
-Repo <|.. SqliteRepo
-GalleryRepo <|.. GalleryRepos
-
-note right of Repo
-Valjs via konfiguration:
-- Memory
-- File
-- Sqlite
-end note
+RecipeRepo <|.. EfRecipeRepo
+GalleryRepo <|.. EfGalleryRepo
+EfRecipeRepo --> DbContext
+EfGalleryRepo --> DbContext
+DbContext --> Postgres
 
 @enduml
