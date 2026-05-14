@@ -5,13 +5,16 @@ Fullstack-repo for en svensk receptapp med React i frontend och ASP.NET Core i b
 ## Delprojekt
 
 - `frontend/` innehaller den publika webbappen och admingranssnittet
-- `backend/` innehaller API, auth-bootstrap, databas/persistens och tester
+- `backend/` innehaller API, auth-bootstrap, PostgreSQL-persistens och tester
+- `docs/` innehaller system- och arkitekturdokumentation
 - `tools/` innehaller lokal Node-runtime som frontendens skript anvander
 
 ## Stack
 
 - frontend: React, TypeScript, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS
-- backend: ASP.NET Core controllers, .NET 10, xUnit, EF Core, SQLite
+- backend: ASP.NET Core controllers, .NET 10, xUnit, EF Core, PostgreSQL
+- lokal drift: Docker Compose for backend + PostgreSQL
+- backendtester: Testcontainers for PostgreSQL-integrationsfloden
 
 ## Kom Igang
 
@@ -25,25 +28,27 @@ npm run dev
 
 Frontend startar da mot mockdata.
 
-### Fullstack lokalt
+### Backend + PostgreSQL via Docker Compose
 
-Starta backend i ett terminalfonster:
+Fran repo-roten:
 
 ```powershell
-cd backend
-dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
+docker compose up --build
 ```
 
-I utvecklingslage anvander backenden nu SQLite och skriver databasen till:
+Det startar:
 
-- `backend/RecipeApp.Api/App_Data/recipes.db`
+- PostgreSQL pa `localhost:5432`
+- backend pa `http://localhost:5080`
 
 Snabbkontroller for backend:
 
 - `http://localhost:5080/health`
 - `http://localhost:5080/swagger`
 
-Starta sedan frontend i ett annat terminalfonster:
+### Fullstack med frontend lokalt
+
+Starta backend och databas via Docker Compose enligt ovan. Starta sedan frontend i ett annat terminalfonster:
 
 ```powershell
 cd frontend
@@ -82,20 +87,25 @@ dotnet build .\RecipeApp.sln
 dotnet test .\RecipeApp.sln
 ```
 
+Backendtesterna anvander Testcontainers och kraver att Docker ar igang.
+
 ## Nuvarande Funktioner
 
 - publik startsida med utvalda recept
 - publik receptlista med filter i URL
 - publik receptdetaljsida med relaterade recept
+- publikt galleri
 - admininloggning med bootstrap-auth
 - adminoversikt med filter, publicering och borttagning
 - admineditor for att skapa och redigera recept
+- admingalleri for att lagga till och ta bort bilder
 - explicit 404-sida i frontend
-- SQLite-baserad backend i utvecklingslage
+- PostgreSQL-baserad backend med EF Core-migrationer
 - interface-baserad dependency injection for service- och repositorylager
 - health-endpoint for lokal diagnostik
 
 ## Vidare Arbete
 
 - ersatta bootstrap-auth med mer riktig autentisering
+- containerisera frontend nar backend + databasflodet sitter
 - lagga till e2e-tester nar huvudflodena satt sig helt

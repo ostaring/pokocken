@@ -4,17 +4,18 @@ ASP.NET Core Web API for receptappen.
 
 ## Stack
 
-- ASP.NET Core minimal API
+- ASP.NET Core controllers
 - .NET 10 SDK
-- xUnit for tester
-- EF Core med SQLite i utvecklingslage
+- EF Core med PostgreSQL
+- Docker Compose for lokal PostgreSQL + backend
+- xUnit och Testcontainers for tester
 - lokal `dotnet-ef` tool-manifest for migrationer
-- konfigurerbar repositorystrategi med minne, fil eller SQLite
 
 ## Projektstruktur
 
 ```text
 backend/
+  Dockerfile
   RecipeApp.sln
   README.md
   RecipeApp.Api/
@@ -26,34 +27,40 @@ backend/
 Backenden innehaller just nu:
 
 - publik receptlista och receptdetalj
+- publikt galleri
 - adminskyddade CRUD-endpoints for recept
+- adminskyddade endpoints for gallerihantering
 - cookie-baserad bootstrap-auth for admin
-- fältspecifik requestvalidering for admin create/update
+- faltspecifik requestvalidering for admin create/update
 - tidsbegransade adminsessions och konfigurerbar API-key fallback
 - hash-baserad verifiering av adminlosenord
 - CORS-konfiguration for frontendens dev-server
 - Swagger i utvecklingslage
-- SQLite-baserad receptpersistens i utvecklingslage
+- PostgreSQL-baserad persistens via EF Core
 - EF Core-migrationer for databasschema
 - health-endpoint for snabb lokal diagnostik
 - testprojekt for services, repositories och endpoints
 
 ## Lokal Utveckling
 
-Utvecklingsprofilen ar konfigurerad for:
+Backend exponeras pa:
 
 - `http://localhost:5080`
 
 Detta matchar frontendens `VITE_API_BASE_URL`.
 
-### Starta API:t
+### Starta Backend Och Databas
 
 Fran repo-roten:
 
 ```powershell
-cd backend
-dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
+docker compose up --build
 ```
+
+Det startar:
+
+- `db`: PostgreSQL pa `localhost:5432`
+- `backend`: ASP.NET Core API pa `http://localhost:5080`
 
 Swagger finns pa:
 
@@ -67,33 +74,29 @@ Backenden tillater frontendens dev-origin:
 
 - `http://localhost:5173`
 
-### Persistenslagen
+### Persistens
 
-Backenden kan kora i tre lagen:
-
-- `Memory`
-- `File`
-- `Sqlite`
+PostgreSQL ar den enda aktiva persistenslosningen.
 
 Konfigurationen ligger i:
 
 - `RecipeApp.Api/appsettings.json`
 - `RecipeApp.Api/appsettings.Development.json`
+- `docker-compose.yml`
 
-Nuvarande standard:
+Lokal connection string:
 
-- generell baseline: `Memory`
-- utvecklingslage: `Sqlite`
+```text
+Host=localhost;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
+```
 
-Vid SQLite-lagring sparas databasen i:
+I Compose anvander backenden hostnamnet `db`:
 
-- `RecipeApp.Api/App_Data/recipes.db`
+```text
+Host=db;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
+```
 
-Databasen skapas och uppgraderas nu via EF Core-migrationer nar API:t startar i `Sqlite`-lage.
-
-Filrepositoryn finns kvar som alternativ och anvander:
-
-- `RecipeApp.Api/App_Data/recipes.json`
+Databasen skapas, migreras och seedas via `RecipeDbInitializer` nar API:t startar.
 
 ### Koer Tester
 
@@ -103,7 +106,7 @@ dotnet build .\RecipeApp.sln
 dotnet test .\RecipeApp.sln
 ```
 
-Notera att endpointtesterna tvingas till minneslagring i testhosten for att sviten ska vara deterministisk aven om utvecklingslaget ar SQLite.
+Backendtesterna anvander Testcontainers for PostgreSQL och kraver att Docker ar igang.
 
 ### Migrationer Och Schemauppdateringar
 
@@ -123,14 +126,6 @@ dotnet ef migrations add <MigrationName> --project .\RecipeApp.Api\RecipeApp.Api
 
 Backenden applicerar migrationer automatiskt vid uppstart genom `RecipeDbInitializer`.
 
-Om du bara vill verifiera att migrationerna gar att applicera lokalt:
-
-```powershell
-cd backend
-dotnet test .\RecipeApp.sln
-dotnet run --project .\RecipeApp.Api\RecipeApp.Api.csproj
-```
-
 ## Adminatkomst
 
 Nuvarande adminauth ar bootstrapad pa tva satt:
@@ -143,12 +138,8 @@ Utvecklingsuppgifter:
 - username: `admin`
 - password: `admin123`
 
-Adminlosenordet verifieras nu i forsta hand mot `Admin:PasswordHash`.
+Adminlosenordet verifieras i forsta hand mot `Admin:PasswordHash`.
 Det gamla faltet `Admin:Password` finns kvar som tillfallig fallback under overgangen, men grundkonfigurationen anvander hashad lagring.
-
-Nuvarande hashformat:
-
-- `pbkdf2-sha256$<iterations>$<base64-salt>$<base64-hash>`
 
 Auth-endpoints:
 
@@ -156,14 +147,10 @@ Auth-endpoints:
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 
-Adminsessions ar tidsbegransade och sessionens langd styrs via `Admin:SessionDurationHours`.
-
-API-key fallback ar nu konfigurerbar via `Admin:AllowApiKeyFallback`:
+API-key fallback ar konfigurerbar via `Admin:AllowApiKeyFallback`:
 
 - `false` i grundkonfigurationen
-- `true` i lokal utvecklingskonfiguration
-
-Detta ar fortfarande en tillfallig losning fore riktig produktionsauth, men betydligt mer kontrollerad an en alltid-aktiv fallback.
+- `true` i lokal utvecklingskonfiguration och Docker Compose
 
 ## API-Oversikt
 
@@ -175,41 +162,24 @@ Detta ar fortfarande en tillfallig losning fore riktig produktionsauth, men bety
 
 - `GET /api/recipes`
 - `GET /api/recipes/{slug}`
+- `GET /api/gallery`
 
 ### Admin-endpoints
 
 - `GET /api/admin/recipes`
-- `GET /api/admin/recipes/{id}`
+- `GET /api/admin/recipes/{slug}`
 - `POST /api/admin/recipes`
-- `PUT /api/admin/recipes/{id}`
-- `DELETE /api/admin/recipes/{id}`
-
-## Payloadformat
-
-`POST /api/admin/recipes` och `PUT /api/admin/recipes/{id}` anvander just nu detta payloadformat:
-
-```json
-{
-  "title": "Ortig potatissallad",
-  "slug": "ortig-potatissallad",
-  "description": "Ljummen potatis med orter och senapsdressing.",
-  "category": "Lunch",
-  "prepTimeMinutes": 30,
-  "servings": 4,
-  "imageUrl": "https://example.com/potato-salad.jpg",
-  "isPublished": false,
-  "ingredients": ["1 kg potatis", "Persilja", "Senap"],
-  "steps": ["Koka potatisen.", "Blanda dressingen.", "Vand ihop allt."]
-}
-```
-
-Om payloaden ar ogiltig returnerar API:t `400 Bad Request` med fältspecifika valideringsfel i `errors`-objektet, till exempel for ogiltig slug, tomma ingredienslistor eller saknade obligatoriska fält.
+- `PUT /api/admin/recipes/{slug}`
+- `DELETE /api/admin/recipes/{slug}`
+- `GET /api/admin/gallery`
+- `POST /api/admin/gallery`
+- `DELETE /api/admin/gallery/{id}`
 
 ## Koppling Till Frontend
 
 For att kora fullstack lokalt:
 
-1. Starta backend med `dotnet run`.
+1. Starta backend och PostgreSQL med `docker compose up --build`.
 2. Skapa `frontend/.env.local`.
 3. Satt `VITE_API_MODE=http`.
 4. Satt `VITE_API_BASE_URL=http://localhost:5080`.
@@ -217,6 +187,6 @@ For att kora fullstack lokalt:
 
 ## Nastkommande Steg
 
-- kunna byta vidare till PostgreSQL nar deploysparet tar form
 - ersatta bootstrap-auth med riktig autentisering
-- hardna validering, felhantering och persistens innan extern publicering
+- containerisera frontend nar backend + databasflodet sitter
+- hardna validering och felhantering innan extern publicering
