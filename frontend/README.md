@@ -17,16 +17,25 @@ Frontend for receptappen.
 
 ## Krav
 
-- Windows med `npm` tillgangligt
-- ingen global Node-uppgradering kravs for projektet
+- Node.js och npm installerat i den miljo dar frontend koras.
+- I WSL rekommenderas Node via Ubuntu, inte Windows-installationen via `/mnt/c`.
 
-Frontendskripten anvander den lokala portabla Node-runtime som ligger i `../tools/node-v24.14.1-win-x64`, sa appen kan koras aven om den globalt installerade Node-versionen ar aldre.
+Kontrollera i WSL:
+
+```bash
+node --version
+npm --version
+which node
+which npm
+```
+
+`which node` och `which npm` bor peka pa Linux-pathar, inte `Program Files`.
 
 ## Starta Frontend
 
 Fran repo-roten:
 
-```powershell
+```bash
 cd frontend
 npm install
 npm run dev
@@ -43,9 +52,9 @@ Frontend har tva API-lagen:
 
 Skapa en lokal env-fil om du vill styra laget:
 
-```powershell
+```bash
 cd frontend
-copy .env.example .env.local
+cp .env.example .env.local
 ```
 
 Tillgangliga variabler:
@@ -63,7 +72,7 @@ Projektets standardlage ar fortfarande `mock`.
 
 ## Bygg Och Testa
 
-```powershell
+```bash
 cd frontend
 npm run test -- --run
 npm run build
@@ -71,7 +80,7 @@ npm run build
 
 ## Forhandsgranska Produktionsbygge
 
-```powershell
+```bash
 cd frontend
 npm run preview
 ```
@@ -115,7 +124,7 @@ frontend/
 
 ## Koera Mot Backend
 
-1. Starta API:t enligt [backend/README.md](C:/Users/Oscar/Documents/New%20project/backend/README.md).
+1. Starta API:t enligt [backend/README.md](../backend/README.md).
 2. Skapa `frontend/.env.local`.
 3. Satt:
 
