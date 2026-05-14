@@ -85,6 +85,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
     [Fact]
     public async Task Me_ReturnsUnauthorized_AfterSessionExpires()
     {
+        await _factory.ResetDatabaseAsync();
         var timeProvider = new MutableTimeProvider(new DateTimeOffset(2026, 4, 27, 10, 0, 0, TimeSpan.Zero));
         using var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -106,6 +107,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
     [Fact]
     public async Task AdminEndpoints_AcceptApiKey_WhenFallbackIsEnabled()
     {
+        await _factory.ResetDatabaseAsync();
         using var client = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, configurationBuilder) =>
@@ -127,6 +129,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
     [Fact]
     public async Task AdminEndpoints_RejectApiKey_WhenFallbackIsDisabled()
     {
+        await _factory.ResetDatabaseAsync();
         using var client = _factory.WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment("Production");
@@ -134,7 +137,6 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
             {
                 configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["Persistence:Mode"] = "Memory",
                     ["Admin:AllowApiKeyFallback"] = "false"
                 });
             });
@@ -150,6 +152,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
     [Fact]
     public async Task Login_AcceptsLegacyPasswordFallback_WhenHashIsMissing()
     {
+        await _factory.ResetDatabaseAsync();
         using var client = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, configurationBuilder) =>
@@ -170,6 +173,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
     [Fact]
     public async Task Login_RejectsPassword_WhenConfiguredHashDoesNotMatch()
     {
+        await _factory.ResetDatabaseAsync();
         using var client = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, configurationBuilder) =>

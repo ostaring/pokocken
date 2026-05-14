@@ -1,15 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
+using RecipeApp.Api.Data;
 
 namespace RecipeApp.Api.Controllers;
 
 [ApiController]
 public sealed class HealthController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
+    private readonly RecipeDbContext _dbContext;
 
-    public HealthController(IConfiguration configuration)
+    public HealthController(RecipeDbContext dbContext)
     {
-        _configuration = configuration;
+        _dbContext = dbContext;
     }
 
     [HttpGet("/health")]
@@ -18,7 +19,8 @@ public sealed class HealthController : ControllerBase
         return Ok(new
         {
             status = "ok",
-            persistenceMode = _configuration["Persistence:Mode"] ?? "Memory"
+            database = "PostgreSQL",
+            canConnect = _dbContext.Database.CanConnect()
         });
     }
 }

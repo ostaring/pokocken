@@ -1,6 +1,5 @@
 using RecipeApp.Api.Controllers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using RecipeApp.Api.Data;
 using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Repositories;
@@ -8,8 +7,7 @@ using RecipeApp.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-var persistenceMode = builder.Configuration["Persistence:Mode"] ?? "Memory";
-var sqliteConnectionString = builder.Configuration.GetConnectionString("RecipesDb");
+var databaseConnectionString = builder.Configuration.GetConnectionString("RecipesDb");
 
 builder.Services.Configure<AdminAuthOptions>(builder.Configuration.GetSection("Admin"));
 builder.Services.AddSingleton(TimeProvider.System);
@@ -37,35 +35,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-if (string.Equals(persistenceMode, "Sqlite", StringComparison.OrdinalIgnoreCase))
+builder.Services.AddDbContext<RecipeDbContext>(options =>
 {
-    builder.Services.AddDbContext<RecipeDbContext>(options =>
-    {
-        options.UseSqlite(sqliteConnectionString);
-    });
-    builder.Services.AddScoped<IRecipeRepository, SqliteRecipeRepository>();
-    builder.Services.AddScoped<IGalleryRepository, SqliteGalleryRepository>();
-    builder.Services.AddScoped<RecipeDbInitializer>();
-}
-else if (string.Equals(persistenceMode, "File", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddSingleton<IRecipeRepository>(_ =>
-    {
-        var storagePath = builder.Configuration["Persistence:RecipesFilePath"];
-        return new FileRecipeRepository(storagePath!);
-    });
-    builder.Services.AddSingleton<IGalleryRepository>(_ =>
-    {
-        var storagePath = builder.Configuration["Persistence:GalleryFilePath"];
-        return new FileGalleryRepository(storagePath!);
-    });
-}
-else
-{
-    builder.Services.AddSingleton<IRecipeRepository, InMemoryRecipeRepository>();
-    builder.Services.AddSingleton<IGalleryRepository, InMemoryGalleryRepository>();
-}
-
+    options.UseNpgsql(databaseConnectionString);
+});
+builder.Services.AddScoped<IRecipeRepository, EfRecipeRepository>();
+builder.Services.AddScoped<IGalleryRepository, EfGalleryRepository>();
+builder.Services.AddScoped<RecipeDbInitializer>();
 builder.Services.AddSingleton<AdminSessionStore>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IGalleryService, GalleryService>();
@@ -73,13 +49,11 @@ builder.Services.AddScoped<IGalleryService, GalleryService>();
 var app = builder.Build();
 app.UseCors("FrontendDevClient");
 app.Logger.LogInformation(
-    "Starting RecipeApp API in {Environment} with persistence mode {PersistenceMode}",
-    app.Environment.EnvironmentName,
-    persistenceMode);
+    "Starting RecipeApp API in {Environment} with PostgreSQL persistence",
+    app.Environment.EnvironmentName);
 
-if (string.Equals(persistenceMode, "Sqlite", StringComparison.OrdinalIgnoreCase))
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var initializer = scope.ServiceProvider.GetRequiredService<RecipeDbInitializer>();
     try
     {

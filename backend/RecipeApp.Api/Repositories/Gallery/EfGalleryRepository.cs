@@ -4,11 +4,11 @@ using RecipeApp.Api.Domain;
 
 namespace RecipeApp.Api.Repositories;
 
-public sealed class SqliteGalleryRepository : IGalleryRepository
+public sealed class EfGalleryRepository : IGalleryRepository
 {
     private readonly RecipeDbContext _dbContext;
 
-    public SqliteGalleryRepository(RecipeDbContext dbContext)
+    public EfGalleryRepository(RecipeDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using RecipeApp.Api.Domain;
 using RecipeApp.Api.Repositories;
 using RecipeApp.Api.Services;
 using Xunit;
@@ -10,7 +11,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void GetPublishedRecipes_FiltersOutDrafts()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var recipes = service.GetPublishedRecipes(search: null, category: null);
@@ -23,7 +24,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void GetPublishedRecipes_FiltersBySearch()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var recipes = service.GetPublishedRecipes(search: "pasta", category: null);
@@ -35,7 +36,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void GetPublishedRecipes_FiltersByCategory()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var recipes = service.GetPublishedRecipes(search: null, category: "Dessert");
@@ -47,7 +48,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void GetPublishedRecipeBySlug_ReturnsNullForDraft()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var recipe = service.GetPublishedRecipeBySlug("draft-lemon-tart");
@@ -58,7 +59,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void GetAllRecipes_IncludesDraftsForAdminQueries()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var recipes = service.GetAllRecipes(search: null, category: null);
@@ -69,7 +70,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void CreateRecipe_AddsRecipeForAdminFlows()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var createdRecipe = service.CreateRecipe(new(
@@ -91,7 +92,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void CreateRecipe_ThrowsForDuplicateSlug()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var action = () => service.CreateRecipe(new(
@@ -113,7 +114,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void UpdateRecipe_UpdatesExistingRecipeIncludingSlug()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var updatedRecipe = service.UpdateRecipe("draft-lemon-tart", new(
@@ -138,7 +139,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void UpdateRecipe_ThrowsForDuplicateSlug()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var action = () => service.UpdateRecipe("draft-lemon-tart", new(
@@ -160,7 +161,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void DeleteRecipe_RemovesRecipeWhenItExists()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var deleted = service.DeleteRecipe("draft-lemon-tart");
@@ -172,7 +173,7 @@ public sealed class RecipeServiceTests
     [Fact]
     public void DeleteRecipe_ReturnsFalseWhenRecipeDoesNotExist()
     {
-        var repository = new InMemoryRecipeRepository();
+        var repository = new TestRecipeRepository();
         var service = CreateService(repository);
 
         var deleted = service.DeleteRecipe("missing-recipe");
@@ -182,4 +183,42 @@ public sealed class RecipeServiceTests
 
     private static RecipeService CreateService(IRecipeRepository repository) =>
         new(repository, NullLogger<RecipeService>.Instance);
+
+    private sealed class TestRecipeRepository : IRecipeRepository
+    {
+        private readonly List<Recipe> _recipes = RecipeSeedData.CreateRecipes().ToList();
+
+        public IReadOnlyList<Recipe> GetAll() => _recipes
+            .OrderBy(recipe => recipe.Title)
+            .ToList();
+
+        public Recipe? GetBySlug(string slug) =>
+            _recipes.FirstOrDefault(recipe => string.Equals(recipe.Slug, slug, StringComparison.OrdinalIgnoreCase));
+
+        public Recipe Add(Recipe recipe)
+        {
+            _recipes.Add(recipe);
+            return recipe;
+        }
+
+        public Recipe? Replace(string currentSlug, Recipe recipe)
+        {
+            var index = _recipes.FindIndex(existingRecipe =>
+                string.Equals(existingRecipe.Slug, currentSlug, StringComparison.OrdinalIgnoreCase));
+
+            if (index < 0)
+            {
+                return null;
+            }
+
+            _recipes[index] = recipe;
+            return recipe;
+        }
+
+        public bool Delete(string slug)
+        {
+            var recipe = GetBySlug(slug);
+            return recipe is not null && _recipes.Remove(recipe);
+        }
+    }
 }

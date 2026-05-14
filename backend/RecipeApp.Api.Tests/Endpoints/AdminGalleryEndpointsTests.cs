@@ -101,6 +101,7 @@ public sealed class AdminGalleryEndpointsTests : IClassFixture<RecipeApiFactory>
 
     private async Task<HttpClient> CreateAuthenticatedClientAsync()
     {
+        await _factory.ResetDatabaseAsync();
         var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);

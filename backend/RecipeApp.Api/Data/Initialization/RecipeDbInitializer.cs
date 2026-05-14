@@ -55,19 +55,5 @@ public sealed class RecipeDbInitializer
         _logger.LogInformation("Database initialization completed");
     }
 
-    internal static RecipeEntity MapToEntity(Recipe recipe) =>
-        new()
-        {
-            Id = recipe.Id,
-            Title = recipe.Title,
-            Slug = recipe.Slug,
-            Description = recipe.Description,
-            Category = recipe.Category,
-            PrepTimeMinutes = recipe.PrepTimeMinutes,
-            Servings = recipe.Servings,
-            ImageUrl = recipe.ImageUrl,
-            IsPublished = recipe.IsPublished,
-            IngredientsJson = SqliteRecipeRepository.SerializeList(recipe.Ingredients),
-            StepsJson = SqliteRecipeRepository.SerializeList(recipe.Steps)
-        };
+    internal static RecipeEntity MapToEntity(Recipe recipe) => RecipeDbMapper.MapToEntity(recipe);
 }

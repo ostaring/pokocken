@@ -15,7 +15,7 @@ public sealed class HealthEndpointsTests : IClassFixture<RecipeApiFactory>
     }
 
     [Fact]
-    public async Task Health_ReturnsOkAndCurrentPersistenceMode()
+    public async Task Health_ReturnsOkAndDatabaseStatus()
     {
         using var client = _factory.CreateClient();
 
@@ -26,8 +26,9 @@ public sealed class HealthEndpointsTests : IClassFixture<RecipeApiFactory>
         var payload = await response.Content.ReadFromJsonAsync<HealthResponse>();
         Assert.NotNull(payload);
         Assert.Equal("ok", payload!.Status);
-        Assert.Equal("Memory", payload.PersistenceMode);
+        Assert.Equal("PostgreSQL", payload.Database);
+        Assert.True(payload.CanConnect);
     }
 
-    private sealed record HealthResponse(string Status, string PersistenceMode);
+    private sealed record HealthResponse(string Status, string Database, bool CanConnect);
 }

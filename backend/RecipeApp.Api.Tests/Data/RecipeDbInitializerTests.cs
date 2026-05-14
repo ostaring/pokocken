@@ -1,42 +1,32 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
-using RecipeApp.Api.Data;
+using RecipeApp.Api.Tests.Testing;
 using Xunit;
 
 namespace RecipeApp.Api.Tests.Data;
 
-public sealed class RecipeDbInitializerTests : IDisposable
+public sealed class RecipeDbInitializerTests : IClassFixture<PostgresTestDatabase>, IAsyncLifetime
 {
-    private readonly string _tempDirectory;
-    private readonly string _databasePath;
+    private readonly PostgresTestDatabase _database;
 
-    public RecipeDbInitializerTests()
+    public RecipeDbInitializerTests(PostgresTestDatabase database)
     {
-        _tempDirectory = Path.Combine(Path.GetTempPath(), "recipe-app-dbinit-tests", Guid.NewGuid().ToString("N"));
-        _databasePath = Path.Combine(_tempDirectory, "recipes.db");
+        _database = database;
     }
+
+    public Task InitializeAsync() => _database.ResetAsync();
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task InitializeAsync_AppliesMigrationsAndSeedsRecipesWhenDatabaseIsMissing()
     {
-        await using (var dbContext = CreateDbContext())
-        {
-            var initializer = new RecipeDbInitializer(dbContext, NullLogger<RecipeDbInitializer>.Instance);
-            await initializer.InitializeAsync();
-        }
-
-        await using var verificationContext = CreateDbContext();
+        await using var verificationContext = _database.CreateDbContext();
         var seededRecipes = await verificationContext.Recipes.ToListAsync();
 
         Assert.NotEmpty(seededRecipes);
         Assert.Contains(seededRecipes, recipe => recipe.Slug == "draft-lemon-tart");
 
-        await using var connection = new SqliteConnection($"Data Source={_databasePath}");
-        await connection.OpenAsync();
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COUNT(*) FROM __EFMigrationsHistory";
-        var migrationCount = Convert.ToInt32(await command.ExecuteScalarAsync());
+        var migrationCount = (await verificationContext.Database.GetAppliedMigrationsAsync()).Count();
 
         Assert.True(migrationCount > 0);
     }
@@ -44,14 +34,9 @@ public sealed class RecipeDbInitializerTests : IDisposable
     [Fact]
     public async Task InitializeAsync_DoesNotDuplicateSeedDataWhenCalledTwice()
     {
-        await using (var dbContext = CreateDbContext())
-        {
-            var initializer = new RecipeDbInitializer(dbContext, NullLogger<RecipeDbInitializer>.Instance);
-            await initializer.InitializeAsync();
-            await initializer.InitializeAsync();
-        }
+        await _database.ResetAsync();
 
-        await using var verificationContext = CreateDbContext();
+        await using var verificationContext = _database.CreateDbContext();
         var recipeCount = await verificationContext.Recipes.CountAsync();
         var distinctSlugCount = await verificationContext.Recipes
             .Select(recipe => recipe.Slug)
@@ -59,32 +44,5 @@ public sealed class RecipeDbInitializerTests : IDisposable
             .CountAsync();
 
         Assert.Equal(distinctSlugCount, recipeCount);
-    }
-
-    public void Dispose()
-    {
-        try
-        {
-            if (Directory.Exists(_tempDirectory))
-            {
-                Directory.Delete(_tempDirectory, recursive: true);
-            }
-        }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
-    }
-
-    private RecipeDbContext CreateDbContext()
-    {
-        Directory.CreateDirectory(_tempDirectory);
-        var options = new DbContextOptionsBuilder<RecipeDbContext>()
-            .UseSqlite($"Data Source={_databasePath}")
-            .Options;
-
-        return new RecipeDbContext(options);
     }
 }

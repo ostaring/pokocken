@@ -17,10 +17,10 @@ public sealed class RecipeDbContextFactory : IDesignTimeDbContextFactory<RecipeD
             .Build();
 
         var connectionString = configuration.GetConnectionString("RecipesDb")
-            ?? "Data Source=App_Data/recipes.db";
+            ?? "Host=localhost;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken";
 
         var optionsBuilder = new DbContextOptionsBuilder<RecipeDbContext>();
-        optionsBuilder.UseSqlite(connectionString);
+        optionsBuilder.UseNpgsql(connectionString);
 
         return new RecipeDbContext(optionsBuilder.Options);
     }
