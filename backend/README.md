@@ -1,170 +1,134 @@
 # Backend
 
-ASP.NET Core Web API for receptappen.
+ASP.NET Core Web API for Pokocken. The backend exposes public recipe and gallery endpoints, admin endpoints, bootstrap admin auth, PostgreSQL persistence, and local diagnostics.
 
 ## Stack
 
 - ASP.NET Core controllers
 - .NET 10 SDK
-- EF Core med PostgreSQL
-- Docker Compose for lokal PostgreSQL + backend
-- xUnit och Testcontainers for tester
-- lokal `dotnet-ef` tool-manifest for migrationer
+- EF Core with PostgreSQL
+- Docker Compose for local backend and database runtime
+- xUnit and Testcontainers for tests
+- Local `dotnet-ef` tool manifest for migrations
 
-## Projektstruktur
+## Structure
 
 ```text
 backend/
   Dockerfile
   RecipeApp.sln
-  README.md
   RecipeApp.Api/
   RecipeApp.Api.Tests/
 ```
 
-## Nuvarande Omfang
+## Launch
 
-Backenden innehaller just nu:
+From the repo root:
 
-- publik receptlista och receptdetalj
-- publikt galleri
-- adminskyddade CRUD-endpoints for recept
-- adminskyddade endpoints for gallerihantering
-- cookie-baserad bootstrap-auth for admin
-- faltspecifik requestvalidering for admin create/update
-- tidsbegransade adminsessions och konfigurerbar API-key fallback
-- hash-baserad verifiering av adminlosenord
-- CORS-konfiguration for frontendens dev-server
-- Swagger i utvecklingslage
-- PostgreSQL-baserad persistens via EF Core
-- EF Core-migrationer for databasschema
-- health-endpoint for snabb lokal diagnostik
-- testprojekt for services, repositories och endpoints
-
-## Lokal Utveckling
-
-Backend exponeras pa:
-
-- `http://localhost:5080`
-
-Detta matchar frontendens `VITE_API_BASE_URL`.
-
-### Starta Backend Och Databas
-
-Fran repo-roten:
-
-```powershell
+```bash
 docker compose up --build
 ```
 
-Det startar:
+This starts:
 
-- `db`: PostgreSQL pa `localhost:5432`
-- `backend`: ASP.NET Core API pa `http://localhost:5080`
+- `db` - PostgreSQL on `localhost:5432`
+- `backend` - ASP.NET Core API on `http://localhost:5080`
 
-Swagger finns pa:
-
-- `http://localhost:5080/swagger`
-
-Health-endpoint finns pa:
+Useful local URLs:
 
 - `http://localhost:5080/health`
+- `http://localhost:5080/swagger`
 
-Backenden tillater frontendens dev-origin:
+The backend allows the frontend dev origin `http://localhost:5173`.
 
-- `http://localhost:5173`
+## Persistence
 
-### Persistens
+PostgreSQL is the only active persistence provider.
 
-PostgreSQL ar den enda aktiva persistenslosningen.
-
-Konfigurationen ligger i:
+Configuration lives in:
 
 - `RecipeApp.Api/appsettings.json`
 - `RecipeApp.Api/appsettings.Development.json`
-- `docker-compose.yml`
+- `../docker-compose.yml`
 
-Lokal connection string:
+Local connection string:
 
 ```text
 Host=localhost;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
 ```
 
-I Compose anvander backenden hostnamnet `db`:
+Docker Compose connection string:
 
 ```text
 Host=db;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
 ```
 
-Databasen skapas, migreras och seedas via `RecipeDbInitializer` nar API:t startar.
+`RecipeDbInitializer` applies migrations and seed data when the API starts.
 
-### Koer Tester
+## Tests
 
-```powershell
+```bash
 cd backend
-dotnet build .\RecipeApp.sln
-dotnet test .\RecipeApp.sln
+dotnet build ./RecipeApp.sln
+dotnet test ./RecipeApp.sln
 ```
 
-Backendtesterna anvander Testcontainers for PostgreSQL och kraver att Docker ar igang.
+Backend tests use Testcontainers for PostgreSQL and require Docker to be running.
 
-### Migrationer Och Schemauppdateringar
+## Migrations
 
-Forsta gangen pa en ny maskin:
+Restore local tools on a new machine:
 
-```powershell
+```bash
 cd backend
 dotnet tool restore
 ```
 
-Skapa en ny migration efter en modelandring:
+Create a migration after a model change:
 
-```powershell
+```bash
 cd backend
-dotnet ef migrations add <MigrationName> --project .\RecipeApp.Api\RecipeApp.Api.csproj --startup-project .\RecipeApp.Api\RecipeApp.Api.csproj --output-dir Data\Migrations
+dotnet ef migrations add <MigrationName> --project ./RecipeApp.Api/RecipeApp.Api.csproj --startup-project ./RecipeApp.Api/RecipeApp.Api.csproj --output-dir Data/Migrations
 ```
 
-Backenden applicerar migrationer automatiskt vid uppstart genom `RecipeDbInitializer`.
+Migrations are applied automatically at API startup.
 
-## Adminatkomst
+## Admin Access
 
-Nuvarande adminauth ar bootstrapad pa tva satt:
+Current admin auth is intended for local development and education.
 
-- foredraget for frontend: `POST /api/auth/login` med utvecklingsuppgifterna nedan
-- valfri fallback for manuell eller teknisk API-testning: skicka header `X-Admin-Api-Key: dev-admin-key`
-
-Utvecklingsuppgifter:
+Development login:
 
 - username: `admin`
 - password: `admin123`
 
-Adminlosenordet verifieras i forsta hand mot `Admin:PasswordHash`.
-Det gamla faltet `Admin:Password` finns kvar som tillfallig fallback under overgangen, men grundkonfigurationen anvander hashad lagring.
-
-Auth-endpoints:
+Auth endpoints:
 
 - `GET /api/auth/me`
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 
-API-key fallback ar konfigurerbar via `Admin:AllowApiKeyFallback`:
+Optional API-key fallback for manual testing:
 
-- `false` i grundkonfigurationen
-- `true` i lokal utvecklingskonfiguration och Docker Compose
+```text
+X-Admin-Api-Key: dev-admin-key
+```
 
-## API-Oversikt
+The fallback is controlled by `Admin:AllowApiKeyFallback`. It is disabled in base configuration and enabled for local development and Docker Compose.
 
-### Infrastruktur
+## API Overview
+
+Infrastructure:
 
 - `GET /health`
 
-### Publika endpoints
+Public endpoints:
 
 - `GET /api/recipes`
 - `GET /api/recipes/{slug}`
 - `GET /api/gallery`
 
-### Admin-endpoints
+Admin endpoints:
 
 - `GET /api/admin/recipes`
 - `GET /api/admin/recipes/{slug}`
@@ -175,18 +139,4 @@ API-key fallback ar konfigurerbar via `Admin:AllowApiKeyFallback`:
 - `POST /api/admin/gallery`
 - `DELETE /api/admin/gallery/{id}`
 
-## Koppling Till Frontend
-
-For att kora fullstack lokalt:
-
-1. Starta backend och PostgreSQL med `docker compose up --build`.
-2. Skapa `frontend/.env.local`.
-3. Satt `VITE_API_MODE=http`.
-4. Satt `VITE_API_BASE_URL=http://localhost:5080`.
-5. Starta frontendens Vite-server.
-
-## Nastkommande Steg
-
-- ersatta bootstrap-auth med riktig autentisering
-- containerisera frontend nar backend + databasflodet sitter
-- hardna validering och felhantering innan extern publicering
+More architecture details are available in `../docs/backend-architecture.md` and `../docs/system/`.
