@@ -1,21 +1,21 @@
 # Pokocken
 
-Pokocken ar en fullstack-receptapp for familj och vanner. Den publika delen visar recept och galleri, medan adminytan anvands for att logga in, skapa recept, publicera recept och hantera galleribilder.
+Pokocken is a fullstack recipe app for family and friends. The public app shows recipes and gallery images, while the admin area is used to sign in, create recipes, publish recipes, and manage gallery images.
 
-## Projekt
+## Project
 
-- `frontend/` - React, TypeScript, Vite, React Router, TanStack Query och Tailwind CSS.
-- `backend/` - ASP.NET Core API med controllers, services, repositories, EF Core och PostgreSQL.
-- `docs/` - systemdokumentation och arkitekturanteckningar.
+- `frontend/` - React, TypeScript, Vite, React Router, TanStack Query, and Tailwind CSS.
+- `backend/` - ASP.NET Core API with controllers, services, repositories, EF Core, and PostgreSQL.
+- `docs/` - system documentation and architecture notes.
 
-## Systemkrav
+## Requirements
 
 - Git
-- Node.js och npm for frontend
-- .NET SDK for backend och tester
-- Docker Desktop med WSL 2-integration for PostgreSQL och Docker Compose
+- Node.js and npm for frontend development
+- .NET SDK for backend development and tests
+- Docker Desktop with WSL 2 integration for PostgreSQL and Docker Compose
 
-I WSL bor `node`, `npm` och `docker` komma fran Linux/WSL-miljon:
+In WSL, `node`, `npm`, and `docker` should come from the Linux/WSL environment:
 
 ```bash
 which node
@@ -25,7 +25,7 @@ docker version
 
 ## Launch
 
-Frontend med mockdata:
+Frontend with mock data:
 
 ```bash
 cd frontend
@@ -33,37 +33,37 @@ npm install
 npm run dev
 ```
 
-Backend och PostgreSQL:
+Backend and PostgreSQL:
 
 ```bash
 docker compose up --build
 ```
 
-Backend finns pa `http://localhost:5080`, med `/health` och `/swagger`. Frontend finns normalt pa `http://localhost:5173`.
+The backend runs at `http://localhost:5080`, with `/health` and `/swagger`. The frontend usually runs at `http://localhost:5173`.
 
-## Kora Fullstack
+## Run Fullstack Locally
 
-Starta backend och PostgreSQL med Docker Compose. Skapa sedan en lokal frontend-env:
+Start the backend and PostgreSQL with Docker Compose. Then create a local frontend env file:
 
 ```bash
 cd frontend
 cp .env.example .env.local
 ```
 
-Satt:
+Set:
 
 ```env
 VITE_API_MODE=http
 VITE_API_BASE_URL=http://localhost:5080
 ```
 
-Starta frontend:
+Start the frontend:
 
 ```bash
 npm run dev
 ```
 
-## Tester
+## Tests
 
 ```bash
 cd frontend
@@ -78,6 +78,6 @@ dotnet build ./RecipeApp.sln
 dotnet test ./RecipeApp.sln
 ```
 
-Backendtesterna anvander Testcontainers och kraver att Docker ar igang.
+Backend tests use Testcontainers and require Docker to be running.
 
-Mer detaljer finns i `frontend/README.md`, `backend/README.md`, `docs/backend-architecture.md` och `docs/system/`.
+More details are available in `frontend/README.md`, `backend/README.md`, `docs/backend-architecture.md`, and `docs/system/`.
