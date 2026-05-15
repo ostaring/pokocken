@@ -35,6 +35,14 @@ which npm
 From the repo root:
 
 ```bash
+docker compose up --build
+```
+
+This starts the frontend container at `http://localhost:5173`.
+
+For Vite development without containers:
+
+```bash
 cd frontend
 npm install
 npm run dev
@@ -49,7 +57,13 @@ The frontend supports two API modes:
 - `mock` - local mock data, useful for fast UI work.
 - `http` - calls the ASP.NET Core backend.
 
-The default mode is `mock`. To run against the backend, create `frontend/.env.local`:
+The default mode is `mock`. To run Vite against the backend, start only the backend and PostgreSQL from the repo root:
+
+```bash
+docker compose up --build db backend
+```
+
+Then create `frontend/.env.local`:
 
 ```bash
 cd frontend
@@ -63,7 +77,14 @@ VITE_API_MODE=http
 VITE_API_BASE_URL=http://localhost:5080
 ```
 
-Start the backend from the repo root with `docker compose up --build`, then run `npm run dev` in `frontend/`.
+Run `npm run dev` in `frontend/`.
+
+The Docker image builds with:
+
+```text
+VITE_API_MODE=http
+VITE_API_BASE_URL=http://localhost:5080
+```
 
 ## Scripts
 

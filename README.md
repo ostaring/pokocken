@@ -13,7 +13,7 @@ Pokocken is a fullstack recipe app for family and friends. The public app shows 
 - Git
 - Node.js and npm for frontend development
 - .NET SDK for backend development and tests
-- Docker Desktop with WSL 2 integration for PostgreSQL and Docker Compose
+- Docker Desktop with WSL 2 integration for the full Docker Compose stack
 
 In WSL, `node`, `npm`, and `docker` should come from the Linux/WSL environment:
 
@@ -33,17 +33,29 @@ npm install
 npm run dev
 ```
 
-Backend and PostgreSQL:
+Full stack with Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-The backend runs at `http://localhost:5080`, with `/health` and `/swagger`. The frontend usually runs at `http://localhost:5173`.
+This starts:
+
+- frontend at `http://localhost:5173`
+- backend at `http://localhost:5080`
+- PostgreSQL on `localhost:5432`
+
+Backend diagnostics are available at `http://localhost:5080/health` and `http://localhost:5080/swagger`.
 
 ## Run Fullstack Locally
 
-Start the backend and PostgreSQL with Docker Compose. Then create a local frontend env file:
+For local frontend development with Vite, start only the backend and PostgreSQL with Docker Compose:
+
+```bash
+docker compose up --build db backend
+```
+
+Then create a local frontend env file:
 
 ```bash
 cd frontend

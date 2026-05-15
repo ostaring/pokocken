@@ -7,7 +7,7 @@ ASP.NET Core Web API for Pokocken. The backend exposes public recipe and gallery
 - ASP.NET Core controllers
 - .NET 10 SDK
 - EF Core with PostgreSQL
-- Docker Compose for local backend and database runtime
+- Docker Compose for local frontend, backend, and database runtime
 - xUnit and Testcontainers for tests
 - Local `dotnet-ef` tool manifest for migrations
 
@@ -33,6 +33,7 @@ This starts:
 
 - `db` - PostgreSQL on `localhost:5432`
 - `backend` - ASP.NET Core API on `http://localhost:5080`
+- `frontend` - Nginx-served React app on `http://localhost:5173`
 
 Useful local URLs:
 
