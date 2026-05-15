@@ -36,10 +36,12 @@ public sealed class GalleryService : IGalleryService
             throw new ArgumentException("Image URL is required.");
         }
 
-        if (!Uri.TryCreate(normalizedImageUrl, UriKind.Absolute, out _))
+        if (!Uri.TryCreate(normalizedImageUrl, UriKind.Absolute, out var parsedImageUrl) ||
+            (parsedImageUrl.Scheme != Uri.UriSchemeHttp &&
+             parsedImageUrl.Scheme != Uri.UriSchemeHttps))
         {
             _logger.LogWarning("Rejected gallery image create because image URL was invalid");
-            throw new ArgumentException("Image URL must be an absolute URL.");
+            throw new ArgumentException("Image URL must be an absolute HTTP(S) URL.");
         }
 
         if (string.IsNullOrWhiteSpace(normalizedAltText))

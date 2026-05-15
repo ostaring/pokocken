@@ -43,7 +43,7 @@ public sealed class GalleryServiceTests
             "Relativ bildsökväg."));
 
         var exception = Assert.Throws<ArgumentException>(action);
-        Assert.Contains("absolute URL", exception.Message);
+        Assert.Contains("absolute HTTP(S) URL", exception.Message);
     }
 
     [Fact]
