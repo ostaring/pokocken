@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+repo_root="$(git rev-parse --show-toplevel)"
+script_path="$repo_root/scripts/git-guards/check-staged.py"
+
+if [ -n "${POCKEN_PYTHON:-}" ]; then
+  exec "$POCKEN_PYTHON" "$script_path"
+fi
+
+if command -v python >/dev/null 2>&1 && python --version >/dev/null 2>&1; then
+  exec python "$script_path"
+fi
+
+if command -v python3 >/dev/null 2>&1 && python3 --version >/dev/null 2>&1; then
+  exec python3 "$script_path"
+fi
+
+if command -v py >/dev/null 2>&1 && py -3 --version >/dev/null 2>&1; then
+  exec py -3 "$script_path"
+fi
+
+echo "pre-commit guard failed: Python 3 was not found." >&2
+echo "Install Python 3, make it available as python/python3/py, or set POCKEN_PYTHON." >&2
+exit 1
