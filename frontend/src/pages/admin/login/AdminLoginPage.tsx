@@ -104,7 +104,7 @@ export function AdminLoginPage() {
           <ul className="mt-4 space-y-3 text-sm leading-6 text-emerald-50/85">
             <li>Användarnamn och lösenord valideras innan formuläret skickas.</li>
             <li>Adminroutes skyddas nu bakom en session query.</li>
-            <li>Utvecklingsinloggning just nu: `admin` / `admin123`.</li>
+            <li>Lokala adminuppgifter sätts i miljökonfigurationen.</li>
           </ul>
         </aside>
       </div>
