@@ -3,6 +3,17 @@ Thumbs.db
 *.lscache
 .env
 .env.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.dump
 .env.*.local
 
 tools/

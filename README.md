@@ -107,4 +107,16 @@ dotnet test ./RecipeApp.sln
 
 Backend tests use Testcontainers and require Docker to be running.
 
+## Git Hooks
+
+Activate repo-versioned hooks locally:
+
+```bash
+./scripts/git-guards/install.sh
+```
+
+The hooks block staged `.env` files, private keys/certificates, local databases/dumps, and obvious secrets in the staged diff. `.env.example` is allowed for documented local configuration.
+
+The hooks require Python 3 as `python`, `python3`, or `py`. Alternatively, `POCKEN_PYTHON` can point to a specific Python binary.
+
 More details are available in `frontend/README.md`, `backend/README.md`, `docs/backend-architecture.md`, and `docs/system/`.
