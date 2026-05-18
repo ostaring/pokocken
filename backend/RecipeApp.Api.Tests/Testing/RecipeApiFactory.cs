@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using RecipeApp.Api.Data;
+using RecipeApp.Api.Infrastructure;
 using Xunit;
 
 namespace RecipeApp.Api.Tests.Testing;
@@ -21,7 +22,11 @@ public sealed class RecipeApiFactory : WebApplicationFactory<Program>, IAsyncLif
         {
             configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:RecipesDb"] = _database.ConnectionString
+                ["ConnectionStrings:RecipesDb"] = _database.ConnectionString,
+                ["Admin:Username"] = "admin",
+                ["Admin:PasswordHash"] = AdminPasswordHasher.HashPassword("admin123", iterations: 10_000),
+                ["Admin:ApiKey"] = "test-admin-key",
+                ["Admin:AllowApiKeyFallback"] = "false"
             });
         });
         builder.ConfigureServices(services =>

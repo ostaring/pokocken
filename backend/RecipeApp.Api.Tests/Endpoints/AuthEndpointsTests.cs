@@ -119,7 +119,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
             });
         }).CreateClient();
 
-        client.DefaultRequestHeaders.Add(AdminAuthConstants.ApiKeyHeaderName, "dev-admin-key");
+        client.DefaultRequestHeaders.Add(AdminAuthConstants.ApiKeyHeaderName, "test-admin-key");
 
         var response = await client.GetAsync("/api/admin/recipes");
 
@@ -142,7 +142,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
             });
         }).CreateClient();
 
-        client.DefaultRequestHeaders.Add(AdminAuthConstants.ApiKeyHeaderName, "dev-admin-key");
+        client.DefaultRequestHeaders.Add(AdminAuthConstants.ApiKeyHeaderName, "test-admin-key");
 
         var response = await client.GetAsync("/api/admin/recipes");
 

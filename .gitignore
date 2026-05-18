@@ -1,6 +1,9 @@
 .DS_Store
 Thumbs.db
 *.lscache
+.env
+.env.local
+.env.*.local
 
 tools/
 

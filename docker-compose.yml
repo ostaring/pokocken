@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: pokocken
-      POSTGRES_USER: pokocken
-      POSTGRES_PASSWORD: pokocken
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
       - "5432:5432"
     volumes:
@@ -22,8 +22,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__RecipesDb: Host=db;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
-      Admin__AllowApiKeyFallback: "true"
+      ConnectionStrings__RecipesDb: Host=db;Port=5432;Database=${POSTGRES_DB:?POSTGRES_DB is required};Username=${POSTGRES_USER:?POSTGRES_USER is required};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      Admin__Username: ${ADMIN_USERNAME:?ADMIN_USERNAME is required}
+      Admin__PasswordHash: ${ADMIN_PASSWORD_HASH:?ADMIN_PASSWORD_HASH is required}
+      Admin__ApiKey: ${ADMIN_API_KEY:?ADMIN_API_KEY is required}
+      Admin__AllowApiKeyFallback: ${ADMIN_ALLOW_API_KEY_FALLBACK:-true}
     ports:
       - "5080:8080"
     depends_on:

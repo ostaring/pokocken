@@ -25,6 +25,21 @@ docker version
 
 ## Launch
 
+Create a local environment file first:
+
+```bash
+cp .env.example .env
+```
+
+Set local values in `.env`. Generate an admin password hash with:
+
+```bash
+cd backend
+dotnet run --project RecipeApp.Api -- hash-admin-password "your-local-admin-password"
+```
+
+Wrap the generated `ADMIN_PASSWORD_HASH` in single quotes in `.env`, because PBKDF2 hashes contain `$` characters.
+
 Frontend with mock data:
 
 ```bash

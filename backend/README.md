@@ -23,6 +23,32 @@ backend/
 
 ## Launch
 
+Create a local environment file from the repo root:
+
+```bash
+cp .env.example .env
+```
+
+Set local database and admin values in `.env`. Generate an admin password hash with:
+
+```bash
+cd backend
+dotnet run --project RecipeApp.Api -- hash-admin-password "your-local-admin-password"
+```
+
+Wrap the generated `ADMIN_PASSWORD_HASH` in single quotes in `.env`, because PBKDF2 hashes contain `$` characters.
+
+For local `dotnet run` or EF tooling outside Docker, store values in user-secrets instead of git:
+
+```bash
+cd backend/RecipeApp.Api
+dotnet user-secrets set "ConnectionStrings:RecipesDb" "Host=localhost;Port=5432;Database=pokocken;Username=pokocken;Password=<local-password>"
+dotnet user-secrets set "Admin:Username" "admin"
+dotnet user-secrets set "Admin:PasswordHash" "<generated-password-hash>"
+dotnet user-secrets set "Admin:ApiKey" "<local-api-key>"
+dotnet user-secrets set "Admin:AllowApiKeyFallback" "true"
+```
+
 From the repo root:
 
 ```bash
@@ -50,18 +76,13 @@ Configuration lives in:
 
 - `RecipeApp.Api/appsettings.json`
 - `RecipeApp.Api/appsettings.Development.json`
+- `.env` for local Docker Compose values
 - `../docker-compose.yml`
 
-Local connection string:
+Docker Compose builds the backend connection string from local `.env` values:
 
 ```text
-Host=localhost;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
-```
-
-Docker Compose connection string:
-
-```text
-Host=db;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken
+Host=db;Port=5432;Database=<POSTGRES_DB>;Username=<POSTGRES_USER>;Password=<POSTGRES_PASSWORD>
 ```
 
 `RecipeDbInitializer` applies migrations and seed data when the API starts.
@@ -85,6 +106,8 @@ cd backend
 dotnet tool restore
 ```
 
+Make sure `ConnectionStrings:RecipesDb` is available through user-secrets or environment variables before running EF commands.
+
 Create a migration after a model change:
 
 ```bash
@@ -98,10 +121,11 @@ Migrations are applied automatically at API startup.
 
 Current admin auth is intended for local development and education.
 
-Development login:
+Development login is controlled by local `.env` or user-secrets. Do not commit real admin credentials.
+
+Example local username:
 
 - username: `admin`
-- password: `admin123`
 
 Auth endpoints:
 
@@ -112,7 +136,7 @@ Auth endpoints:
 Optional API-key fallback for manual testing:
 
 ```text
-X-Admin-Api-Key: dev-admin-key
+X-Admin-Api-Key: <ADMIN_API_KEY from .env>
 ```
 
 The fallback is controlled by `Admin:AllowApiKeyFallback`. It is disabled in base configuration and enabled for local development and Docker Compose.

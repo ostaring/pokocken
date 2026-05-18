@@ -13,11 +13,15 @@ public sealed class RecipeDbContextFactory : IDesignTimeDbContextFactory<RecipeD
             .SetBasePath(basePath)
             .AddJsonFile("appsettings.json", optional: false)
             .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddUserSecrets<Program>(optional: true)
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = configuration.GetConnectionString("RecipesDb")
-            ?? "Host=localhost;Port=5432;Database=pokocken;Username=pokocken;Password=pokocken";
+        var connectionString = configuration.GetConnectionString("RecipesDb");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException("ConnectionStrings:RecipesDb must be configured for EF design-time operations.");
+        }
 
         var optionsBuilder = new DbContextOptionsBuilder<RecipeDbContext>();
         optionsBuilder.UseNpgsql(connectionString);

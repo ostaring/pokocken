@@ -5,9 +5,19 @@ using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Repositories;
 using RecipeApp.Api.Services;
 
+if (args is ["hash-admin-password", var password])
+{
+    Console.WriteLine(AdminPasswordHasher.HashPassword(password));
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 var databaseConnectionString = builder.Configuration.GetConnectionString("RecipesDb");
+if (string.IsNullOrWhiteSpace(databaseConnectionString))
+{
+    throw new InvalidOperationException("ConnectionStrings:RecipesDb must be configured.");
+}
 
 builder.Services.Configure<AdminAuthOptions>(builder.Configuration.GetSection("Admin"));
 builder.Services.AddSingleton(TimeProvider.System);
