@@ -4,11 +4,12 @@ import { NotFoundPage } from "@/pages/system/not-found/NotFoundPage";
 import { renderWithMemoryRouter } from "@/test/utils/render";
 
 describe("NotFoundPage", () => {
-  it("shows recovery links back into the app", () => {
+  it("shows a simple not found state without duplicate navigation links", () => {
     renderWithMemoryRouter(<NotFoundPage />, ["/saknas"]);
 
     expect(screen.getByText("Vi hittade inte sidan du letade efter.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /gå till startsidan/i })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /visa recept/i })).toHaveAttribute("href", "/recipes");
+    expect(screen.getByText("Sidan finns inte")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /gå till startsidan/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /visa recept/i })).not.toBeInTheDocument();
   });
 });

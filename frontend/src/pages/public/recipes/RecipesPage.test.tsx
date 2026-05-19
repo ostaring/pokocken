@@ -41,7 +41,7 @@ describe("RecipesPage", () => {
     expect(screen.getByText("Laddar recept...")).toBeInTheDocument();
   });
 
-  it("shows public recipe cards and a link back to the start page", () => {
+  it("shows public recipe cards without duplicate start-page navigation", () => {
     mockUseRecipesQuery.mockReturnValue({
       data: [
         {
@@ -63,10 +63,7 @@ describe("RecipesPage", () => {
     renderWithMemoryRouter(<RecipesPage />, ["/recipes"]);
 
     expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /tillbaka till startsidan/i })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(screen.queryByRole("link", { name: /tillbaka till startsidan/i })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /öppna recept/i })).toHaveAttribute(
       "href",
       "/recipes/rostad-tomatpasta",

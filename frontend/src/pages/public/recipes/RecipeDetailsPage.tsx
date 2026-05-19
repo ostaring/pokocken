@@ -39,14 +39,6 @@ export function RecipeDetailsPage() {
         eyebrow="Recept"
         title="Receptet hittades inte"
         description="Vi kunde inte hitta något recept som matchar länken du öppnade."
-        actions={
-          <Link
-            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
-            to="/recipes"
-          >
-            Tillbaka till recepten
-          </Link>
-        }
       >
         <p className="text-slate-700">
           Prova att gå tillbaka till receptlistan och välj ett annat recept därifrån.
@@ -60,14 +52,6 @@ export function RecipeDetailsPage() {
       eyebrow="Recept"
       title={recipe.title}
       description={recipe.description}
-      actions={
-        <Link
-          className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
-          to="/recipes"
-        >
-          Tillbaka till recepten
-        </Link>
-      }
     >
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.9fr)]">
         <div className="space-y-6">
@@ -133,7 +117,7 @@ export function RecipeDetailsPage() {
                   key={step}
                   className="rounded-[1.5rem] border border-slate-200 bg-white/70 px-5 py-4"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-lime-950/70">
                     Steg {index + 1}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{step}</p>
@@ -145,7 +129,7 @@ export function RecipeDetailsPage() {
           {relatedRecipes.length > 0 ? (
             <section className="space-y-4 rounded-[1.25rem] border border-slate-200 bg-white/75 p-4 sm:rounded-[1.5rem] sm:p-5">
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-lime-950/70">
                   Mer att laga
                 </p>
                 <h2 className="text-xl font-semibold text-slate-900">Liknande recept</h2>
@@ -154,7 +138,7 @@ export function RecipeDetailsPage() {
                 {relatedRecipes.map((relatedRecipe) => (
                   <Link
                     key={relatedRecipe.id}
-                    className="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-emerald-500 hover:bg-emerald-50/50"
+                    className="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-lime-700 hover:bg-lime-50/60"
                     to={`/recipes/${relatedRecipe.slug}`}
                   >
                     <p className="text-sm font-semibold text-slate-900">{relatedRecipe.title}</p>

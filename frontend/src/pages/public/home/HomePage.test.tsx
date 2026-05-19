@@ -4,6 +4,7 @@ import { HomePage } from "@/pages/public/home/HomePage";
 import { renderWithMemoryRouter } from "@/test/utils/render";
 
 const mockUseRecipesQuery = vi.fn();
+const mockUseGalleryImagesQuery = vi.fn();
 
 vi.mock("@/features/recipes/hooks/recipe-hooks", async () => {
   const actual = await vi.importActual<typeof import("@/features/recipes/hooks/recipe-hooks")>(
@@ -16,6 +17,59 @@ vi.mock("@/features/recipes/hooks/recipe-hooks", async () => {
   };
 });
 
+vi.mock("@/features/gallery/hooks/gallery-hooks", async () => {
+  const actual = await vi.importActual<typeof import("@/features/gallery/hooks/gallery-hooks")>(
+    "@/features/gallery/hooks/gallery-hooks",
+  );
+
+  return {
+    ...actual,
+    useGalleryImagesQuery: () => mockUseGalleryImagesQuery(),
+  };
+});
+
+const recipeQuerySuccess = {
+  data: [
+    {
+      id: "1",
+      title: "Rostad tomatpasta",
+      slug: "rostad-tomatpasta",
+      description: "En snabb pasta med sota tomater.",
+      category: "Dinner",
+      prepTimeMinutes: 35,
+      servings: 3,
+      imageUrl: "https://example.com/pasta.jpg",
+      isPublished: true,
+    },
+    {
+      id: "2",
+      title: "Mork chokladmousse",
+      slug: "mork-chokladmousse",
+      description: "Luftig chokladdessert.",
+      category: "Dessert",
+      prepTimeMinutes: 20,
+      servings: 6,
+      imageUrl: "https://example.com/mousse.jpg",
+      isPublished: true,
+    },
+  ],
+  isLoading: false,
+  isError: false,
+};
+
+const galleryQuerySuccess = {
+  data: [
+    {
+      id: "gallery-1",
+      imageUrl: "https://example.com/gallery-1.jpg",
+      altText: "Pasta pa ett serveringsfat.",
+      createdAtUtc: "2026-05-01T08:30:00Z",
+    },
+  ],
+  isLoading: false,
+  isError: false,
+};
+
 describe("HomePage", () => {
   it("shows loading state while featured recipes are fetched", () => {
     mockUseRecipesQuery.mockReturnValue({
@@ -23,57 +77,26 @@ describe("HomePage", () => {
       isLoading: true,
       isError: false,
     });
+    mockUseGalleryImagesQuery.mockReturnValue(galleryQuerySuccess);
 
     renderWithMemoryRouter(<HomePage />, ["/"]);
 
     expect(screen.getByText("Laddar utvalda recept...")).toBeInTheDocument();
   });
 
-  it("renders featured recipes together with public navigation actions", () => {
-    mockUseRecipesQuery.mockReturnValue({
-      data: [
-        {
-          id: "1",
-          title: "Rostad tomatpasta",
-          slug: "rostad-tomatpasta",
-          description: "En snabb pasta med söta tomater.",
-          category: "Dinner",
-          prepTimeMinutes: 35,
-          servings: 3,
-          imageUrl: "https://example.com/pasta.jpg",
-          isPublished: true,
-        },
-        {
-          id: "2",
-          title: "Mörk chokladmousse",
-          slug: "mork-chokladmousse",
-          description: "Luftig chokladdessert.",
-          category: "Dessert",
-          prepTimeMinutes: 20,
-          servings: 6,
-          imageUrl: "https://example.com/mousse.jpg",
-          isPublished: true,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-    });
+  it("renders the app-style home layout with recipes and gallery images", () => {
+    mockUseRecipesQuery.mockReturnValue(recipeQuerySuccess);
+    mockUseGalleryImagesQuery.mockReturnValue(galleryQuerySuccess);
 
     renderWithMemoryRouter(<HomePage />, ["/"]);
 
-    expect(
-      screen.getByRole("heading", {
-        name: "Recept samlade för vardag, helg och allt däremellan.",
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Enbart för guldkäftar" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Middag" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Rostad tomatpasta" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Mörk chokladmousse" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /utforska recept/i })).toHaveAttribute(
-      "href",
-      "/recipes",
-    );
-    expect(screen.getByRole("link", { name: /se galleriet/i })).toHaveAttribute("href", "/gallery");
-    expect(screen.queryByRole("link", { name: /öppna admin/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Mork chokladmousse" })).toBeInTheDocument();
+    expect(screen.getByAltText("Pasta pa ett serveringsfat.")).toBeInTheDocument();
+    expect(screen.queryByText("Utvalt recept")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sa anvander du sidan")).not.toBeInTheDocument();
   });
 
   it("shows an error state when featured recipes cannot be loaded", () => {
@@ -82,6 +105,7 @@ describe("HomePage", () => {
       isLoading: false,
       isError: true,
     });
+    mockUseGalleryImagesQuery.mockReturnValue(galleryQuerySuccess);
 
     renderWithMemoryRouter(<HomePage />, ["/"]);
 
