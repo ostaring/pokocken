@@ -65,7 +65,7 @@ export function GalleryPage() {
             {images.map((image) => (
               <button
                 key={image.id}
-                className="group overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/80 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:rounded-[1.5rem]"
                 type="button"
                 onClick={() => setSelectedImage(image)}
               >
@@ -87,14 +87,14 @@ export function GalleryPage() {
 
       {selectedImage ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-8"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-3 py-5 sm:px-4 sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-label={`Förstorad bild: ${selectedImage.altText}`}
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="max-h-full max-w-5xl overflow-hidden rounded-[1.75rem] bg-white shadow-2xl"
+            className="max-h-full w-full max-w-5xl overflow-hidden rounded-[1.25rem] bg-white shadow-2xl sm:rounded-[1.75rem]"
             onClick={(event) => event.stopPropagation()}
           >
             <img
@@ -102,10 +102,10 @@ export function GalleryPage() {
               src={selectedImage.imageUrl}
               alt={selectedImage.altText}
             />
-            <div className="flex items-center justify-between gap-4 px-5 py-4">
+            <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5">
               <p className="text-sm text-slate-700">{selectedImage.altText}</p>
               <button
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                className="w-full rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 sm:w-auto"
                 type="button"
                 onClick={() => setSelectedImage(null)}
               >

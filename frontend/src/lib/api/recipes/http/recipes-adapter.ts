@@ -1,5 +1,6 @@
 import type { RecipeDetail } from "@/types/recipe/recipe";
 import { buildApiUrl } from "@/lib/api/shared/http-client";
+import { buildCsrfHeaders } from "@/lib/api/shared/csrf-token";
 import type { SaveRecipeInput } from "@/lib/api/recipes/mock/recipes-adapter";
 import type { RecipeFilters } from "@/lib/api/recipes/recipes";
 
@@ -143,6 +144,7 @@ async function sendRecipeWriteRequest(
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...buildCsrfHeaders(),
     },
     body: JSON.stringify(toBackendRecipeWriteRequest(input)),
   });
@@ -210,6 +212,7 @@ export async function deleteRecipeHttp(id: string): Promise<void> {
   const response = await fetch(buildApiUrl(`/api/admin/recipes/${recipe.slug}`), {
     method: "DELETE",
     credentials: "include",
+    headers: buildCsrfHeaders(),
   });
 
   if (response.status === 401) {

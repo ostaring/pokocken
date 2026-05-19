@@ -30,7 +30,7 @@ export async function loginAdminMock(username: string, password: string): Promis
     throw new Error("Invalid username or password.");
   }
 
-  const session = { username };
+  const session = { username, csrfToken: "mock-csrf-token" };
   window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
   return session;
 }

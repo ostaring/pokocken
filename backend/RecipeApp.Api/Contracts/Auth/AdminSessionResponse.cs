@@ -1,3 +1,3 @@
 namespace RecipeApp.Api.Contracts;
 
-public sealed record AdminSessionResponse(string Username);
+public sealed record AdminSessionResponse(string Username, string CsrfToken);

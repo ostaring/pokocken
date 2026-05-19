@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RecipeApp.Api.Contracts;
 using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Services;
@@ -8,6 +9,7 @@ namespace RecipeApp.Api.Controllers;
 [ApiController]
 [Route("api/admin/recipes")]
 [AdminAuthorize]
+[EnableRateLimiting(SecurityPolicyNames.AdminApiRateLimit)]
 public sealed class AdminRecipesController : ControllerBase
 {
     private readonly IRecipeService _recipeService;

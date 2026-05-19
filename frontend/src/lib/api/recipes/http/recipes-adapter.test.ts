@@ -9,6 +9,7 @@ import {
   fetchRecipesHttp,
   toggleRecipePublishedHttp,
 } from "@/lib/api/recipes/http/recipes-adapter";
+import { clearCsrfToken, setCsrfToken } from "@/lib/api/shared/csrf-token";
 
 const fetchMock = vi.fn();
 
@@ -17,6 +18,7 @@ vi.stubGlobal("fetch", fetchMock);
 describe("http recipes adapter", () => {
   beforeEach(() => {
     fetchMock.mockReset();
+    clearCsrfToken();
   });
 
   it("fetches admin recipes with credentials", async () => {
@@ -87,6 +89,7 @@ describe("http recipes adapter", () => {
   });
 
   it("creates a recipe with a generated slug and credentials", async () => {
+    setCsrfToken("test-csrf-token");
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ id: "10", slug: "fresh-pasta-salad" }), {
         status: 201,
@@ -113,6 +116,7 @@ describe("http recipes adapter", () => {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": "test-csrf-token",
         },
       }),
     );
@@ -202,6 +206,7 @@ describe("http recipes adapter", () => {
   });
 
   it("deletes a recipe by first resolving its slug", async () => {
+    setCsrfToken("test-csrf-token");
     fetchMock
       .mockResolvedValueOnce(
         new Response(JSON.stringify([{ id: "1", slug: "brown-butter-pancakes" }]), {
@@ -222,6 +227,9 @@ describe("http recipes adapter", () => {
       {
         method: "DELETE",
         credentials: "include",
+        headers: {
+          "X-CSRF-Token": "test-csrf-token",
+        },
       },
     );
   });
@@ -240,6 +248,7 @@ describe("http recipes adapter", () => {
   });
 
   it("toggles recipe published state by issuing an update request", async () => {
+    setCsrfToken("test-csrf-token");
     fetchMock
       .mockResolvedValueOnce(
         new Response(
@@ -281,6 +290,7 @@ describe("http recipes adapter", () => {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": "test-csrf-token",
         },
       }),
     );

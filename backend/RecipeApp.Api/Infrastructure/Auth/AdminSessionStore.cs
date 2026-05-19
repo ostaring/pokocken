@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 
 namespace RecipeApp.Api.Infrastructure;
@@ -23,7 +24,11 @@ public sealed class AdminSessionStore
     public AdminSession CreateSession(string username)
     {
         var expiresAtUtc = _timeProvider.GetUtcNow().AddHours(_options.SessionDurationHours);
-        var session = new AdminSession(Guid.NewGuid().ToString("N"), username, expiresAtUtc);
+        var session = new AdminSession(
+            Guid.NewGuid().ToString("N"),
+            username,
+            Convert.ToHexString(RandomNumberGenerator.GetBytes(32)),
+            expiresAtUtc);
         _sessions[session.Id] = session;
         _logger.LogInformation("Created admin session for user {Username} expiring at {ExpiresAtUtc}", username, expiresAtUtc);
         return session;
@@ -64,5 +69,5 @@ public sealed class AdminSessionStore
         }
     }
 
-    public sealed record AdminSession(string Id, string Username, DateTimeOffset ExpiresAtUtc);
+    public sealed record AdminSession(string Id, string Username, string CsrfToken, DateTimeOffset ExpiresAtUtc);
 }

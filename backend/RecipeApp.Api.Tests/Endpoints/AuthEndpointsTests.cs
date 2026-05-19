@@ -39,6 +39,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
         var session = await response.Content.ReadFromJsonAsync<AdminSessionResponse>();
         Assert.NotNull(session);
         Assert.Equal("admin", session!.Username);
+        Assert.False(string.IsNullOrWhiteSpace(session.CsrfToken));
     }
 
     [Fact]
@@ -49,6 +50,33 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
         var response = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "wrong"));
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_ReturnsTooManyRequests_WhenRateLimitIsExceeded()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+            {
+                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Security:RateLimiting:AdminLoginPermitLimit"] = "2"
+                });
+            });
+        }).CreateClient();
+
+        Assert.Equal(
+            HttpStatusCode.Unauthorized,
+            (await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "wrong"))).StatusCode);
+        Assert.Equal(
+            HttpStatusCode.Unauthorized,
+            (await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "wrong"))).StatusCode);
+
+        var limitedResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "wrong"));
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, limitedResponse.StatusCode);
     }
 
     [Fact]
@@ -65,6 +93,7 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
         var session = await meResponse.Content.ReadFromJsonAsync<AdminSessionResponse>();
         Assert.NotNull(session);
         Assert.Equal("admin", session!.Username);
+        Assert.False(string.IsNullOrWhiteSpace(session.CsrfToken));
     }
 
     [Fact]
@@ -74,12 +103,28 @@ public sealed class AuthEndpointsTests : IClassFixture<RecipeApiFactory>
 
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        var session = await loginResponse.Content.ReadFromJsonAsync<AdminSessionResponse>();
+        Assert.NotNull(session);
+        client.DefaultRequestHeaders.Add(AdminAuthConstants.CsrfHeaderName, session!.CsrfToken);
 
         var logoutResponse = await client.PostAsync("/api/auth/logout", content: null);
         Assert.Equal(HttpStatusCode.NoContent, logoutResponse.StatusCode);
 
         var meResponse = await client.GetAsync("/api/auth/me");
         Assert.Equal(HttpStatusCode.Unauthorized, meResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Logout_ReturnsForbiddenWithoutCsrfToken()
+    {
+        using var client = _factory.CreateClient();
+
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        var logoutResponse = await client.PostAsync("/api/auth/logout", content: null);
+
+        Assert.Equal(HttpStatusCode.Forbidden, logoutResponse.StatusCode);
     }
 
     [Fact]

@@ -73,7 +73,7 @@ export function RecipesPage() {
           </div>
         ) : null}
 
-        <div className="rounded-[1.75rem] border border-slate-200 bg-white/75 p-5">
+        <div className="rounded-[1.25rem] border border-slate-200 bg-white/75 p-4 sm:rounded-[1.75rem] sm:p-5">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px_auto]">
             <label className="space-y-2">
               <span className="text-sm font-semibold text-slate-700">Sök recept</span>
@@ -133,7 +133,7 @@ export function RecipesPage() {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <p className="text-sm text-slate-600">
             Visar <span className="font-semibold text-slate-900">{filteredRecipes.length}</span>{" "}
             recept
@@ -148,7 +148,7 @@ export function RecipesPage() {
             {filteredRecipes.map((recipe) => (
               <article
                 key={recipe.id}
-                className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 shadow-sm"
+                className="overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm sm:rounded-[1.75rem]"
               >
                 <div className="aspect-[16/10] overflow-hidden">
                   <img
@@ -170,7 +170,7 @@ export function RecipesPage() {
                     <p className="text-sm leading-6 text-slate-700">{recipe.description}</p>
                   </div>
                   <Link
-                    className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="inline-flex w-full justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
                     to={`/recipes/${recipe.slug}`}
                   >
                     Öppna recept

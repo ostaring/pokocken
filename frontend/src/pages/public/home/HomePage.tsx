@@ -31,30 +31,30 @@ export function HomePage() {
     >
       <div className="space-y-8">
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
-          <div className="rounded-[1.75rem] bg-slate-900 px-6 py-7 text-white">
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/60">
+          <div className="rounded-[1.25rem] bg-slate-900 px-4 py-6 text-white sm:rounded-[1.75rem] sm:px-6 sm:py-7">
+            <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.18em] text-white/60 sm:text-sm sm:tracking-[0.28em]">
               För familj och vänner
             </p>
-            <h2 className="mt-3 text-3xl font-semibold">Alla favoriter på ett ställe</h2>
+            <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Alla favoriter på ett ställe</h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/80">
               Pokocken är min egen receptsamling för sådant jag vill laga igen och kunna dela vidare.
               Här ska det vara lätt att hitta rätt rätt, se ingredienserna direkt och följa stegen utan
               att behöva leta bland gamla chattar, anteckningar eller lösa länkar.
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:rounded-3xl">
                 <p className="text-sm font-semibold">Lätt att dela</p>
                 <p className="mt-2 text-sm text-white/70">
                   Skicka en länk i stället för att skriva om receptet från början.
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:rounded-3xl">
                 <p className="text-sm font-semibold">Tydliga steg</p>
                 <p className="mt-2 text-sm text-white/70">
                   Ingredienser, tid och tillagning finns samlat i ett lugnt format.
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:rounded-3xl">
                 <p className="text-sm font-semibold">Matgalleri</p>
                 <p className="mt-2 text-sm text-white/70">
                   Små köksögonblick får också en egen plats när recepten inte räcker till.
@@ -63,8 +63,8 @@ export function HomePage() {
             </div>
           </div>
 
-          <aside className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
+          <aside className="rounded-[1.25rem] border border-slate-200 bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-6">
+            <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800/70 sm:text-sm sm:tracking-[0.28em]">
               Så använder du sidan
             </p>
             <ol className="mt-5 space-y-4">
@@ -91,9 +91,9 @@ export function HomePage() {
         </section>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
+              <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800/70 sm:text-sm sm:tracking-[0.28em]">
                 Utvalda recept
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-900">Börja här</h2>
@@ -123,7 +123,7 @@ export function HomePage() {
               {featuredRecipes.map((recipe) => (
                 <article
                   key={recipe.id}
-                  className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 shadow-sm"
+                  className="overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm sm:rounded-[1.75rem]"
                 >
                   <div className="aspect-[16/10] overflow-hidden">
                     <img
@@ -144,7 +144,7 @@ export function HomePage() {
                       <p className="text-sm leading-6 text-slate-700">{recipe.description}</p>
                     </div>
                     <Link
-                      className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:text-white focus-visible:text-white"
+                      className="inline-flex w-full justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:text-white focus-visible:text-white sm:w-auto"
                       to={`/recipes/${recipe.slug}`}
                     >
                       Öppna recept

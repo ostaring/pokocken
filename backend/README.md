@@ -67,6 +67,7 @@ Useful local URLs:
 - `http://localhost:5080/swagger`
 
 The backend allows the frontend dev origin `http://localhost:5173`.
+Allowed CORS origins must be explicit; wildcard origins are rejected.
 
 ## Persistence
 
@@ -133,6 +134,17 @@ Auth endpoints:
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 
+Browser admin sessions use an HTTP-only cookie plus a session-bound CSRF token. The token is returned by `POST /api/auth/login` and `GET /api/auth/me`; frontend write requests send it as:
+
+```text
+X-CSRF-Token: <csrf-token from admin session response>
+```
+
+Login and admin endpoints have ASP.NET Core rate limits. Defaults are:
+
+- login: 5 requests per minute
+- admin API: 120 requests per minute per remote IP
+
 Optional API-key fallback for manual testing:
 
 ```text
@@ -140,6 +152,8 @@ X-Admin-Api-Key: <ADMIN_API_KEY from .env>
 ```
 
 The fallback is controlled by `Admin:AllowApiKeyFallback`. It is disabled in base configuration and enabled for local development and Docker Compose.
+
+A deployment checklist is maintained in `../docs/security-checklist.md`.
 
 ## API Overview
 

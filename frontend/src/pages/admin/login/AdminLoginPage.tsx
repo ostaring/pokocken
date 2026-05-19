@@ -80,7 +80,7 @@ export function AdminLoginPage() {
           </label>
 
           <button
-            className="inline-flex rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-full justify-center rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             type="submit"
             disabled={!isValid || isSubmitting}
           >
@@ -96,8 +96,8 @@ export function AdminLoginPage() {
           ) : null}
         </form>
 
-        <aside className="rounded-[1.75rem] bg-emerald-950 px-6 py-7 text-emerald-50">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-200/75">
+        <aside className="rounded-[1.25rem] bg-emerald-950 px-5 py-6 text-emerald-50 sm:rounded-[1.75rem] sm:px-6 sm:py-7">
+          <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/75 sm:text-sm sm:tracking-[0.3em]">
             Admininfo
           </p>
           <h2 className="mt-3 text-2xl font-semibold">Formkontrakt redo för backend</h2>
