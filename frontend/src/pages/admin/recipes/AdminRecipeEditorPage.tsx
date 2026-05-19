@@ -317,12 +317,12 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </label>
 
             <section className="space-y-3 md:col-span-2" aria-labelledby="ingredients-heading">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 id="ingredients-heading" className="text-sm font-semibold text-slate-700">
                   Ingredienser
                 </h2>
                 <button
-                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                  className="w-full rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 sm:w-auto"
                   type="button"
                   onClick={() => ingredientsFieldArray.append({ ...emptyRecipeListItem })}
                 >
@@ -331,7 +331,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               </div>
               <div className="space-y-3">
                 {ingredientsFieldArray.fields.map((field, index) => (
-                  <div key={field.id} className="flex gap-3">
+                  <div key={field.id} className="flex flex-col gap-3 sm:flex-row">
                     <input
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                       type="text"
@@ -340,7 +340,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
                       {...register(`ingredients.${index}.value`)}
                     />
                     <button
-                      className="rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:shrink-0"
                       type="button"
                       onClick={() => ingredientsFieldArray.remove(index)}
                       disabled={ingredientsFieldArray.fields.length === 1}
@@ -363,12 +363,12 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             </section>
 
             <section className="space-y-3 md:col-span-2" aria-labelledby="steps-heading">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 id="steps-heading" className="text-sm font-semibold text-slate-700">
                   Steg
                 </h2>
                 <button
-                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                  className="w-full rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 sm:w-auto"
                   type="button"
                   onClick={() => stepsFieldArray.append({ ...emptyRecipeListItem })}
                 >
@@ -377,7 +377,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               </div>
               <div className="space-y-3">
                 {stepsFieldArray.fields.map((field, index) => (
-                  <div key={field.id} className="flex gap-3">
+                  <div key={field.id} className="flex flex-col gap-3 sm:flex-row">
                     <input
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500"
                       type="text"
@@ -386,7 +386,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
                       {...register(`steps.${index}.value`)}
                     />
                     <button
-                      className="rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:shrink-0"
                       type="button"
                       onClick={() => stepsFieldArray.remove(index)}
                       disabled={stepsFieldArray.fields.length === 1}
@@ -414,7 +414,7 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
             <span className="text-sm font-semibold text-slate-800">Publicerad</span>
           </label>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
               className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               type="submit"
@@ -431,8 +431,8 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
           </div>
         </form>
 
-        <aside className="space-y-4 rounded-[1.75rem] bg-slate-900 px-6 py-7 text-white">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">
+        <aside className="space-y-4 rounded-[1.25rem] bg-slate-900 px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-6 sm:py-7">
+          <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.2em] text-white/60 sm:text-sm sm:tracking-[0.3em]">
             Editorinfo
           </p>
           <h2 className="text-2xl font-semibold">Redo för backendkoppling</h2>
@@ -441,9 +441,9 @@ export function AdminRecipeEditorPage({ mode }: AdminRecipeEditorPageProps) {
               Förhandsvisning
             </p>
             <dl className="mt-4 grid gap-3 text-sm text-white/85">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <dt className="text-white/55">Slug</dt>
-                <dd className="font-mono text-right text-white">
+                <dd className="break-anywhere font-mono text-white sm:text-right">
                   {slugPreview || "skapas-från-titeln"}
                 </dd>
               </div>

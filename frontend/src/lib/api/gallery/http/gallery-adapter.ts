@@ -1,5 +1,6 @@
 import type { GalleryImage } from "@/types/gallery/gallery";
 import { buildApiUrl } from "@/lib/api/shared/http-client";
+import { buildCsrfHeaders } from "@/lib/api/shared/csrf-token";
 import { AdminSessionExpiredError } from "@/lib/api/recipes/http/recipes-adapter";
 
 export async function fetchGalleryImagesHttp(): Promise<GalleryImage[]> {
@@ -37,6 +38,7 @@ export async function createGalleryImageHttp(input: {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...buildCsrfHeaders(),
     },
     body: JSON.stringify({
       imageUrl: input.imageUrl.trim(),
@@ -64,6 +66,7 @@ export async function deleteGalleryImageHttp(id: string): Promise<void> {
   const response = await fetch(buildApiUrl(`/api/admin/gallery/${id}`), {
     method: "DELETE",
     credentials: "include",
+    headers: buildCsrfHeaders(),
   });
 
   if (response.status === 401) {

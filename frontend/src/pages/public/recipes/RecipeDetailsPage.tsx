@@ -71,12 +71,12 @@ export function RecipeDetailsPage() {
     >
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.9fr)]">
         <div className="space-y-6">
-          <div className="overflow-hidden rounded-[1.75rem]">
+          <div className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.75rem]">
             <img className="h-full w-full object-cover" src={recipe.imageUrl} alt={recipe.title} />
           </div>
 
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <h2 className="text-2xl font-semibold text-slate-900">Ingredienser</h2>
               <p className="text-sm text-slate-500">{recipe.ingredients.length} poster</p>
             </div>
@@ -94,8 +94,10 @@ export function RecipeDetailsPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-[1.75rem] bg-slate-900 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/65">Översikt</p>
+          <div className="rounded-[1.25rem] bg-slate-900 p-5 text-white sm:rounded-[1.75rem] sm:p-6">
+            <p className="break-anywhere text-xs uppercase tracking-[0.2em] text-white/65 sm:text-sm sm:tracking-[0.3em]">
+              Översikt
+            </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-white/60">Kategori</p>
@@ -121,7 +123,7 @@ export function RecipeDetailsPage() {
           </div>
 
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <h2 className="text-2xl font-semibold text-slate-900">Gör så här</h2>
               <p className="text-sm text-slate-500">{recipe.steps.length} steg</p>
             </div>
@@ -141,7 +143,7 @@ export function RecipeDetailsPage() {
           </section>
 
           {relatedRecipes.length > 0 ? (
-            <section className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-white/75 p-5">
+            <section className="space-y-4 rounded-[1.25rem] border border-slate-200 bg-white/75 p-4 sm:rounded-[1.5rem] sm:p-5">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800/70">
                   Mer att laga

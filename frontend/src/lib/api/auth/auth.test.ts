@@ -46,7 +46,7 @@ describe("auth api adapter selection", () => {
       apiBaseUrl: "http://localhost:5080",
     });
     mockFetchAdminSessionMock.mockResolvedValueOnce(null);
-    mockLoginAdminMock.mockResolvedValueOnce({ username: "admin" });
+    mockLoginAdminMock.mockResolvedValueOnce({ username: "admin", csrfToken: "test-csrf-token" });
     mockLogoutAdminMock.mockResolvedValueOnce(undefined);
 
     await fetchAdminSession();
@@ -65,7 +65,7 @@ describe("auth api adapter selection", () => {
       apiBaseUrl: "http://localhost:5080",
     });
     mockFetchAdminSessionHttp.mockResolvedValueOnce(null);
-    mockLoginAdminHttp.mockResolvedValueOnce({ username: "admin" });
+    mockLoginAdminHttp.mockResolvedValueOnce({ username: "admin", csrfToken: "test-csrf-token" });
     mockLogoutAdminHttp.mockResolvedValueOnce(undefined);
 
     await fetchAdminSession();

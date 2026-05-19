@@ -116,19 +116,19 @@ export function AdminDashboardPage() {
     >
       <div className="space-y-8">
         {feedbackMessage ? (
-          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+          <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800 sm:rounded-[1.75rem] sm:px-5">
             {feedbackMessage}
           </div>
         ) : null}
 
         {!feedbackMessage && locationFeedback ? (
-          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+          <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800 sm:rounded-[1.75rem] sm:px-5">
             {locationFeedback}
           </div>
         ) : null}
 
         {togglePublishedMutation.isError || deleteRecipeMutation.isError ? (
-          <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700 sm:rounded-[1.75rem] sm:px-5">
             {(togglePublishedMutation.error ?? deleteRecipeMutation.error) instanceof Error
               ? (togglePublishedMutation.error ?? deleteRecipeMutation.error)?.message
               : "Kunde inte uppdatera receptets status."}
@@ -148,29 +148,29 @@ export function AdminDashboardPage() {
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-[1.75rem] bg-emerald-950 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.28em] text-emerald-200/70">Publicerade</p>
+          <div className="rounded-[1.25rem] bg-emerald-950 p-5 text-white sm:rounded-[1.75rem] sm:p-6">
+            <p className="break-anywhere text-xs uppercase tracking-[0.18em] text-emerald-200/70 sm:text-sm sm:tracking-[0.28em]">Publicerade</p>
             <p className="mt-3 text-4xl font-semibold">{publishedCount}</p>
           </div>
-          <div className="rounded-[1.75rem] bg-amber-100 p-6 text-amber-950">
-            <p className="text-sm uppercase tracking-[0.28em] text-amber-800/70">Utkast</p>
+          <div className="rounded-[1.25rem] bg-amber-100 p-5 text-amber-950 sm:rounded-[1.75rem] sm:p-6">
+            <p className="break-anywhere text-xs uppercase tracking-[0.18em] text-amber-800/70 sm:text-sm sm:tracking-[0.28em]">Utkast</p>
             <p className="mt-3 text-4xl font-semibold">{draftCount}</p>
           </div>
-          <div className="rounded-[1.75rem] bg-slate-900 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.28em] text-white/60">Totalt antal recept</p>
+          <div className="rounded-[1.25rem] bg-slate-900 p-5 text-white sm:rounded-[1.75rem] sm:p-6">
+            <p className="break-anywhere text-xs uppercase tracking-[0.18em] text-white/60 sm:text-sm sm:tracking-[0.28em]">Totalt antal recept</p>
             <p className="mt-3 text-4xl font-semibold">{recipes.length}</p>
           </div>
         </div>
 
         {!recipesQuery.isLoading && !recipesQuery.isError ? (
-          <div className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white/80">
-            <div className="border-b border-slate-200 px-6 py-4">
+          <div className="overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white/80 sm:rounded-[1.75rem]">
+            <div className="border-b border-slate-200 px-4 py-4 sm:px-6">
               <h2 className="text-xl font-semibold text-slate-900">Receptadministration</h2>
               <p className="mt-1 text-sm text-slate-600">
                 Detta mappar naturligt mot admin-API:ets lista över recept.
               </p>
             </div>
-            <div className="grid gap-4 border-b border-slate-200 px-6 py-4 md:grid-cols-3">
+            <div className="grid gap-4 border-b border-slate-200 px-4 py-4 sm:px-6 md:grid-cols-3">
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-slate-700">Sök recept</span>
                 <input
@@ -215,20 +215,20 @@ export function AdminDashboardPage() {
               {visibleRecipes.map((recipe) => (
                 <div
                   key={recipe.id}
-                  className="grid gap-4 px-6 py-5 md:grid-cols-[minmax(0,1.5fr)_140px_140px_180px]"
+                  className="grid gap-4 px-4 py-5 sm:px-6 md:grid-cols-[minmax(0,1.5fr)_140px_140px_180px]"
                 >
-                  <div>
-                    <p className="text-lg font-semibold text-slate-900">{recipe.title}</p>
+                  <div className="min-w-0">
+                    <p className="break-anywhere text-lg font-semibold text-slate-900">{recipe.title}</p>
                     <p className="mt-1 text-sm text-slate-600">{recipe.description}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Kategori</p>
+                    <p className="break-anywhere text-xs uppercase tracking-[0.18em] text-slate-500 sm:tracking-[0.28em]">Kategori</p>
                     <p className="mt-2 text-sm font-medium text-slate-800">
                       {getRecipeCategoryLabel(recipe.category)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Status</p>
+                    <p className="break-anywhere text-xs uppercase tracking-[0.18em] text-slate-500 sm:tracking-[0.28em]">Status</p>
                     <span
                       className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
                         recipe.isPublished
@@ -239,9 +239,9 @@ export function AdminDashboardPage() {
                       {recipe.isPublished ? "Publicerat" : "Utkast"}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap md:items-start">
                     <Link
-                      className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                      className="rounded-full border border-slate-300 px-4 py-2 text-center text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
                       to={`/admin/recipes/${recipe.id}/edit`}
                     >
                       Redigera
@@ -275,7 +275,7 @@ export function AdminDashboardPage() {
                 </div>
               ))}
               {visibleRecipes.length === 0 ? (
-                <div className="px-6 py-8 text-sm text-slate-600">
+                <div className="px-4 py-8 text-sm text-slate-600 sm:px-6">
                   Inga recept matchar det aktuella filtret.
                 </div>
               ) : null}

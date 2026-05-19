@@ -79,7 +79,7 @@ export function AdminGalleryPage() {
     >
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <form
-          className="space-y-5 rounded-[1.75rem] border border-slate-200 bg-white/80 p-6"
+          className="space-y-5 rounded-[1.25rem] border border-slate-200 bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-6"
           onSubmit={handleSubmit}
         >
           <div>
@@ -125,7 +125,7 @@ export function AdminGalleryPage() {
           </label>
 
           <button
-            className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+            className="w-full rounded-full bg-emerald-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 sm:w-auto"
             type="submit"
             disabled={createImageMutation.isPending}
           >
@@ -164,7 +164,7 @@ export function AdminGalleryPage() {
               {galleryQuery.data!.map((image) => (
                 <article
                   key={image.id}
-                  className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/80 shadow-sm"
+                  className="overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white/80 shadow-sm sm:rounded-[1.5rem]"
                 >
                   <div className="aspect-[4/3] overflow-hidden">
                     <img className="h-full w-full object-cover" src={image.imageUrl} alt={image.altText} />
@@ -172,7 +172,7 @@ export function AdminGalleryPage() {
                   <div className="space-y-3 p-4">
                     <p className="text-sm leading-6 text-slate-700">{image.altText}</p>
                     <button
-                      className="rounded-full border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60"
+                      className="w-full rounded-full border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60 sm:w-auto"
                       type="button"
                       onClick={() => void handleDelete(image.id)}
                       disabled={deleteImageMutation.isPending}
