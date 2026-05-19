@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { PageFrame } from "@/components/layout/public/PageFrame";
 import { useGalleryImagesQuery } from "@/features/gallery/hooks/gallery-hooks";
 import type { GalleryImage } from "@/types/gallery/gallery";
@@ -29,14 +28,6 @@ export function GalleryPage() {
       eyebrow="Pokocken"
       title="Matgalleri"
       description="Små ögonblick från köket, samlade på en plats. Klicka på en bild för att se den större."
-      actions={
-        <Link
-          className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
-          to="/"
-        >
-          Tillbaka till startsidan
-        </Link>
-      }
     >
       <div className="space-y-6">
         {galleryQuery.isLoading ? (

@@ -22,6 +22,14 @@ vi.mock("@/features/auth/hooks/auth-hooks", async () => {
 });
 
 describe("AppRoutes", () => {
+  it("renders the shared public header on public routes", () => {
+    renderWithMemoryRouter(<AppRoutes />, ["/gallery"]);
+
+    expect(screen.getByRole("link", { name: "Pokocken" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("searchbox", { name: "Sök recept" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Bläddra recept" })).not.toBeInTheDocument();
+  });
+
   it("renders the public recipe list route", () => {
     renderWithMemoryRouter(<AppRoutes />, ["/recipes"]);
 
@@ -34,10 +42,16 @@ describe("AppRoutes", () => {
     expect(screen.getByRole("heading", { name: "Matgalleri" })).toBeInTheDocument();
   });
 
+  it("renders the recipe suggestion route", () => {
+    renderWithMemoryRouter(<AppRoutes />, ["/suggest"]);
+
+    expect(screen.getByRole("heading", { name: "Vad kan jag laga?" })).toBeInTheDocument();
+  });
+
   it("renders the not found page for unknown routes", () => {
     renderWithMemoryRouter(<AppRoutes />, ["/den-har-sidan-finns-inte"]);
 
     expect(screen.getByText("Vi hittade inte sidan du letade efter.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /visa recept/i })).toHaveAttribute("href", "/recipes");
+    expect(screen.queryByRole("link", { name: /visa recept/i })).not.toBeInTheDocument();
   });
 });

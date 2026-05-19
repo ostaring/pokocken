@@ -79,6 +79,7 @@ builder.Services.AddScoped<IGalleryRepository, EfGalleryRepository>();
 builder.Services.AddScoped<RecipeDbInitializer>();
 builder.Services.AddSingleton<AdminSessionStore>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IRecipeSuggestionService, RecipeSuggestionService>();
 builder.Services.AddScoped<IGalleryService, GalleryService>();
 
 var app = builder.Build();

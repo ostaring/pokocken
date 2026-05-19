@@ -45,7 +45,7 @@ describe("RecipeDetailsPage", () => {
     expect(screen.getByText("Laddar receptdetaljer...")).toBeInTheDocument();
   });
 
-  it("shows a not found state with a link back to the recipes page", () => {
+  it("shows a not found state without duplicate back navigation", () => {
     recipeBySlugQueryState.data = undefined;
     recipeBySlugQueryState.isLoading = false;
     recipeBySlugQueryState.isError = false;
@@ -55,10 +55,10 @@ describe("RecipeDetailsPage", () => {
 
     expect(screen.getByText("Receptet hittades inte")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", {
+      screen.queryByRole("link", {
         name: /tillbaka till recepten/i,
       }),
-    ).toHaveAttribute("href", "/recipes");
+    ).not.toBeInTheDocument();
   });
 
   it("renders recipe details together with related recipes from the same category", () => {

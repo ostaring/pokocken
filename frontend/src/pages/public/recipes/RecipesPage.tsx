@@ -51,14 +51,6 @@ export function RecipesPage() {
       eyebrow="Pokocken"
       title="Recept att hitta tillbaka till"
       description="Bläddra bland recepten, filtrera på kategori och hitta snabbt det du vill laga eller dela vidare."
-      actions={
-        <Link
-          className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
-          to="/"
-        >
-          Tillbaka till startsidan
-        </Link>
-      }
     >
       <div className="space-y-8">
         {recipesQuery.isLoading ? (
@@ -125,7 +117,7 @@ export function RecipesPage() {
                 </span>
               ) : null}
               {category !== "All" ? (
-                <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-900">
+                <span className="rounded-full bg-stone-200 px-3 py-1 text-sm font-medium text-stone-950">
                   Kategori: {getRecipeCategoryLabel(category)}
                 </span>
               ) : null}
@@ -159,7 +151,7 @@ export function RecipesPage() {
                 </div>
                 <div className="space-y-4 p-5">
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="rounded-full bg-orange-100 px-3 py-1 font-semibold text-orange-900">
+                    <span className="rounded-full bg-stone-200 px-3 py-1 font-semibold text-stone-950">
                       {getRecipeCategoryLabel(recipe.category)}
                     </span>
                     <span className="text-slate-500">{recipe.prepTimeMinutes} min</span>
