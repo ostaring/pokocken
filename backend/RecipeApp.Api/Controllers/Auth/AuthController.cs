@@ -11,17 +11,20 @@ public sealed class AuthController : ControllerBase
 {
     private readonly AdminAuthOptions _authOptions;
     private readonly AdminPasswordHasher _passwordHasher;
+    private readonly AdminLoginRateLimiter _loginRateLimiter;
     private readonly AdminSessionStore _sessionStore;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         IOptions<AdminAuthOptions> authOptions,
         AdminPasswordHasher passwordHasher,
+        AdminLoginRateLimiter loginRateLimiter,
         AdminSessionStore sessionStore,
         ILogger<AuthController> logger)
     {
         _authOptions = authOptions.Value;
         _passwordHasher = passwordHasher;
+        _loginRateLimiter = loginRateLimiter;
         _sessionStore = sessionStore;
         _logger = logger;
     }
@@ -32,12 +35,18 @@ public sealed class AuthController : ControllerBase
         var session = _sessionStore.GetSession(Request.Cookies[AdminAuthConstants.SessionCookieName]);
         return session is null
             ? Unauthorized()
-            : Ok(new AdminSessionResponse(session.Username));
+            : Ok(new AdminSessionResponse(session.Username, session.CsrfToken));
     }
 
     [HttpPost("login")]
     public ActionResult<AdminSessionResponse> Login([FromBody] LoginAdminRequest request)
     {
+        if (!_loginRateLimiter.TryAcquire(HttpContext))
+        {
+            _logger.LogWarning("Rate limited admin login attempt for username {Username}", request.Username);
+            return StatusCode(StatusCodes.Status429TooManyRequests);
+        }
+
         if (!string.Equals(request.Username, _authOptions.Username, StringComparison.Ordinal) ||
             !_passwordHasher.Verify(
                 request.Password,
@@ -62,7 +71,7 @@ public sealed class AuthController : ControllerBase
             });
 
         _logger.LogInformation("Admin login succeeded for username {Username}", session.Username);
-        return Ok(new AdminSessionResponse(session.Username));
+        return Ok(new AdminSessionResponse(session.Username, session.CsrfToken));
     }
 
     [HttpPost("logout")]
@@ -70,6 +79,11 @@ public sealed class AuthController : ControllerBase
     {
         var sessionId = Request.Cookies[AdminAuthConstants.SessionCookieName];
         var session = _sessionStore.GetSession(sessionId);
+        if (session is not null && !HasValidCsrfToken(session))
+        {
+            _logger.LogWarning("Rejected admin logout for user {Username} because CSRF validation failed", session.Username);
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
 
         _sessionStore.RemoveSession(sessionId);
         Response.Cookies.Delete(AdminAuthConstants.SessionCookieName);
@@ -79,5 +93,11 @@ public sealed class AuthController : ControllerBase
             session?.Username ?? "unknown");
 
         return NoContent();
+    }
+
+    private bool HasValidCsrfToken(AdminSessionStore.AdminSession session)
+    {
+        return Request.Headers.TryGetValue(AdminAuthConstants.CsrfHeaderName, out var providedToken) &&
+            string.Equals(providedToken.ToString(), session.CsrfToken, StringComparison.Ordinal);
     }
 }

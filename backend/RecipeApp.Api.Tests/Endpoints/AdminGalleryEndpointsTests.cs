@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Tests.Testing;
 using Xunit;
 
@@ -105,6 +106,9 @@ public sealed class AdminGalleryEndpointsTests : IClassFixture<RecipeApiFactory>
         var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        var session = await loginResponse.Content.ReadFromJsonAsync<AdminSessionResponse>();
+        Assert.NotNull(session);
+        client.DefaultRequestHeaders.Add(AdminAuthConstants.CsrfHeaderName, session!.CsrfToken);
         return client;
     }
 }

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using RecipeApp.Api.Contracts;
+using RecipeApp.Api.Infrastructure;
 using RecipeApp.Api.Tests.Testing;
 using Xunit;
 
@@ -72,6 +73,26 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<RecipeApiFactory>
         Assert.NotNull(createdRecipe);
         Assert.Equal("herby-potato-salad", createdRecipe!.Slug);
         Assert.Equal("/api/admin/recipes/herby-potato-salad", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task PostAdminRecipe_ReturnsForbiddenWithoutCsrfToken()
+    {
+        using var client = await CreateAuthenticatedClientAsync(includeCsrfHeader: false);
+
+        var response = await client.PostAsJsonAsync("/api/admin/recipes", new CreateRecipeRequest(
+            "Herby potato salad",
+            "herby-potato-salad",
+            "Warm potatoes with herbs and mustard dressing.",
+            "Lunch",
+            30,
+            4,
+            "https://example.com/potato-salad.jpg",
+            false,
+            ["1 kg potatoes", "Parsley", "Mustard"],
+            ["Boil potatoes.", "Dress and toss."]));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -209,12 +230,20 @@ public sealed class AdminRecipeEndpointsTests : IClassFixture<RecipeApiFactory>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    private async Task<HttpClient> CreateAuthenticatedClientAsync()
+    private async Task<HttpClient> CreateAuthenticatedClientAsync(bool includeCsrfHeader = true)
     {
         await _factory.ResetDatabaseAsync();
         var client = _factory.WithWebHostBuilder(_ => { }).CreateClient();
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginAdminRequest("admin", "admin123"));
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        var session = await loginResponse.Content.ReadFromJsonAsync<AdminSessionResponse>();
+        Assert.NotNull(session);
+
+        if (includeCsrfHeader)
+        {
+            client.DefaultRequestHeaders.Add(AdminAuthConstants.CsrfHeaderName, session!.CsrfToken);
+        }
+
         return client;
     }
 

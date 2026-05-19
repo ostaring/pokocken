@@ -23,9 +23,19 @@ public sealed class AdminAuthorizationFilter : IAsyncAuthorizationFilter
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         var path = context.HttpContext.Request.Path;
+        var method = context.HttpContext.Request.Method;
         var sessionId = context.HttpContext.Request.Cookies[AdminAuthConstants.SessionCookieName];
-        if (_sessionStore.GetSession(sessionId) is not null)
+        var session = _sessionStore.GetSession(sessionId);
+        if (session is not null)
         {
+            if (RequiresCsrfToken(method) && !HasValidCsrfToken(context, session))
+            {
+                _logger.LogWarning(
+                    "Rejected admin request to {RequestPath} because CSRF validation failed",
+                    path);
+                context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
+            }
+
             return Task.CompletedTask;
         }
 
@@ -62,5 +72,19 @@ public sealed class AdminAuthorizationFilter : IAsyncAuthorizationFilter
 
         _logger.LogInformation("Authorized admin request to {RequestPath} via API key fallback", path);
         return Task.CompletedTask;
+    }
+
+    private static bool RequiresCsrfToken(string method)
+    {
+        return HttpMethods.IsPost(method) ||
+            HttpMethods.IsPut(method) ||
+            HttpMethods.IsPatch(method) ||
+            HttpMethods.IsDelete(method);
+    }
+
+    private static bool HasValidCsrfToken(AuthorizationFilterContext context, AdminSessionStore.AdminSession session)
+    {
+        return context.HttpContext.Request.Headers.TryGetValue(AdminAuthConstants.CsrfHeaderName, out var providedToken) &&
+            string.Equals(providedToken.ToString(), session.CsrfToken, StringComparison.Ordinal);
     }
 }

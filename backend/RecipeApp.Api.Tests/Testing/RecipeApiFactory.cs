@@ -26,7 +26,9 @@ public sealed class RecipeApiFactory : WebApplicationFactory<Program>, IAsyncLif
                 ["Admin:Username"] = "admin",
                 ["Admin:PasswordHash"] = AdminPasswordHasher.HashPassword("admin123", iterations: 10_000),
                 ["Admin:ApiKey"] = "test-admin-key",
-                ["Admin:AllowApiKeyFallback"] = "false"
+                ["Admin:AllowApiKeyFallback"] = "false",
+                ["Security:RateLimiting:AdminLoginPermitLimit"] = "100",
+                ["Security:RateLimiting:AdminApiPermitLimit"] = "1000"
             });
         });
         builder.ConfigureServices(services =>
