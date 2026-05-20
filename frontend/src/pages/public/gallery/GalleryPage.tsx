@@ -51,11 +51,11 @@ export function GalleryPage() {
         ) : null}
 
         {!galleryQuery.isLoading && !galleryQuery.isError && images.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {images.map((image) => (
               <button
                 key={image.id}
-                className="group overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:rounded-[1.5rem]"
+                className="group overflow-hidden rounded-2xl border border-white/70 bg-white/80 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 type="button"
                 onClick={() => setSelectedImage(image)}
               >
@@ -66,7 +66,7 @@ export function GalleryPage() {
                     alt={image.altText}
                   />
                 </div>
-                <div className="px-4 py-3">
+                <div className="px-3 py-2.5 sm:px-4 sm:py-3">
                   <p className="text-sm text-slate-700">{image.altText}</p>
                 </div>
               </button>

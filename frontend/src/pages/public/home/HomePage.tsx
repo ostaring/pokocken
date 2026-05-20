@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { PublicRecipeSearch } from "@/components/layout/public/PublicRecipeSearch";
 import { useGalleryImagesQuery } from "@/features/gallery/hooks/gallery-hooks";
 import { useRecipesQuery } from "@/features/recipes/hooks/recipe-hooks";
 import { getRecipeCategoryLabel } from "@/features/recipes/utils/recipe-utils";
@@ -25,6 +26,7 @@ export function HomePage() {
             <p className="max-w-2xl text-base leading-7 text-slate-700 md:text-lg">
               Recept testade och godkända av våra guldkäftar.
             </p>
+            <PublicRecipeSearch className="mx-auto mt-6 w-full max-w-md" inputId="home-recipe-search" />
           </div>
         </section>
 
@@ -53,30 +55,31 @@ export function HomePage() {
           ) : null}
 
           {!recipesQuery.isLoading && !recipesQuery.isError && featuredRecipes.length > 0 ? (
-            <div className="grid gap-5 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {featuredRecipes.map((recipe) => (
                 <article
                   key={recipe.id}
-                  className="overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm sm:rounded-[1.75rem]"
+                  className="overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <Link to={`/recipes/${recipe.slug}`}>
-                    <div className="aspect-[16/10] overflow-hidden">
+                  <Link className="block h-full" to={`/recipes/${recipe.slug}`}>
+                    <div className="aspect-[5/3] overflow-hidden">
                       <img
                         className="h-full w-full object-cover"
                         src={recipe.imageUrl}
                         alt={recipe.title}
                       />
                     </div>
-                    <div className="space-y-4 p-5">
-                      <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <span className="rounded-full bg-stone-200 px-3 py-1 font-semibold text-stone-950">
+                    <div className="space-y-3 p-3 sm:p-4">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="rounded-full bg-stone-200 px-2.5 py-1 font-semibold text-stone-950">
                           {getRecipeCategoryLabel(recipe.category)}
                         </span>
                         <span className="text-slate-500">{recipe.prepTimeMinutes} min</span>
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold text-slate-950">{recipe.title}</h3>
-                        <p className="text-sm leading-6 text-slate-700">{recipe.description}</p>
+                      <div className="space-y-1.5">
+                        <h3 className="text-base font-semibold leading-snug text-slate-950 sm:text-lg">
+                          {recipe.title}
+                        </h3>
                       </div>
                     </div>
                   </Link>
@@ -106,13 +109,11 @@ export function HomePage() {
           ) : null}
 
           {!galleryQuery.isLoading && !galleryQuery.isError && galleryImages.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {galleryImages.map((image, index) => (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {galleryImages.map((image) => (
                 <Link
                   key={image.id}
-                  className={`group overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-                    index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-                  }`}
+                  className="group overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   to="/gallery"
                 >
                   <div className="aspect-[4/3] overflow-hidden">

@@ -27,6 +27,10 @@ describe("AppRoutes", () => {
 
     expect(screen.getByRole("link", { name: "Pokocken" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("searchbox", { name: "Sök recept" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Vad kan jag laga?" })[0]).toHaveAttribute(
+      "href",
+      "/suggest",
+    );
     expect(screen.queryByRole("link", { name: "Bläddra recept" })).not.toBeInTheDocument();
   });
 

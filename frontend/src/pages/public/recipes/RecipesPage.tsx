@@ -135,38 +135,41 @@ export function RecipesPage() {
         </div>
 
         {!recipesQuery.isLoading && !recipesQuery.isError && filteredRecipes.length > 0 ? (
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredRecipes.map((recipe) => (
               <article
                 key={recipe.id}
-                className="overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm sm:rounded-[1.75rem]"
+                className="overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img
-                    className="h-full w-full object-cover"
-                    src={recipe.imageUrl}
-                    alt={recipe.title}
-                  />
-                </div>
-                <div className="space-y-4 p-5">
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="rounded-full bg-stone-200 px-3 py-1 font-semibold text-stone-950">
-                      {getRecipeCategoryLabel(recipe.category)}
-                    </span>
-                    <span className="text-slate-500">{recipe.prepTimeMinutes} min</span>
-                    <span className="text-slate-500">{recipe.servings} portioner</span>
+                <Link
+                  className="block h-full"
+                  to={`/recipes/${recipe.slug}`}
+                  aria-label={`Öppna recept: ${recipe.title}`}
+                >
+                  <div className="aspect-[5/3] overflow-hidden">
+                    <img
+                      className="h-full w-full object-cover"
+                      src={recipe.imageUrl}
+                      alt={recipe.title}
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <h2 className="text-2xl font-semibold text-slate-900">{recipe.title}</h2>
-                    <p className="text-sm leading-6 text-slate-700">{recipe.description}</p>
+                  <div className="space-y-3 p-3 sm:p-4">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="rounded-full bg-stone-200 px-2.5 py-1 font-semibold text-stone-950">
+                        {getRecipeCategoryLabel(recipe.category)}
+                      </span>
+                      <span className="text-slate-500">{recipe.prepTimeMinutes} min</span>
+                      <span className="hidden text-slate-500 sm:inline">
+                        {recipe.servings} portioner
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      <h2 className="text-base font-semibold leading-snug text-slate-900 sm:text-lg">
+                        {recipe.title}
+                      </h2>
+                    </div>
                   </div>
-                  <Link
-                    className="inline-flex w-full justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
-                    to={`/recipes/${recipe.slug}`}
-                  >
-                    Öppna recept
-                  </Link>
-                </div>
+                </Link>
               </article>
             ))}
           </div>
