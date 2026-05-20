@@ -25,9 +25,8 @@ export function GalleryPage() {
 
   return (
     <PageFrame
-      eyebrow="Pokocken"
-      title="Matgalleri"
-      description="Små ögonblick från köket, samlade på en plats. Klicka på en bild för att se den större."
+      title="Galleriet"
+      description="Titta på bilder av våra guldkäftars senaste kulinariska äventyr och låt dig inspireras av Pockockens kreationer."
     >
       <div className="space-y-6">
         {galleryQuery.isLoading ? (

@@ -39,7 +39,7 @@ describe("AppRoutes", () => {
   it("renders the gallery route", () => {
     renderWithMemoryRouter(<AppRoutes />, ["/gallery"]);
 
-    expect(screen.getByRole("heading", { name: "Matgalleri" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Galleriet" })).toBeInTheDocument();
   });
 
   it("renders the recipe suggestion route", () => {

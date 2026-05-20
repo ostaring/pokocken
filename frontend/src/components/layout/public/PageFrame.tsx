@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactNode } from "react";
 
 type PageFrameProps = PropsWithChildren<{
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description: string;
   actions?: ReactNode;
@@ -19,9 +19,11 @@ export function PageFrame({
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:gap-8">
         <header className="flex min-w-0 flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl space-y-3">
-            <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.22em] text-lime-950/70 sm:text-sm sm:tracking-[0.35em]">
-              {eyebrow}
-            </p>
+            {eyebrow ? (
+              <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.22em] text-lime-950/70 sm:text-sm sm:tracking-[0.35em]">
+                {eyebrow}
+              </p>
+            ) : null}
             <h1 className="display-type break-anywhere text-3xl leading-tight sm:text-4xl md:text-6xl">
               {title}
             </h1>

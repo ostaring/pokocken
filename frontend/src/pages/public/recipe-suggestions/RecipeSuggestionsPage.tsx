@@ -39,7 +39,6 @@ export function RecipeSuggestionsPage() {
 
   return (
     <PageFrame
-      eyebrow="Pokocken"
       title="Vad kan jag laga?"
       description="Skriv in råvarorna du har hemma så bygger vi grunden för receptförslag. Just nu är flödet förberett och svarar tomt tills generatorn kopplas på."
     >

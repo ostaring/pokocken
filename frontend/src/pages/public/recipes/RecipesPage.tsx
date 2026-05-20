@@ -48,7 +48,6 @@ export function RecipesPage() {
 
   return (
     <PageFrame
-      eyebrow="Pokocken"
       title="Recept att hitta tillbaka till"
       description="Bläddra bland recepten, filtrera på kategori och hitta snabbt det du vill laga eller dela vidare."
     >
