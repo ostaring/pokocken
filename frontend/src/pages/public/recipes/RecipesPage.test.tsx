@@ -85,10 +85,10 @@ describe("RecipesPage", () => {
       ["/recipes?search=tomat&category=Dinner"],
     );
 
-    expect(screen.getByDisplayValue("tomat")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: /kategori/i })).toHaveValue("Dinner");
     expect(screen.getByText("Sökning: tomat")).toBeInTheDocument();
     expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("tomat")).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: /kategori/i })).not.toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=tomat&category=Dinner");
     expect(mockUseRecipesQuery).toHaveBeenCalledWith({
       search: "tomat",
@@ -96,7 +96,7 @@ describe("RecipesPage", () => {
     });
   });
 
-  it("shows active filters and allows the user to reset them", async () => {
+  it("allows the user to reset active URL filters", async () => {
     const user = userEvent.setup();
     mockUseRecipesQuery.mockImplementation((filters: { search?: string; category?: string }) => ({
       data:
@@ -124,24 +124,18 @@ describe("RecipesPage", () => {
         <RecipesPage />
         <LocationDisplay />
       </>,
-      ["/recipes"],
+      ["/recipes?search=tomat&category=Dinner"],
     );
 
-    expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
-
-    await user.type(screen.getByLabelText(/sök recept/i), "tomat");
-    await user.selectOptions(screen.getByLabelText(/kategori/i), "Dinner");
-
-    expect(await screen.findByText("Sökning: tomat")).toBeInTheDocument();
+    expect(screen.getByText("Sökning: tomat")).toBeInTheDocument();
     expect(screen.getByText("Kategori: Middag")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /rensa filter/i })).toBeEnabled();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=tomat&category=Dinner");
 
     await user.click(screen.getByRole("button", { name: /rensa filter/i }));
 
     expect(screen.queryByText("Sökning: tomat")).not.toBeInTheDocument();
     expect(screen.queryByText("Kategori: Middag")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /rensa filter/i })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /rensa filter/i })).not.toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes");
   });
 
@@ -173,10 +167,8 @@ describe("RecipesPage", () => {
         <RecipesPage />
         <LocationDisplay />
       </>,
-      ["/recipes"],
+      ["/recipes?search=zzz"],
     );
-
-    await user.type(screen.getByLabelText(/sök recept/i), "zzz");
 
     expect(await screen.findByText("Inga recept matchade")).toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/recipes?search=zzz");

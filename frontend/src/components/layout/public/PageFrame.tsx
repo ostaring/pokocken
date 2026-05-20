@@ -5,6 +5,7 @@ type PageFrameProps = PropsWithChildren<{
   title: string;
   description: string;
   actions?: ReactNode;
+  contentVariant?: "card" | "plain";
 }>;
 
 export function PageFrame({
@@ -12,6 +13,7 @@ export function PageFrame({
   title,
   description,
   actions,
+  contentVariant = "card",
   children,
 }: PageFrameProps) {
   return (
@@ -35,7 +37,9 @@ export function PageFrame({
             </div>
           ) : null}
         </header>
-        <section className="content-card p-4 sm:p-6 md:p-8">{children}</section>
+        <section className={contentVariant === "card" ? "content-card p-4 sm:p-6 md:p-8" : ""}>
+          {children}
+        </section>
       </div>
     </main>
   );

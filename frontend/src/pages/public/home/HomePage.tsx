@@ -1,19 +1,33 @@
-import { useMemo } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { PublicRecipeSearch } from "@/components/layout/public/PublicRecipeSearch";
 import { useGalleryImagesQuery } from "@/features/gallery/hooks/gallery-hooks";
+import { RecipeSearchFilters } from "@/features/recipes/components/RecipeSearchFilters";
 import { useRecipesQuery } from "@/features/recipes/hooks/recipe-hooks";
 import { getRecipeCategoryLabel } from "@/features/recipes/utils/recipe-utils";
+import type { RecipeCategory } from "@/types/recipe/recipe";
 
 export function HomePage() {
-  const recipesQuery = useRecipesQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useState<RecipeCategory | "All">("All");
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const trimmedSearchTerm = searchTerm.trim();
+  const hasActiveFilters = trimmedSearchTerm.length > 0 || category !== "All";
+  const recipesQuery = useRecipesQuery({
+    search: deferredSearchTerm,
+    category: category === "All" ? undefined : category,
+  });
   const galleryQuery = useGalleryImagesQuery();
   const recipes = recipesQuery.data ?? [];
-  const featuredRecipes = recipes.slice(0, 3);
+  const visibleRecipes = hasActiveFilters ? recipes : recipes.slice(0, 5);
   const galleryImages = useMemo(
     () => (galleryQuery.data ?? []).slice(0, 4),
     [galleryQuery.data],
   );
+
+  function resetFilters() {
+    setSearchTerm("");
+    setCategory("All");
+  }
 
   return (
     <main className="text-slate-900">
@@ -26,7 +40,15 @@ export function HomePage() {
             <p className="max-w-2xl text-base leading-7 text-slate-700 md:text-lg">
               Recept testade och godkända av våra guldkäftar.
             </p>
-            <PublicRecipeSearch className="mx-auto mt-6 w-full max-w-md" inputId="home-recipe-search" />
+            <RecipeSearchFilters
+              category={category}
+              className="mt-6 w-full"
+              hasActiveFilters={hasActiveFilters}
+              onCategoryChange={setCategory}
+              onReset={resetFilters}
+              onSearchTermChange={setSearchTerm}
+              searchTerm={searchTerm}
+            />
           </div>
         </section>
 
@@ -34,17 +56,20 @@ export function HomePage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.18em] text-lime-950/70 sm:text-sm sm:tracking-[0.28em]">
-                Utvalda recept
+                {hasActiveFilters ? "Resultat" : "Utvalda recept"}
               </p>
+              {hasActiveFilters ? (
+                <p className="mt-2 text-sm text-slate-600">
+                  Visar <span className="font-semibold text-slate-900">{recipes.length}</span>{" "}
+                  recept
+                </p>
+              ) : null}
             </div>
-            <Link className="text-sm font-semibold text-slate-700 transition hover:text-slate-950" to="/recipes">
-              Se alla recept
-            </Link>
           </div>
 
           {recipesQuery.isLoading ? (
             <div className="rounded-[1.75rem] border border-slate-200 bg-white/70 p-6 text-sm text-slate-600">
-              Laddar utvalda recept...
+              Laddar recept...
             </div>
           ) : null}
 
@@ -54,12 +79,12 @@ export function HomePage() {
             </div>
           ) : null}
 
-          {!recipesQuery.isLoading && !recipesQuery.isError && featuredRecipes.length > 0 ? (
+          {!recipesQuery.isLoading && !recipesQuery.isError && visibleRecipes.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {featuredRecipes.map((recipe) => (
+              {visibleRecipes.map((recipe) => (
                 <article
                   key={recipe.id}
-                  className="overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/20"
                 >
                   <Link className="block h-full" to={`/recipes/${recipe.slug}`}>
                     <div className="aspect-[5/3] overflow-hidden">
@@ -87,6 +112,22 @@ export function HomePage() {
               ))}
             </div>
           ) : null}
+
+          {!recipesQuery.isLoading && !recipesQuery.isError && visibleRecipes.length === 0 ? (
+            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center">
+              <h2 className="text-xl font-semibold text-slate-900">Inga recept matchade</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Testa ett annat sökord eller rensa filtren för att se hela listan igen.
+              </p>
+              <button
+                className="mt-5 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                type="button"
+                onClick={resetFilters}
+              >
+                Visa alla recept
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="space-y-4 px-4 pb-2 sm:px-6">
@@ -109,11 +150,11 @@ export function HomePage() {
           ) : null}
 
           {!galleryQuery.isLoading && !galleryQuery.isError && galleryImages.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {galleryImages.map((image) => (
                 <Link
                   key={image.id}
-                  className="group overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="group overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/20"
                   to="/gallery"
                 >
                   <div className="aspect-[4/3] overflow-hidden">
