@@ -11,7 +11,6 @@ import { HomePage } from "@/pages/public/home/HomePage";
 import { NotFoundPage } from "@/pages/system/not-found/NotFoundPage";
 import { RecipeDetailsPage } from "@/pages/public/recipes/RecipeDetailsPage";
 import { RecipeSuggestionsPage } from "@/pages/public/recipe-suggestions/RecipeSuggestionsPage";
-import { RecipesPage } from "@/pages/public/recipes/RecipesPage";
 
 export function AppRoutes() {
   return (
@@ -19,7 +18,6 @@ export function AppRoutes() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/suggest" element={<RecipeSuggestionsPage />} />
         <Route path="/recipes/:slug" element={<RecipeDetailsPage />} />
         <Route path="*" element={<NotFoundPage />} />

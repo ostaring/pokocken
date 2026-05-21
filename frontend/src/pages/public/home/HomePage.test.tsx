@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { HomePage } from "@/pages/public/home/HomePage";
 import { renderWithMemoryRouter } from "@/test/utils/render";
@@ -13,7 +14,8 @@ vi.mock("@/features/recipes/hooks/recipe-hooks", async () => {
 
   return {
     ...actual,
-    useRecipesQuery: () => mockUseRecipesQuery(),
+    useRecipesQuery: (filters: { search?: string; category?: string }) =>
+      mockUseRecipesQuery(filters),
   };
 });
 
@@ -81,7 +83,7 @@ describe("HomePage", () => {
 
     renderWithMemoryRouter(<HomePage />, ["/"]);
 
-    expect(screen.getByText("Laddar utvalda recept...")).toBeInTheDocument();
+    expect(screen.getByText("Laddar recept...")).toBeInTheDocument();
   });
 
   it("renders the app-style home layout with recipes and gallery images", () => {
@@ -97,6 +99,34 @@ describe("HomePage", () => {
     expect(screen.getByAltText("Pasta pa ett serveringsfat.")).toBeInTheDocument();
     expect(screen.queryByText("Utvalt recept")).not.toBeInTheDocument();
     expect(screen.queryByText("Sa anvander du sidan")).not.toBeInTheDocument();
+  });
+
+  it("filters recipes directly from the home search panel", async () => {
+    const user = userEvent.setup();
+    mockUseRecipesQuery.mockImplementation((filters: { search?: string; category?: string }) => ({
+      data:
+        filters.search || filters.category
+          ? [recipeQuerySuccess.data[0]]
+          : recipeQuerySuccess.data,
+      isLoading: false,
+      isError: false,
+    }));
+    mockUseGalleryImagesQuery.mockReturnValue(galleryQuerySuccess);
+
+    renderWithMemoryRouter(<HomePage />, ["/"]);
+
+    await user.type(screen.getByLabelText(/sök recept/i), "pasta");
+    await user.click(screen.getByRole("button", { name: /^filter$/i }));
+    await user.click(screen.getByRole("button", { name: "Middag" }));
+    await user.click(screen.getByRole("button", { name: /visa recept/i }));
+
+    expect(await screen.findByText("Resultat")).toBeInTheDocument();
+    expect(screen.getByText(/Visar/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /rensa/i })).toBeInTheDocument();
+    expect(mockUseRecipesQuery).toHaveBeenLastCalledWith({
+      search: "pasta",
+      category: "Dinner",
+    });
   });
 
   it("shows an error state when featured recipes cannot be loaded", () => {

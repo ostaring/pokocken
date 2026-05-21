@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { PageFrame } from "@/components/layout/public/PageFrame";
 import { useGalleryImagesQuery } from "@/features/gallery/hooks/gallery-hooks";
 import type { GalleryImage } from "@/types/gallery/gallery";
@@ -23,60 +24,8 @@ export function GalleryPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedImage]);
 
-  return (
-    <PageFrame
-      eyebrow="Pokocken"
-      title="Matgalleri"
-      description="Små ögonblick från köket, samlade på en plats. Klicka på en bild för att se den större."
-    >
-      <div className="space-y-6">
-        {galleryQuery.isLoading ? (
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white/70 p-8 text-sm text-slate-600">
-            Laddar galleriet...
-          </div>
-        ) : null}
-
-        {galleryQuery.isError ? (
-          <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-sm text-rose-700">
-            Kunde inte läsa in galleribilderna just nu.
-          </div>
-        ) : null}
-
-        {!galleryQuery.isLoading && !galleryQuery.isError && images.length === 0 ? (
-          <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center">
-            <h2 className="text-xl font-semibold text-slate-900">Galleriet är tomt just nu</h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Fler bilder kommer när nya rätter hamnar på bordet.
-            </p>
-          </div>
-        ) : null}
-
-        {!galleryQuery.isLoading && !galleryQuery.isError && images.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {images.map((image) => (
-              <button
-                key={image.id}
-                className="group overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:rounded-[1.5rem]"
-                type="button"
-                onClick={() => setSelectedImage(image)}
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                    src={image.imageUrl}
-                    alt={image.altText}
-                  />
-                </div>
-                <div className="px-4 py-3">
-                  <p className="text-sm text-slate-700">{image.altText}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      {selectedImage ? (
+  const lightbox = selectedImage
+    ? createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-3 py-5 sm:px-4 sm:py-8"
           role="dialog"
@@ -104,8 +53,63 @@ export function GalleryPage() {
               </button>
             </div>
           </div>
+        </div>,
+        document.body,
+      )
+    : null;
+
+  return (
+    <>
+      <PageFrame
+        title="Galleriet"
+        description="Titta på bilder av våra guldkäftars senaste kulinariska äventyr och låt dig inspireras av Pockockens kreationer."
+        contentVariant="plain"
+      >
+        <div className="space-y-6">
+          {galleryQuery.isLoading ? (
+            <div className="rounded-[1.75rem] border border-slate-200 bg-white/70 p-8 text-sm text-slate-600">
+              Laddar galleriet...
+            </div>
+          ) : null}
+
+          {galleryQuery.isError ? (
+            <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-sm text-rose-700">
+              Kunde inte läsa in galleribilderna just nu.
+            </div>
+          ) : null}
+
+          {!galleryQuery.isLoading && !galleryQuery.isError && images.length === 0 ? (
+            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center">
+              <h2 className="text-xl font-semibold text-slate-900">Galleriet är tomt just nu</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Fler bilder kommer när nya rätter hamnar på bordet.
+              </p>
+            </div>
+          ) : null}
+
+          {!galleryQuery.isLoading && !galleryQuery.isError && images.length > 0 ? (
+            <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {images.map((image) => (
+                <button
+                  key={image.id}
+                  className="group overflow-hidden rounded-2xl border border-white/70 bg-white/90 text-left shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/20"
+                  type="button"
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                      src={image.imageUrl}
+                      alt={image.altText}
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
-      ) : null}
-    </PageFrame>
+      </PageFrame>
+      {lightbox}
+    </>
   );
 }

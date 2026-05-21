@@ -1,30 +1,62 @@
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useDeferredValue, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useGalleryImagesQuery } from "@/features/gallery/hooks/gallery-hooks";
+import { RecipeSearchFilters } from "@/features/recipes/components/RecipeSearchFilters";
 import { useRecipesQuery } from "@/features/recipes/hooks/recipe-hooks";
 import { getRecipeCategoryLabel } from "@/features/recipes/utils/recipe-utils";
+import type { RecipeCategory } from "@/types/recipe/recipe";
+
+function isRecipeCategory(value: string | null): value is RecipeCategory {
+  return value ? ["Breakfast", "Lunch", "Dinner", "Dessert", "Snack"].includes(value) : false;
+}
 
 export function HomePage() {
-  const recipesQuery = useRecipesQuery();
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category");
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") ?? "");
+  const [category, setCategory] = useState<RecipeCategory | "All">(
+    isRecipeCategory(initialCategory) ? initialCategory : "All",
+  );
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const trimmedSearchTerm = searchTerm.trim();
+  const hasActiveFilters = trimmedSearchTerm.length > 0 || category !== "All";
+  const recipesQuery = useRecipesQuery({
+    search: deferredSearchTerm,
+    category: category === "All" ? undefined : category,
+  });
   const galleryQuery = useGalleryImagesQuery();
   const recipes = recipesQuery.data ?? [];
-  const featuredRecipes = recipes.slice(0, 3);
+  const visibleRecipes = hasActiveFilters ? recipes : recipes.slice(0, 5);
   const galleryImages = useMemo(
     () => (galleryQuery.data ?? []).slice(0, 4),
     [galleryQuery.data],
   );
 
+  function resetFilters() {
+    setSearchTerm("");
+    setCategory("All");
+  }
+
   return (
     <main className="text-slate-900">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-7">
         <section className="px-4 py-10 sm:px-6 sm:py-14">
-          <div className="space-y-4">
-            <h1 className="display-type max-w-3xl text-4xl leading-tight text-slate-950 sm:text-5xl md:text-6xl">
+          <div className="space-y-4 text-center">
+            <h1 className="display-type mx-auto max-w-3xl text-4xl leading-tight text-slate-950 sm:text-5xl md:text-6xl">
               Enbart för guldkäftar
             </h1>
-            <p className="max-w-2xl text-base leading-7 text-slate-700 md:text-lg">
+            <p className="mx-auto max-w-2xl text-base leading-7 text-slate-700 md:text-lg">
               Recept testade och godkända av våra guldkäftar.
             </p>
+            <RecipeSearchFilters
+              category={category}
+              className="mx-auto mt-6 w-full max-w-2xl"
+              hasActiveFilters={hasActiveFilters}
+              onCategoryChange={setCategory}
+              onReset={resetFilters}
+              onSearchTermChange={setSearchTerm}
+              searchTerm={searchTerm}
+            />
           </div>
         </section>
 
@@ -32,17 +64,20 @@ export function HomePage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.18em] text-lime-950/70 sm:text-sm sm:tracking-[0.28em]">
-                Utvalda recept
+                {hasActiveFilters ? "Resultat" : "Utvalda recept"}
               </p>
+              {hasActiveFilters ? (
+                <p className="mt-2 text-sm text-slate-600">
+                  Visar <span className="font-semibold text-slate-900">{recipes.length}</span>{" "}
+                  recept
+                </p>
+              ) : null}
             </div>
-            <Link className="text-sm font-semibold text-slate-700 transition hover:text-slate-950" to="/recipes">
-              Se alla recept
-            </Link>
           </div>
 
           {recipesQuery.isLoading ? (
             <div className="rounded-[1.75rem] border border-slate-200 bg-white/70 p-6 text-sm text-slate-600">
-              Laddar utvalda recept...
+              Laddar recept...
             </div>
           ) : null}
 
@@ -52,31 +87,32 @@ export function HomePage() {
             </div>
           ) : null}
 
-          {!recipesQuery.isLoading && !recipesQuery.isError && featuredRecipes.length > 0 ? (
-            <div className="grid gap-5 lg:grid-cols-3">
-              {featuredRecipes.map((recipe) => (
+          {!recipesQuery.isLoading && !recipesQuery.isError && visibleRecipes.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {visibleRecipes.map((recipe) => (
                 <article
                   key={recipe.id}
-                  className="overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm sm:rounded-[1.75rem]"
+                  className="overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/20"
                 >
-                  <Link to={`/recipes/${recipe.slug}`}>
-                    <div className="aspect-[16/10] overflow-hidden">
+                  <Link className="block h-full" to={`/recipes/${recipe.slug}`}>
+                    <div className="aspect-[5/3] overflow-hidden">
                       <img
                         className="h-full w-full object-cover"
                         src={recipe.imageUrl}
                         alt={recipe.title}
                       />
                     </div>
-                    <div className="space-y-4 p-5">
-                      <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <span className="rounded-full bg-stone-200 px-3 py-1 font-semibold text-stone-950">
+                    <div className="space-y-3 p-3 sm:p-4">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="rounded-full bg-stone-200 px-2.5 py-1 font-semibold text-stone-950">
                           {getRecipeCategoryLabel(recipe.category)}
                         </span>
                         <span className="text-slate-500">{recipe.prepTimeMinutes} min</span>
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold text-slate-950">{recipe.title}</h3>
-                        <p className="text-sm leading-6 text-slate-700">{recipe.description}</p>
+                      <div className="space-y-1.5">
+                        <h3 className="text-base font-semibold leading-snug text-slate-950 sm:text-lg">
+                          {recipe.title}
+                        </h3>
                       </div>
                     </div>
                   </Link>
@@ -84,19 +120,32 @@ export function HomePage() {
               ))}
             </div>
           ) : null}
+
+          {!recipesQuery.isLoading && !recipesQuery.isError && visibleRecipes.length === 0 ? (
+            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center">
+              <h2 className="text-xl font-semibold text-slate-900">Inga recept matchade</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Testa ett annat sökord eller rensa filtren för att se hela listan igen.
+              </p>
+              <button
+                className="mt-5 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                type="button"
+                onClick={resetFilters}
+              >
+                Visa alla recept
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="space-y-4 px-4 pb-2 sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-3">
             <div>
               <p className="break-anywhere text-xs font-semibold uppercase tracking-[0.18em] text-lime-950/70 sm:text-sm sm:tracking-[0.28em]">
                 Inspiration
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">Senaste bilderna</h2>
             </div>
-            <Link className="text-sm font-semibold text-slate-700 transition hover:text-slate-950" to="/gallery">
-              Se galleriet
-            </Link>
           </div>
 
           {galleryQuery.isLoading ? (
@@ -106,13 +155,11 @@ export function HomePage() {
           ) : null}
 
           {!galleryQuery.isLoading && !galleryQuery.isError && galleryImages.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {galleryImages.map((image, index) => (
+            <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {galleryImages.map((image) => (
                 <Link
                   key={image.id}
-                  className={`group overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-                    index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-                  }`}
+                  className="group overflow-hidden rounded-2xl border border-white/70 bg-white/90 shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/20"
                   to="/gallery"
                 >
                   <div className="aspect-[4/3] overflow-hidden">
