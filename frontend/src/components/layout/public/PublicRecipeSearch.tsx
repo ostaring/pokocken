@@ -19,8 +19,8 @@ export function PublicRecipeSearch({
     const normalizedSearch = searchTerm.trim();
     navigate(
       normalizedSearch
-        ? `/recipes?search=${encodeURIComponent(normalizedSearch)}`
-        : "/recipes",
+        ? `/?search=${encodeURIComponent(normalizedSearch)}`
+        : "/",
     );
   }
 

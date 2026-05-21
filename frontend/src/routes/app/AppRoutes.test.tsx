@@ -31,13 +31,14 @@ describe("AppRoutes", () => {
       "href",
       "/suggest",
     );
+    expect(screen.queryByRole("link", { name: "Recept" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Bläddra recept" })).not.toBeInTheDocument();
   });
 
-  it("renders the public recipe list route", () => {
+  it("does not render a public recipe list route", () => {
     renderWithMemoryRouter(<AppRoutes />, ["/recipes"]);
 
-    expect(screen.getByRole("heading", { name: "Recept att hitta tillbaka till" })).toBeInTheDocument();
+    expect(screen.getByText("Vi hittade inte sidan du letade efter.")).toBeInTheDocument();
   });
 
   it("renders the gallery route", () => {
