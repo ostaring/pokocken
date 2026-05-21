@@ -1,7 +1,7 @@
 @startuml Public recipe browse and detail flow
 
 actor "Besokare" as Visitor
-participant "RecipesPage /\nRecipeDetailsPage" as Page
+participant "HomePage /\nRecipeDetailsPage" as Page
 participant "useRecipesQuery /\nuseRecipeBySlugQuery" as Hook
 participant "lib/api/recipes/recipes.ts" as ApiFacade
 participant "HTTP adapter or\nmock adapter" as Adapter
@@ -9,8 +9,8 @@ participant "API endpoint" as Endpoint
 participant "RecipeService" as Service
 participant "IRecipeRepository" as Repo
 
-== Recipe list ==
-Visitor -> Page : Open /recipes
+== Recipe discovery ==
+Visitor -> Page : Open /
 Page -> Hook : useRecipesQuery({ search, category })
 Hook -> ApiFacade : fetchRecipes(filters)
 ApiFacade -> Adapter : fetchRecipesHttp or fetchRecipesMock
@@ -23,7 +23,7 @@ Endpoint --> Adapter : 200 OK + list
 Adapter --> ApiFacade
 ApiFacade --> Hook
 Hook --> Page : query result
-Page --> Visitor : Render filtered recipe cards
+Page --> Visitor : Render discovery recipe cards
 
 == Recipe detail ==
 Visitor -> Page : Open /recipes/{slug}

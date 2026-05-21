@@ -6,6 +6,7 @@ The frontend is responsible for:
 
 - rendering the public recipe experience
 - rendering the public gallery
+- rendering the public recipe suggestion tool
 - rendering the admin interface
 - handling navigation and page composition
 - validating user input before submitting to the API
@@ -38,7 +39,7 @@ The frontend will not own business-critical rules. The backend remains the sourc
 
 - `/`
 - `/gallery`
-- `/recipes`
+- `/suggest`
 - `/recipes/:slug`
 
 ### Admin routes
@@ -56,8 +57,9 @@ The admin editor route still uses `:id` on the client. In HTTP mode the API adap
 ### Home page
 
 - Show latest published recipes
-- Show quick entry points to browse categories
-- Highlight search entry
+- Support recipe discovery with search by title
+- Support filter by category
+- Support loading, empty, and error states
 
 ### Gallery page
 
@@ -65,12 +67,12 @@ The admin editor route still uses `:id` on the client. In HTTP mode the API adap
 - Support loading, empty, and error states
 - Use backend API data in HTTP mode and fixtures in mock mode
 
-### Recipe listing page
+### Recipe suggestion page
 
-- List published recipes
-- Support search by title
-- Support filter by category
-- Support empty state when no recipes match
+- Let visitors enter/select available ingredients
+- Let visitors set servings and maximum time
+- Submit to the recipe suggestion API in HTTP mode
+- Return an empty suggestion state until the backend suggestion logic is implemented
 
 ### Recipe detail page
 
@@ -132,6 +134,7 @@ Use TanStack Query for:
 - fetching recipe details
 - fetching admin recipe lists
 - fetching gallery images
+- creating recipe suggestions
 - mutations for login/logout and recipe CRUD
 - mutations for gallery create/delete
 
@@ -162,12 +165,24 @@ Use TanStack Query for:
 - `altText`
 - `createdAtUtc`
 
+### Recipe suggestion request
+
+- `ingredients`
+- `servings`
+- `maxTimeMinutes`
+
+### Recipe suggestion response
+
+- `suggestions`
+- each suggestion has `title`, `description`, `usedIngredients`, `missingIngredients`, and `steps`
+
 ## 8. API Interaction Rules
 
 - All API access goes through a dedicated API client layer.
 - Components should not build fetch calls inline.
 - Query and mutation hooks should be centralized by feature.
 - Authentication state should be derived from backend/session behavior, not guessed purely on the client.
+- HTTP admin write requests send the in-memory `X-CSRF-Token` returned by backend session endpoints.
 - API access can run in `mock` mode or `http` mode through `VITE_API_MODE`.
 
 ## 9. Auth Model
@@ -175,6 +190,7 @@ Use TanStack Query for:
 Current frontend auth behavior:
 
 - use backend session-cookie login in HTTP mode
+- keep the session CSRF token in memory and attach it to admin write/logout requests
 - keep admin session handling simple
 - protect admin routes by checking authenticated session
 - redirect unauthenticated users to `/admin/login`
@@ -199,6 +215,7 @@ If we later switch to token-based auth, we should keep that change isolated to t
   /features
     /auth
     /gallery
+    /recipe-suggestions
     /recipes
   /lib
     /api
@@ -235,6 +252,7 @@ If we later switch to token-based auth, we should keep that change isolated to t
 
 - A visitor can browse and read published recipes.
 - A visitor can view gallery images.
+- A visitor can open the suggestion page and submit suggestion criteria.
 - An admin can log in and manage recipes.
 - An admin can manage gallery images.
 - All key pages work on mobile and desktop.

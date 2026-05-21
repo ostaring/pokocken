@@ -10,6 +10,7 @@ participant "loginAdmin()" as LoginAdminFacade
 participant "loginAdminHttp()" as LoginAdminHttp
 participant "buildApiUrl()" as BuildApiUrl
 participant "Program.cs\nMapPost(/api/auth/login)" as LoginEndpoint
+participant "AdminLoginRateLimiter.TryAcquire()" as LoginRateLimiter
 participant "AdminSessionStore.CreateSession()" as CreateSession
 participant "useNavigate()" as Navigate
 
@@ -22,9 +23,11 @@ LoginAdminFacade -> LoginAdminHttp : loginAdminHttp(username, password)
 LoginAdminHttp -> BuildApiUrl : buildApiUrl("/api/auth/login")
 BuildApiUrl --> LoginAdminHttp : absolute URL
 LoginAdminHttp -> LoginEndpoint : POST /api/auth/login
+LoginEndpoint -> LoginRateLimiter : TryAcquire(HttpContext)
+LoginRateLimiter --> LoginEndpoint : allowed
 LoginEndpoint -> CreateSession : CreateSession(username)
-CreateSession --> LoginEndpoint : session id
-LoginEndpoint --> LoginAdminHttp : 200 OK + Set-Cookie + AdminSessionResponse
+CreateSession --> LoginEndpoint : session id + csrf token
+LoginEndpoint --> LoginAdminHttp : 200 OK + Set-Cookie + AdminSessionResponse(csrfToken)
 LoginAdminHttp --> LoginAdminFacade : AdminSession
 LoginAdminFacade --> UseLoginMutation : session
 UseLoginMutation -> UseLoginMutation : queryClient.setQueryData(authQueryKeys.session, session)

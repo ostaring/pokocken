@@ -1,0 +1,32 @@
+@startuml
+title Recipe suggestions - exact function calls
+
+actor User
+participant "RecipeSuggestionsPage" as SuggestionsPage
+participant "useCreateRecipeSuggestionsMutation()" as SuggestionMutation
+participant "createRecipeSuggestions()" as SuggestionApi
+participant "buildApiUrl()" as BuildApiUrl
+participant "RecipeSuggestionsController\nPOST /api/recipe-suggestions" as SuggestionsEndpoint
+participant "RecipeSuggestionService.CreateSuggestions()" as SuggestionService
+
+User -> SuggestionsPage : Open /suggest
+User -> SuggestionsPage : Enter ingredients, servings, max time
+SuggestionsPage -> SuggestionMutation : mutateAsync(input)
+SuggestionMutation -> SuggestionApi : createRecipeSuggestions(input)
+
+alt Mock mode
+  SuggestionApi --> SuggestionMutation : empty suggestion response
+else HTTP mode
+  SuggestionApi -> BuildApiUrl : buildApiUrl("/api/recipe-suggestions")
+  BuildApiUrl --> SuggestionApi : absolute URL
+  SuggestionApi -> SuggestionsEndpoint : POST /api/recipe-suggestions
+  SuggestionsEndpoint -> SuggestionService : CreateSuggestions(request)
+  SuggestionService --> SuggestionsEndpoint : RecipeSuggestionResponse
+  SuggestionsEndpoint --> SuggestionApi : 200 OK + JSON
+  SuggestionApi --> SuggestionMutation : RecipeSuggestionResponse
+end
+
+SuggestionMutation --> SuggestionsPage : result or error
+SuggestionsPage --> User : Render suggestions, empty state, or error
+
+@enduml

@@ -4,7 +4,7 @@
 
 The backend is responsible for:
 
-- exposing API endpoints for public recipe reads and admin recipe management
+- exposing API endpoints for public recipe reads, recipe suggestions, and admin recipe management
 - exposing API endpoints for public gallery reads and admin gallery management
 - authenticating and authorizing admin access
 - validating requests
@@ -40,6 +40,7 @@ The backend is the source of truth for business logic and data integrity.
 - `GET /api/recipes`
 - `GET /api/recipes/{slug}`
 - `GET /api/gallery`
+- `POST /api/recipe-suggestions`
 - `GET /health`
 
 ### Admin auth endpoints
@@ -66,6 +67,7 @@ The backend is the source of truth for business logic and data integrity.
 
 - `Recipe` contains id, title, slug, description, category, prep time, servings, image URL, published state, ingredients, and steps.
 - `GalleryImage` contains id, image URL, alt text, and created timestamp.
+- Recipe suggestion contracts contain requested ingredients, servings, maximum time, and a list of suggestion items.
 - Admin credentials are configured through application configuration rather than stored as an EF entity.
 - API controllers use dedicated request/response DTOs rather than exposing EF entities directly.
 
@@ -77,20 +79,26 @@ Current MVP approach:
 - password hash verification through `AdminPasswordHasher`
 - server-side `AdminSessionStore`
 - HTTP-only session cookie
+- session-bound CSRF token returned by login/me and required for cookie-authenticated admin writes/logout
+- login rate limiting
+- admin API rate limiting
 - optional development API-key fallback
 
 ## 7. Error Handling And Observability
 
 - Return `400` for validation errors.
 - Return `401` for unauthenticated admin access.
+- Return `403` for failed CSRF validation on authenticated admin write/logout requests.
 - Return `404` for missing resources.
 - Return `409` for slug conflicts.
+- Return `429` for rate-limited login/admin requests.
 - Use standard ASP.NET Core logging for auth failures, mutations, and database initialization failures.
 
 ## 8. Backend Acceptance Criteria
 
 - Public users can fetch published recipes only.
 - Public users can fetch gallery images.
+- Public users can call the recipe suggestion endpoint.
 - Admin can authenticate and manage recipes.
 - Admin can manage gallery images.
 - Draft recipes remain private.

@@ -6,9 +6,9 @@ actor "Admin" as Admin
 
 rectangle "Frontend (React + Vite)" {
   component "HomePage" as HomePage
-  component "RecipesPage" as RecipesPage
   component "RecipeDetailsPage" as RecipeDetailsPage
   component "GalleryPage" as GalleryPage
+  component "RecipeSuggestionsPage" as RecipeSuggestionsPage
   component "AdminLoginPage" as AdminLoginPage
   component "AdminDashboardPage" as AdminDashboardPage
   component "AdminGalleryPage" as AdminGalleryPage
@@ -22,6 +22,7 @@ rectangle "Backend (ASP.NET Core controllers)" {
   component "AdminAuthorizationFilter" as Filter
   component "AdminSessionStore" as SessionStore
   component "RecipeService" as RecipeService
+  component "RecipeSuggestionService" as RecipeSuggestionService
   component "GalleryService" as GalleryService
   interface "IRecipeRepository" as RecipeRepo
   interface "IGalleryRepository" as GalleryRepo
@@ -33,18 +34,18 @@ rectangle "Backend (ASP.NET Core controllers)" {
 database "PostgreSQL\nDocker Compose / Testcontainers" as Postgres
 
 Visitor --> HomePage
-Visitor --> RecipesPage
 Visitor --> RecipeDetailsPage
 Visitor --> GalleryPage
+Visitor --> RecipeSuggestionsPage
 Admin --> AdminLoginPage
 Admin --> AdminDashboardPage
 Admin --> AdminGalleryPage
 Admin --> AdminRecipeEditorPage
 
 HomePage --> Hooks
-RecipesPage --> Hooks
 RecipeDetailsPage --> Hooks
 GalleryPage --> Hooks
+RecipeSuggestionsPage --> Hooks
 AdminLoginPage --> Hooks
 AdminDashboardPage --> Hooks
 AdminGalleryPage --> Hooks
@@ -56,6 +57,7 @@ ApiFacade --> Controllers
 Controllers --> Filter
 Filter --> SessionStore
 Controllers --> RecipeService
+Controllers --> RecipeSuggestionService
 Controllers --> GalleryService
 RecipeService --> RecipeRepo
 GalleryService --> GalleryRepo

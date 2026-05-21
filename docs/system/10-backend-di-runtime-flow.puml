@@ -5,8 +5,8 @@ title Backend dependency injection runtime flow
 actor "HTTP request" as Request
 participant "ASP.NET Core routing" as Routing
 participant "Controller" as Controller
-participant "IRecipeService /\nIGalleryService" as IService
-participant "RecipeService /\nGalleryService" as Service
+participant "IRecipeService /\nIGalleryService /\nIRecipeSuggestionService" as IService
+participant "RecipeService /\nGalleryService /\nRecipeSuggestionService" as Service
 participant "IRecipeRepository /\nIGalleryRepository" as IRepository
 participant "EfRecipeRepository /\nEfGalleryRepository" as Repository
 participant "RecipeDbContext" as DbContext
@@ -16,14 +16,19 @@ Request -> Routing : route match
 Routing -> Controller : create controller through DI
 Controller -> IService : constructor dependency
 IService -> Service : scoped service instance
-Service -> IRepository : constructor dependency
-IRepository -> Repository : scoped EF repository instance
-Repository -> DbContext : scoped EF DbContext
-DbContext -> Postgres : Npgsql connection
 
 Controller -> Service : action calls service method
-Service -> Repository : query or mutate data
-Repository -> DbContext : EF Core operation
-DbContext -> Postgres : SQL
+
+alt Recipe or gallery request
+  Service -> IRepository : constructor dependency
+  IRepository -> Repository : scoped EF repository instance
+  Repository -> DbContext : scoped EF DbContext
+  DbContext -> Postgres : Npgsql connection
+  Service -> Repository : query or mutate data
+  Repository -> DbContext : EF Core operation
+  DbContext -> Postgres : SQL
+else Recipe suggestion request
+  Service --> Controller : non-persistent suggestion response
+end
 
 @enduml
