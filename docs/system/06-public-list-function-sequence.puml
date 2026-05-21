@@ -1,8 +1,8 @@
 @startuml
-title Public recipe list - exact function calls
+title Public recipe discovery - exact function calls
 
 actor User
-participant "RecipesPage" as RecipesPage
+participant "HomePage" as HomePage
 participant "updateFilters()" as UpdateFilters
 participant "useRecipesQuery()" as UseRecipesQuery
 participant "fetchRecipes()" as FetchRecipes
@@ -14,8 +14,8 @@ participant "RecipeService.GetPublishedRecipes()" as GetPublishedRecipes
 participant "EfRecipeRepository.GetAll()" as RepoGetAll
 
 == Initial page load ==
-User -> RecipesPage : Open /recipes?search&category
-RecipesPage -> UseRecipesQuery : useRecipesQuery({ search, category })
+User -> HomePage : Open /?search&category
+HomePage -> UseRecipesQuery : useRecipesQuery({ search, category })
 UseRecipesQuery -> FetchRecipes : fetchRecipes(filters)
 FetchRecipes -> FetchRecipesHttp : fetchRecipesHttp(filters)
 FetchRecipesHttp -> BuildCollectionUrl : buildRecipeCollectionUrl("/api/recipes", filters)
@@ -30,13 +30,13 @@ GetPublishedRecipes --> RecipesEndpoint : List<RecipeResponse>
 RecipesEndpoint --> FetchRecipesHttp : 200 OK + JSON
 FetchRecipesHttp --> FetchRecipes : RecipeDetail[]
 FetchRecipes --> UseRecipesQuery : query data
-UseRecipesQuery --> RecipesPage : recipesQuery.data
-RecipesPage --> User : Render filtered recipe cards
+UseRecipesQuery --> HomePage : recipesQuery.data
+HomePage --> User : Render discovery recipe cards
 
 == User changes filters ==
-User -> RecipesPage : Type search or select category
-RecipesPage -> UpdateFilters : updateFilters({ search/category })
-UpdateFilters -> RecipesPage : setSearchParams(nextParams)
-RecipesPage -> UseRecipesQuery : useRecipesQuery({ search, category })
+User -> HomePage : Type search or select category
+HomePage -> UpdateFilters : updateFilters({ search/category })
+UpdateFilters -> HomePage : setSearchParams(nextParams)
+HomePage -> UseRecipesQuery : useRecipesQuery({ search, category })
 
 @enduml

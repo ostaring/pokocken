@@ -1,6 +1,6 @@
 # Backend
 
-ASP.NET Core Web API for Pokocken. The backend exposes public recipe and gallery endpoints, admin endpoints, bootstrap admin auth, PostgreSQL persistence, and local diagnostics.
+ASP.NET Core Web API for Pokocken. The backend exposes public recipe, gallery, and recipe suggestion endpoints, admin endpoints, bootstrap admin auth, PostgreSQL persistence, and local diagnostics.
 
 ## Stack
 
@@ -140,7 +140,7 @@ Browser admin sessions use an HTTP-only cookie plus a session-bound CSRF token. 
 X-CSRF-Token: <csrf-token from admin session response>
 ```
 
-Login and admin endpoints have ASP.NET Core rate limits. Defaults are:
+Login and admin endpoints are rate limited. Defaults are:
 
 - login: 5 requests per minute
 - admin API: 120 requests per minute per remote IP
@@ -166,6 +166,7 @@ Public endpoints:
 - `GET /api/recipes`
 - `GET /api/recipes/{slug}`
 - `GET /api/gallery`
+- `POST /api/recipe-suggestions`
 
 Admin endpoints:
 

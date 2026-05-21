@@ -52,10 +52,11 @@ end
 
 SendWriteRequest -> BuildApiUrl : buildApiUrl(path)
 BuildApiUrl --> SendWriteRequest : absolute URL
-SendWriteRequest -> AdminEndpoint : POST/PUT admin recipe request
+SendWriteRequest -> AdminEndpoint : POST/PUT admin recipe request\nX-CSRF-Token
 AdminEndpoint -> Filter : OnAuthorizationAsync(context)
 Filter -> GetSession : GetSession(cookie)
 GetSession --> Filter : session exists
+Filter -> Filter : validate csrf token
 Filter --> AdminEndpoint : continue
 
 alt CreateRecipe

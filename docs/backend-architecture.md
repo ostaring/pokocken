@@ -9,7 +9,7 @@ The backend is split into clear layers:
 - `Controllers`
   Receive HTTP requests, map routes, read request data, and return HTTP responses.
 - `Services`
-  Contain business logic and work behind service interfaces such as `IRecipeService` and `IGalleryService`.
+  Contain business logic and work behind service interfaces such as `IRecipeService`, `IGalleryService`, and `IRecipeSuggestionService`.
 - `Repositories`
   Contain EF Core persistence logic behind `IRecipeRepository` and `IGalleryRepository`.
 - `Data`
@@ -33,6 +33,7 @@ builder.Services.AddDbContext<RecipeDbContext>(options =>
 builder.Services.AddScoped<IRecipeRepository, EfRecipeRepository>();
 builder.Services.AddScoped<IGalleryRepository, EfGalleryRepository>();
 builder.Services.AddScoped<RecipeDbInitializer>();
+builder.Services.AddScoped<IRecipeSuggestionService, RecipeSuggestionService>();
 ```
 
 Runtime flow:
@@ -50,6 +51,8 @@ HTTP request
 
 `RecipeDbInitializer` runs at startup, applies migrations, and seeds recipes/gallery images if the database is empty.
 
+`RecipeSuggestionService` is currently a non-persistent service. It returns a suggestion response for `POST /api/recipe-suggestions` without reading or writing PostgreSQL.
+
 ## Testing Architecture
 
 - Service tests use small in-test repository doubles for focused business-logic coverage.
@@ -61,6 +64,7 @@ HTTP request
 - [backend/RecipeApp.Api/Program.cs](../backend/RecipeApp.Api/Program.cs)
 - [backend/RecipeApp.Api/Repositories/Recipes/EfRecipeRepository.cs](../backend/RecipeApp.Api/Repositories/Recipes/EfRecipeRepository.cs)
 - [backend/RecipeApp.Api/Repositories/Gallery/EfGalleryRepository.cs](../backend/RecipeApp.Api/Repositories/Gallery/EfGalleryRepository.cs)
+- [backend/RecipeApp.Api/Services/RecipeSuggestions/RecipeSuggestionService.cs](../backend/RecipeApp.Api/Services/RecipeSuggestions/RecipeSuggestionService.cs)
 - [backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs](../backend/RecipeApp.Api/Data/Persistence/RecipeDbContext.cs)
 - [backend/RecipeApp.Api/Data/Initialization/RecipeDbInitializer.cs](../backend/RecipeApp.Api/Data/Initialization/RecipeDbInitializer.cs)
 - [backend/RecipeApp.Api.Tests/Testing/PostgresTestDatabase.cs](../backend/RecipeApp.Api.Tests/Testing/PostgresTestDatabase.cs)

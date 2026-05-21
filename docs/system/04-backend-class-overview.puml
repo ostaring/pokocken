@@ -10,6 +10,8 @@ package "Contracts" {
   class GalleryImageResponse
   class LoginAdminRequest
   class AdminSessionResponse
+  class RecipeSuggestionRequest
+  class RecipeSuggestionResponse
 }
 
 package "Domain" {
@@ -22,6 +24,8 @@ package "Services" {
   class RecipeService
   interface IGalleryService
   class GalleryService
+  interface IRecipeSuggestionService
+  class RecipeSuggestionService
 }
 
 package "Infrastructure" {
@@ -50,6 +54,7 @@ package "Data" {
 
 IRecipeService <|.. RecipeService
 IGalleryService <|.. GalleryService
+IRecipeSuggestionService <|.. RecipeSuggestionService
 
 RecipeService --> IRecipeRepository
 GalleryService --> IGalleryRepository

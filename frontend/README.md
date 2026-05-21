@@ -1,6 +1,6 @@
 # Frontend
 
-React frontend for Pokocken. It contains the public recipe and gallery pages, plus the admin UI for login, recipe management, publishing, and gallery management.
+React frontend for Pokocken. It contains the public home recipe discovery view, recipe detail pages, gallery page, recipe suggestion page, plus the admin UI for login, recipe management, publishing, and gallery management.
 
 ## Stack
 
@@ -56,7 +56,7 @@ Vite prints the local dev URL, usually `http://localhost:5173`.
 The frontend supports two API modes:
 
 - `mock` - local mock data, useful for fast UI work.
-- `http` - calls the ASP.NET Core backend.
+- `http` - calls the ASP.NET Core backend for recipes, gallery, auth, and recipe suggestions.
 
 The default mode is `mock`. To run Vite against the backend, start only the backend and PostgreSQL from the repo root:
 
@@ -86,6 +86,18 @@ The Docker image builds with:
 VITE_API_MODE=http
 VITE_API_BASE_URL=http://localhost:5080
 ```
+
+Main routes:
+
+- `/` - home recipe discovery
+- `/recipes/:slug` - recipe detail
+- `/gallery` - gallery
+- `/suggest` - recipe suggestions from selected ingredients
+- `/admin/login` - admin login
+- `/admin` - admin dashboard
+- `/admin/gallery` - admin gallery management
+- `/admin/recipes/new` - create recipe
+- `/admin/recipes/:id/edit` - edit recipe
 
 ## Scripts
 

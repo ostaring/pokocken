@@ -1,6 +1,6 @@
 # Pokocken
 
-Pokocken is a fullstack recipe app for family and friends. The public app shows recipes and gallery images, while the admin area is used to sign in, create recipes, publish recipes, and manage gallery images.
+Pokocken is a fullstack recipe app for family and friends. The public app shows the home recipe discovery view, recipe detail pages, gallery images, and a small recipe suggestion tool. The admin area is used to sign in, create recipes, publish recipes, and manage gallery images.
 
 ## Project
 
@@ -61,6 +61,15 @@ This starts:
 - PostgreSQL on `localhost:5432`
 
 Backend diagnostics are available at `http://localhost:5080/health` and `http://localhost:5080/swagger`.
+
+Main frontend routes:
+
+- `/` - public home and recipe discovery
+- `/recipes/{slug}` - public recipe detail
+- `/gallery` - public gallery
+- `/suggest` - recipe suggestions from selected ingredients
+- `/admin` - protected admin dashboard
+- `/admin/login` - admin login
 
 ## Run Fullstack Locally
 

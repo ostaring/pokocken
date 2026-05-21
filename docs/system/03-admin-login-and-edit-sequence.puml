@@ -21,8 +21,8 @@ LoginPage -> LoginHook : mutate({ username, password })
 LoginHook -> AuthApi : loginAdmin(username, password)
 AuthApi -> AuthEndpoint : POST /api/auth/login
 AuthEndpoint -> SessionStore : CreateSession(username)
-SessionStore --> AuthEndpoint : session id
-AuthEndpoint --> AuthApi : 200 OK + cookie
+SessionStore --> AuthEndpoint : session id + csrf token
+AuthEndpoint --> AuthApi : 200 OK + cookie + csrf token
 AuthApi --> LoginHook : AdminSession
 LoginHook --> LoginPage : success
 LoginPage --> Admin : Redirect to admin route
@@ -31,10 +31,11 @@ LoginPage --> Admin : Redirect to admin route
 Admin -> EditorPage : Save recipe
 EditorPage -> RecipeHook : mutateAsync(payload)
 RecipeHook -> RecipeApi : createRecipe or updateRecipe
-RecipeApi -> AdminEndpoint : POST/PUT /api/admin/recipes...
+RecipeApi -> AdminEndpoint : POST/PUT /api/admin/recipes...\nX-CSRF-Token
 AdminEndpoint -> Filter : authorize request
 Filter -> SessionStore : validate cookie session
 SessionStore --> Filter : session exists
+Filter -> Filter : validate csrf token
 Filter --> AdminEndpoint : continue
 AdminEndpoint -> Service : CreateRecipe or UpdateRecipe
 Service -> Repo : GetBySlug / Add / Replace
