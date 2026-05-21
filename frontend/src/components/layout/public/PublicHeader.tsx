@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import { PublicRecipeSearch } from "@/components/layout/public/PublicRecipeSearch";
 
 const publicNavLinks = [
-  { label: "Galleri", to: "/gallery" },
   { label: "Vad kan jag laga?", to: "/suggest" },
+  { label: "Galleri", to: "/gallery" },
 ];
 
 type PublicHeaderProps = {
@@ -13,7 +13,7 @@ type PublicHeaderProps = {
 export function PublicHeader({ showSearch = true }: PublicHeaderProps) {
   const navLayoutClass = showSearch
     ? "lg:flex-row lg:items-center lg:justify-between"
-    : "lg:flex-row lg:items-center lg:justify-start lg:gap-10";
+    : "lg:flex-row lg:items-center lg:justify-between";
 
   return (
     <header className="px-4 pt-4 sm:px-6 sm:pt-6">
@@ -39,9 +39,13 @@ export function PublicHeader({ showSearch = true }: PublicHeaderProps) {
 
         {showSearch ? <PublicRecipeSearch className="flex-1 lg:max-w-sm" /> : null}
 
-        <div className="hidden items-center gap-8 text-sm font-semibold text-slate-700 lg:flex">
+        <div className="hidden items-center gap-9 text-base font-semibold leading-none text-slate-700 lg:flex">
           {publicNavLinks.map((link) => (
-            <Link className="transition hover:text-lime-950" key={link.to} to={link.to}>
+            <Link
+              className="rounded-sm transition duration-200 hover:-translate-y-0.5 hover:text-lime-950 hover:drop-shadow-[0_8px_12px_rgba(15,23,42,0.18)] focus-visible:-translate-y-0.5 focus-visible:text-lime-950 focus-visible:outline-none focus-visible:drop-shadow-[0_8px_12px_rgba(15,23,42,0.18)]"
+              key={link.to}
+              to={link.to}
+            >
               {link.label}
             </Link>
           ))}
